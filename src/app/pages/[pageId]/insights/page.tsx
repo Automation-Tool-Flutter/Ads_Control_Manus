@@ -6,7 +6,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { usePageInsights } from "@/hooks/usePageInsights";
 import { usePageToken } from "@/hooks/usePageToken";
 import { PageContainer } from "@/components/layout/PageContainer";
-import { Breadcrumb } from "@/components/ui/Breadcrumb";
+import { ControlHeader } from "@/components/layout/ControlHeader";
 import { ErrorState } from "@/components/ui/ErrorState";
 import { DateFilter } from "@/components/ui/DateFilter";
 import { InsightChart } from "@/components/pages/InsightChart";
@@ -73,7 +73,7 @@ export default function PageInsightsPage() {
   const [filter, setFilter] = useState<DatePreset | DateRange>("last_30d");
 
   useEffect(() => {
-    if (!auth.isLoading && !auth.token) router.replace("/");
+    if (!auth.isLoading && !auth.token) router.replace("/login");
   }, [auth.isLoading, auth.token, router]);
 
   const pageToken = usePageToken(pageId, auth.token);
@@ -91,29 +91,30 @@ export default function PageInsightsPage() {
 
   return (
     <PageContainer>
-      <div className="mb-5">
-        <Breadcrumb
-          items={[
+      <ControlHeader
+        breadcrumbs={[
             { label: "Pages", href: "/pages" },
             { label: pageId, href: `/pages/${pageId}` },
             { label: "Insights" },
-          ]}
-        />
-        <div className="flex items-start justify-between mt-3 flex-wrap gap-3">
-          <h1 className="text-xl sm:text-2xl font-bold text-text-primary">
-            Page Insights
-          </h1>
-
-          {/* Date filter */}
-          <div className="w-full sm:w-64">
+        ]}
+        eyebrow="Meta Page analytics"
+        title="Page Insights"
+        description="Review Page growth, engagement, reach, video, monetization signals, and GPT recommendations in one workspace."
+        badge="Insights + GPT"
+        stats={metrics.length > 0 ? [
+          { label: 'net followers', value: computeNetNewFollowers(metrics).toLocaleString(), tone: computeNetNewFollowers(metrics) >= 0 ? 'green' : 'amber' },
+          { label: 'metrics', value: metrics.length, tone: 'neutral' },
+        ] : []}
+      >
+        {/* Date filter */}
+        <div className="w-full sm:w-72">
             <DateFilter
               value={filter}
               onChange={setFilter}
               disabled={state.status === "loading"}
             />
-          </div>
         </div>
-      </div>
+      </ControlHeader>
 
       {state.status === "loading" && (
         <>

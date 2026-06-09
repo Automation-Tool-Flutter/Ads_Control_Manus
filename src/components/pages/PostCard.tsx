@@ -44,53 +44,55 @@ export function PostCard({
     canManage && (onBoost || onAnalyze || onComments || onEdit || canDelete);
 
   return (
-    <div className="soft-card rounded-3xl overflow-hidden">
+    <div className="meta-item">
       {/* Image */}
       {post.full_picture && (
         // eslint-disable-next-line @next/next/no-img-element
         <img
           src={post.full_picture}
           alt="Post"
-          className="aspect-video w-full object-cover"
+          className="aspect-video w-full border-b border-border object-cover"
         />
       )}
+
+      <div className="meta-item-header flex items-center justify-between gap-3 px-4 py-3">
+        <div className="min-w-0">
+          <p className="text-[10px] font-black uppercase text-accent">Page post</p>
+          <p className="mt-0.5 text-xs font-semibold text-text-muted">
+            {formatRelativeTime(post.created_time)}
+          </p>
+        </div>
+        {post.permalink_url && (
+          <a
+            href={post.permalink_url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="meta-action meta-action-secondary min-h-8 px-2.5 py-1 text-xs"
+          >
+            View
+          </a>
+        )}
+      </div>
 
       <div className="p-4">
         {/* Text */}
         {text && (
-          <p className="text-sm text-text-primary line-clamp-3 mb-3">{text}</p>
+          <p className="mb-3 line-clamp-3 text-sm leading-6 text-text-primary">{text}</p>
         )}
 
-        {/* Time + permalink */}
-        <div className="flex items-center justify-between mb-3">
-          <p className="text-xs text-text-muted">
-            {formatRelativeTime(post.created_time)}
-          </p>
-          {post.permalink_url && (
-            <a
-              href={post.permalink_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-xs text-accent hover:text-accent/80 transition-colors"
-            >
-              View post →
-            </a>
-          )}
-        </div>
-
         {/* Engagement bar */}
-        <div className="grid grid-cols-3 gap-2 pt-3 border-t border-border/50">
-          <span className="flex items-center justify-center gap-1 text-xs text-text-muted">
-            <span>❤️</span>
-            <span>{reactions.toLocaleString()}</span>
+        <div className="grid grid-cols-3 gap-2 border-t border-border/50 pt-3">
+          <span className="meta-metric flex flex-col gap-0.5">
+            <span className="text-[10px] font-bold uppercase text-text-muted">Reactions</span>
+            <span className="text-sm font-black text-text-primary tabular-nums">{reactions.toLocaleString()}</span>
           </span>
-          <span className="flex items-center justify-end gap-1 text-xs text-text-muted">
-            <span>💬</span>
-            <span>{comments.toLocaleString()}</span>
+          <span className="meta-metric flex flex-col gap-0.5">
+            <span className="text-[10px] font-bold uppercase text-text-muted">Comments</span>
+            <span className="text-sm font-black text-text-primary tabular-nums">{comments.toLocaleString()}</span>
           </span>
-          <span className="flex items-center gap-1 text-xs text-text-muted">
-            <span>↗️</span>
-            <span>{shares.toLocaleString()}</span>
+          <span className="meta-metric flex flex-col gap-0.5">
+            <span className="text-[10px] font-bold uppercase text-text-muted">Shares</span>
+            <span className="text-sm font-black text-text-primary tabular-nums">{shares.toLocaleString()}</span>
           </span>
         </div>
       </div>
@@ -98,12 +100,12 @@ export function PostCard({
       {/* Action bar */}
       {hasActions && (
         <>
-          <div className="mx-4 border-t border-border/50" />
-          <div className="flex">
+          <div className="border-t border-border" />
+          <div className="grid grid-cols-2 divide-x divide-border sm:flex sm:divide-x">
             {onBoost && (
               <button
                 onClick={() => onBoost(post)}
-                className="flex-1 flex items-center justify-center gap-1.5 py-3 text-accent text-sm font-semibold hover:bg-accent/5 active:bg-accent/10 transition-colors"
+                className="meta-action flex-1 rounded-none text-accent hover:bg-accent/5 active:bg-accent/10"
               >
                 <svg
                   className="w-3.5 h-3.5"
@@ -122,12 +124,12 @@ export function PostCard({
               </button>
             )}
             {onBoost && (onAnalyze || onComments || onEdit || canDelete) && (
-              <div className="w-px bg-border/50" />
+              <div className="hidden" />
             )}
             {onAnalyze && (
               <button
                 onClick={() => onAnalyze(post)}
-                className="flex-1 flex items-center justify-center gap-1.5 py-3 text-text-secondary text-sm hover:bg-white/[0.03] active:bg-white/5 transition-colors"
+                className="meta-action flex-1 rounded-none text-text-secondary hover:bg-bg-secondary active:bg-bg-secondary"
               >
                 <svg
                   className="w-3.5 h-3.5"
@@ -146,23 +148,23 @@ export function PostCard({
               </button>
             )}
             {onAnalyze && (onComments || onEdit || canDelete) && (
-              <div className="w-px bg-border/50" />
+              <div className="hidden" />
             )}
             {onComments && (
               <button
                 onClick={() => onComments(post)}
-                className="flex-1 flex items-center justify-center gap-1.5 py-3 text-text-secondary text-sm hover:bg-white/[0.03] active:bg-white/5 transition-colors"
+                className="meta-action flex-1 rounded-none text-text-secondary hover:bg-bg-secondary active:bg-bg-secondary"
               >
                 Comments
               </button>
             )}
             {onComments && (onEdit || canDelete) && (
-              <div className="w-px bg-border/50" />
+              <div className="hidden" />
             )}
             {onEdit && (
               <button
                 onClick={() => onEdit(post)}
-                className="flex-1 flex items-center justify-center gap-1.5 py-3 text-text-secondary text-sm hover:bg-white/[0.03] active:bg-white/5 transition-colors"
+                className="meta-action flex-1 rounded-none text-text-secondary hover:bg-bg-secondary active:bg-bg-secondary"
               >
                 <svg
                   className="w-3.5 h-3.5"
@@ -180,11 +182,11 @@ export function PostCard({
                 Edit
               </button>
             )}
-            {onEdit && canDelete && <div className="w-px bg-border/50" />}
+            {onEdit && canDelete && <div className="hidden" />}
             {canDelete && (
               <button
                 onClick={() => onDelete!(post.id)}
-                className="flex-1 flex items-center justify-center gap-1.5 py-3 text-status-red text-sm hover:bg-status-red/5 active:bg-status-red/10 transition-colors"
+                className="meta-action flex-1 rounded-none text-status-red hover:bg-status-red/5 active:bg-status-red/10"
               >
                 <svg
                   className="w-3.5 h-3.5"

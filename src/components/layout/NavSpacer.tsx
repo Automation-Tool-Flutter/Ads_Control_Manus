@@ -2,13 +2,15 @@
 
 import { usePathname } from 'next/navigation';
 
-const TOP_LEVEL_ROUTES = ['/accounts', '/businesses', '/pages', '/settings'];
+const APP_NAV_PATHS = new Set(['/businesses', '/accounts', '/pages', '/settings']);
 
 export function NavSpacer({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const isTopLevel = TOP_LEVEL_ROUTES.some(r => pathname === r);
+  const hasPublicHomeNav = pathname === '/';
+  const hasAppNav = APP_NAV_PATHS.has(pathname);
+  const shellOffset = hasPublicHomeNav || hasAppNav ? 'pb-[calc(76px+env(safe-area-inset-bottom))] sm:pb-0 sm:pl-[280px]' : '';
   return (
-    <div className={`flex flex-col flex-1 sm:pl-[116px] ${isTopLevel ? 'pb-bottom-nav' : ''} sm:pb-0`}>
+    <div className={`flex flex-col flex-1 ${shellOffset}`}>
       {children}
     </div>
   );

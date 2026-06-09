@@ -16,37 +16,53 @@ interface PostInsightsResponse {
 }
 
 export interface PostInsights {
-  impressions?: number;    // post_impressions — tổng views (organic + paid)
-  reach?: number;          // post_impressions_unique — số người thấy bài (unique)
-  engagedUsers?: number;   // post_engaged_users — số người đã click/tương tác
+  views?: number;          // post_media_view — replacement for deprecated post_impressions
   clicks?: number;         // post_clicks — tổng lượt click vào bài
 }
 
-export async function getPostInsights(postId: string, token: string): Promise<PostInsights> {
+const SUPPORTED_POST_INSIGHT_METRICS = [
+  'post_media_view',
+  'post_clicks',
+] as const;
+
+type SupportedPostInsightMetric = (typeof SUPPORTED_POST_INSIGHT_METRICS)[number];
+
+async function getSinglePostInsight(
+  postId: string,
+  metric: SupportedPostInsightMetric,
+  token: string,
+): Promise<InsightMetric | null> {
   try {
     const result = await graphFetch<PostInsightsResponse>(
       `/${postId}/insights`,
       {
-        metric: 'post_impressions,post_impressions_unique,post_engaged_users,post_clicks',
+        metric,
         period: 'lifetime',
       },
       token,
     );
 
-    const getVal = (name: string): number | undefined => {
-      const metric = result.data?.find(m => m.name === name);
-      const val = metric?.values?.[0]?.value;
-      return typeof val === 'number' ? val : undefined;
-    };
-
-    return {
-      impressions: getVal('post_impressions'),
-      reach: getVal('post_impressions_unique'),
-      engagedUsers: getVal('post_engaged_users'),
-      clicks: getVal('post_clicks'),
-    };
+    return result.data?.find(m => m.name === metric) ?? null;
   } catch {
-    // Insights not available for all post types — fallback gracefully
-    return {};
+    // Meta regularly deprecates post insight metrics. Keep post analysis usable
+    // when a single metric becomes invalid for the current Graph API version.
+    return null;
   }
+}
+
+export async function getPostInsights(postId: string, token: string): Promise<PostInsights> {
+  const metrics = await Promise.all(
+    SUPPORTED_POST_INSIGHT_METRICS.map(metric => getSinglePostInsight(postId, metric, token)),
+  );
+
+  const getVal = (name: SupportedPostInsightMetric): number | undefined => {
+    const metric = metrics.find(m => m?.name === name);
+    const val = metric?.values?.[0]?.value;
+    return typeof val === 'number' ? val : undefined;
+  };
+
+  return {
+    views: getVal('post_media_view'),
+    clicks: getVal('post_clicks'),
+  };
 }

@@ -5,12 +5,21 @@ import type { AuthState, FBUser } from '@/lib/types';
 import {
   STORAGE_KEYS,
   FB_AUTH_ERROR_EVENT,
-  FB_API_VERSION,
-  FB_APP_ID,
-  FB_LOGIN_CONFIG_ID,
   FB_PERMISSIONS,
 } from '@/lib/constants';
-import { loadFacebookSDK, type FB, type FBLoginResponse } from '@/lib/facebook-sdk';
+import {
+  buildFacebookOAuthUrl,
+  clearFacebookOAuthCallbackUrl,
+  clearCookieValue,
+  createFacebookOAuthState,
+  fetchFacebookPermissions,
+  fetchFacebookUser,
+  getCookieValue,
+  getFacebookOAuthRedirectUri,
+  parseFacebookOAuthCallback,
+  type FacebookOAuthCallback,
+  type FacebookOAuthError,
+} from '@/lib/facebook-oauth';
 
 // ─── Actions ──────────────────────────────────────────────────────────────────
 
@@ -48,110 +57,154 @@ interface AuthContextValue {
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
-type FBPermissionStatus = 'granted' | 'declined' | 'expired';
-
-interface FBPermission {
-  permission: string;
-  status: FBPermissionStatus;
+function isOAuthError(
+  callback: FacebookOAuthCallback | FacebookOAuthError,
+): callback is FacebookOAuthError {
+  return 'error' in callback;
 }
 
-function fbLogin(FB: FB, request: { rerequest?: boolean } = {}): Promise<FBLoginResponse> {
-  const loginOptions: {
-    scope?: string;
-    return_scopes: boolean;
-    config_id?: string;
-    auth_type?: 'rerequest';
-  } = {
-    return_scopes: true,
-  };
+function isLocalOAuthCallback() {
+  return ['localhost', '127.0.0.1', '0.0.0.0'].includes(window.location.hostname);
+}
 
-  if (FB_LOGIN_CONFIG_ID) {
-    loginOptions.config_id = FB_LOGIN_CONFIG_ID;
-  } else {
-    loginOptions.scope = FB_PERMISSIONS.join(',');
+function clearStoredSession() {
+  localStorage.removeItem(STORAGE_KEYS.TOKEN);
+  localStorage.removeItem(STORAGE_KEYS.TOKEN_EXPIRY);
+  localStorage.removeItem(STORAGE_KEYS.USER);
+  localStorage.removeItem(STORAGE_KEYS.GRANTED_SCOPES);
+  localStorage.removeItem(STORAGE_KEYS.DENIED_SCOPES);
+}
+
+function clearOAuthRequest() {
+  localStorage.removeItem(STORAGE_KEYS.OAUTH_STATE);
+  localStorage.removeItem(STORAGE_KEYS.OAUTH_RETURN_TO);
+  clearCookieValue(STORAGE_KEYS.OAUTH_STATE);
+  clearCookieValue(STORAGE_KEYS.OAUTH_RETURN_TO);
+}
+
+function clearOAuthState() {
+  localStorage.removeItem(STORAGE_KEYS.OAUTH_STATE);
+  clearCookieValue(STORAGE_KEYS.OAUTH_STATE);
+}
+
+function restoreStoredSession(dispatch: React.Dispatch<Action>) {
+  const token = localStorage.getItem(STORAGE_KEYS.TOKEN);
+  const userStr = localStorage.getItem(STORAGE_KEYS.USER);
+  const expiryStr = localStorage.getItem(STORAGE_KEYS.TOKEN_EXPIRY);
+
+  const isExpired = expiryStr ? Date.now() > parseInt(expiryStr, 10) : false;
+
+  if (token && userStr && !isExpired) {
+    try {
+      const user = JSON.parse(userStr) as FBUser;
+      dispatch({ type: 'SET_AUTH', payload: { token, user } });
+    } catch {
+      dispatch({ type: 'SET_LOADING', payload: false });
+    }
+    return;
   }
 
-  if (request.rerequest) loginOptions.auth_type = 'rerequest';
-
-  return new Promise((resolve) => {
-    FB.login(resolve, loginOptions);
-  });
+  if (isExpired) {
+    clearStoredSession();
+  }
+  dispatch({ type: 'SET_LOADING', payload: false });
 }
 
-function getLoginStatus(FB: FB): Promise<FBLoginResponse> {
-  return new Promise((resolve) => {
-    FB.getLoginStatus(resolve);
-  });
-}
+async function finishOAuthLogin(callback: FacebookOAuthCallback) {
+  const permissionResponse = await fetchFacebookPermissions(callback.accessToken);
+  const granted = permissionResponse.granted.length > 0
+    ? permissionResponse.granted
+    : callback.grantedScopes;
+  const denied = Array.from(new Set([
+    ...permissionResponse.denied,
+    ...callback.deniedScopes,
+  ]));
+  const missing = FB_PERMISSIONS.filter((permission) => !granted.includes(permission));
 
-function getGrantedPermissions(FB: FB): Promise<{
-  granted: string[];
-  denied: string[];
-}> {
-  return new Promise((resolve) => {
-    FB.api('/me/permissions', {}, (res) => {
-      const data = (
-        res &&
-        typeof res === 'object' &&
-        'data' in res &&
-        Array.isArray((res as { data?: unknown }).data)
-          ? (res as { data: FBPermission[] }).data
-          : []
-      );
+  if (missing.length > 0) {
+    localStorage.setItem(STORAGE_KEYS.GRANTED_SCOPES, JSON.stringify(granted));
+    localStorage.setItem(STORAGE_KEYS.DENIED_SCOPES, JSON.stringify(denied));
+    throw new Error(`Facebook connected, but missing permissions: ${missing.join(', ')}`);
+  }
 
-      const granted = data
-        .filter((item) => item.status === 'granted')
-        .map((item) => item.permission);
-      const denied = data
-        .filter((item) => item.status !== 'granted')
-        .map((item) => item.permission);
+  const user = await fetchFacebookUser(callback.accessToken);
+  const expiresAt = callback.expiresIn > 0
+    ? Date.now() + callback.expiresIn * 1000
+    : Date.now() + 60 * 24 * 60 * 60 * 1000;
 
-      resolve({ granted, denied });
-    });
-  });
+  localStorage.setItem(STORAGE_KEYS.TOKEN, callback.accessToken);
+  localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(user));
+  localStorage.setItem(STORAGE_KEYS.GRANTED_SCOPES, JSON.stringify(granted));
+  localStorage.setItem(STORAGE_KEYS.DENIED_SCOPES, JSON.stringify(denied));
+  localStorage.setItem(STORAGE_KEYS.TOKEN_EXPIRY, String(expiresAt));
+
+  return user;
 }
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [state, dispatch] = useReducer(reducer, initialState);
 
-  // Preload SDK on mount
+  // Restore session or complete the OAuth redirect after Facebook returns.
   useEffect(() => {
-    loadFacebookSDK(FB_APP_ID, FB_API_VERSION).catch(() => {});
-  }, []);
+    let cancelled = false;
 
-  // Restore session on mount
-  useEffect(() => {
-    const token = localStorage.getItem(STORAGE_KEYS.TOKEN);
-    const userStr = localStorage.getItem(STORAGE_KEYS.USER);
-    const expiryStr = localStorage.getItem(STORAGE_KEYS.TOKEN_EXPIRY);
+    async function bootstrap() {
+      const oauthCallback = parseFacebookOAuthCallback(window.location);
 
-    const isExpired = expiryStr ? Date.now() > parseInt(expiryStr, 10) : false;
+      if (!oauthCallback) {
+        restoreStoredSession(dispatch);
+        return;
+      }
 
-    if (token && userStr && !isExpired) {
       try {
-        const user = JSON.parse(userStr) as FBUser;
-        dispatch({ type: 'SET_AUTH', payload: { token, user } });
-      } catch {
-        dispatch({ type: 'SET_LOADING', payload: false });
+        const expectedState =
+          localStorage.getItem(STORAGE_KEYS.OAUTH_STATE) ??
+          getCookieValue(STORAGE_KEYS.OAUTH_STATE);
+
+        if (
+          !oauthCallback.state ||
+          (expectedState && oauthCallback.state !== expectedState) ||
+          (!expectedState && !isLocalOAuthCallback())
+        ) {
+          throw new Error('Invalid Facebook OAuth state. Please sign in again.');
+        }
+
+        clearFacebookOAuthCallbackUrl();
+
+        if (isOAuthError(oauthCallback)) {
+          throw new Error(oauthCallback.errorDescription ?? oauthCallback.error);
+        }
+
+        const user = await finishOAuthLogin(oauthCallback);
+        clearOAuthState();
+
+        if (!cancelled) {
+          dispatch({
+            type: 'SET_AUTH',
+            payload: { token: oauthCallback.accessToken, user },
+          });
+        }
+      } catch (error) {
+        clearStoredSession();
+        clearOAuthRequest();
+        clearFacebookOAuthCallbackUrl();
+        if (!cancelled) {
+          dispatch({ type: 'SET_LOADING', payload: false });
+          console.error(error);
+        }
       }
-    } else {
-      if (isExpired) {
-        localStorage.removeItem(STORAGE_KEYS.TOKEN);
-        localStorage.removeItem(STORAGE_KEYS.TOKEN_EXPIRY);
-        localStorage.removeItem(STORAGE_KEYS.USER);
-      }
-      dispatch({ type: 'SET_LOADING', payload: false });
     }
+
+    bootstrap();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   // Auto-logout when any API call detects an expired/invalid token
   useEffect(() => {
     function handleAuthError() {
-      localStorage.removeItem(STORAGE_KEYS.TOKEN);
-      localStorage.removeItem(STORAGE_KEYS.TOKEN_EXPIRY);
-      localStorage.removeItem(STORAGE_KEYS.USER);
-      localStorage.removeItem(STORAGE_KEYS.GRANTED_SCOPES);
-      localStorage.removeItem(STORAGE_KEYS.DENIED_SCOPES);
+      clearStoredSession();
       dispatch({ type: 'LOGOUT' });
     }
     window.addEventListener(FB_AUTH_ERROR_EVENT, handleAuthError);
@@ -162,58 +215,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     dispatch({ type: 'SET_LOADING', payload: true });
 
     try {
-      const FB = await loadFacebookSDK(FB_APP_ID, FB_API_VERSION);
-      const loginResponse = await fbLogin(FB, options);
+      const state = createFacebookOAuthState();
+      const redirectUri = getFacebookOAuthRedirectUri();
+      const returnTo = `${window.location.pathname}${window.location.search}`;
 
-      if (loginResponse.status !== 'connected' || !loginResponse.authResponse) {
-        throw new Error('Login failed or was cancelled');
+      localStorage.setItem(STORAGE_KEYS.OAUTH_STATE, state);
+      if (returnTo !== '/login') {
+        localStorage.setItem(STORAGE_KEYS.OAUTH_RETURN_TO, returnTo);
+      } else {
+        localStorage.removeItem(STORAGE_KEYS.OAUTH_RETURN_TO);
       }
 
-      const latestStatus = await getLoginStatus(FB);
-      const connectedResponse =
-        latestStatus.status === 'connected' && latestStatus.authResponse
-          ? latestStatus
-          : loginResponse;
-      const { accessToken, expiresIn, grantedScopes, deniedScopes } =
-        connectedResponse.authResponse!;
+      window.location.assign(buildFacebookOAuthUrl({
+        redirectUri,
+        state,
+        rerequest: options.rerequest,
+      }));
 
-      const permissionResponse = await getGrantedPermissions(FB);
-      const granted = permissionResponse.granted.length > 0
-        ? permissionResponse.granted
-        : grantedScopes?.split(',').map((scope) => scope.trim()).filter(Boolean) ?? [];
-      const denied = Array.from(new Set([
-        ...permissionResponse.denied,
-        ...(deniedScopes?.split(',').map((scope) => scope.trim()).filter(Boolean) ?? []),
-      ]));
-      const missing = FB_PERMISSIONS.filter((permission) => !granted.includes(permission));
-
-      if (missing.length > 0) {
-        localStorage.setItem(STORAGE_KEYS.GRANTED_SCOPES, JSON.stringify(granted));
-        localStorage.setItem(STORAGE_KEYS.DENIED_SCOPES, JSON.stringify(denied));
-        throw new Error(`Facebook connected, but missing permissions: ${missing.join(', ')}`);
-      }
-
-      const userResponse = await new Promise<FBUser>((resolve, reject) => {
-        FB.api('/me', { fields: 'id,name,email,picture' }, (res) => {
-          if (res && typeof res === 'object' && 'id' in res) {
-            resolve(res as FBUser);
-          } else {
-            reject(new Error('Failed to fetch user info'));
-          }
-        });
-      });
-
-      localStorage.setItem(STORAGE_KEYS.TOKEN, accessToken);
-      localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(userResponse));
-      localStorage.setItem(STORAGE_KEYS.GRANTED_SCOPES, JSON.stringify(granted));
-      localStorage.setItem(STORAGE_KEYS.DENIED_SCOPES, JSON.stringify(denied));
-      const expiresAt = expiresIn > 0
-        ? Date.now() + expiresIn * 1000
-        : Date.now() + 60 * 24 * 60 * 60 * 1000;
-      localStorage.setItem(STORAGE_KEYS.TOKEN_EXPIRY, String(expiresAt));
-
-      dispatch({ type: 'SET_AUTH', payload: { token: accessToken, user: userResponse } });
-      return userResponse;
+      return await new Promise<FBUser>(() => {});
     } catch (error) {
       dispatch({ type: 'SET_LOADING', payload: false });
       throw error;
@@ -221,11 +240,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const logout = useCallback(() => {
-    localStorage.removeItem(STORAGE_KEYS.TOKEN);
-    localStorage.removeItem(STORAGE_KEYS.TOKEN_EXPIRY);
-    localStorage.removeItem(STORAGE_KEYS.USER);
-    localStorage.removeItem(STORAGE_KEYS.GRANTED_SCOPES);
-    localStorage.removeItem(STORAGE_KEYS.DENIED_SCOPES);
+    clearStoredSession();
+    clearOAuthRequest();
     dispatch({ type: 'LOGOUT' });
     if (typeof window !== 'undefined' && window.FB) {
       window.FB.logout(() => {});

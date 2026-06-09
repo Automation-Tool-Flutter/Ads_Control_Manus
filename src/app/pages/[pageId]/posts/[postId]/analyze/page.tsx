@@ -47,9 +47,9 @@ function PostPreview({ post, insights, followersCount }: {
   const totalEngagement = reactions + comments + shares;
   const text = post.message || post.story || '';
 
-  const engRate = pct(totalEngagement, insights.reach);
-  const shareRate = pct(shares, insights.reach);
-  const reachPct = pct(insights.reach ?? 0, followersCount);
+  const engRate = pct(totalEngagement, insights.views);
+  const shareRate = pct(shares, insights.views);
+  const viewPct = pct(insights.views ?? 0, followersCount);
 
   return (
     <div className="glass-card gradient-border-card rounded-2xl overflow-hidden mb-5">
@@ -77,27 +77,22 @@ function PostPreview({ post, insights, followersCount }: {
           <MetricPill label="Shares" value={fmt(shares)} highlight={shares > reactions * 0.05} />
         </div>
 
-        {(insights.reach || insights.impressions) && (
+        {insights.views !== undefined && (
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-2">
-            {insights.impressions !== undefined && (
-              <MetricPill label="Impressions" value={fmt(insights.impressions)} />
-            )}
-            {insights.reach !== undefined && (
-              <MetricPill label="Reach" value={fmt(insights.reach)} />
-            )}
+            <MetricPill label="Views" value={fmt(insights.views)} />
             {engRate && (
-              <MetricPill label="Eng. Rate" value={engRate} highlight={parseFloat(engRate) >= 1} />
+              <MetricPill label="Eng. / Views" value={engRate} highlight={parseFloat(engRate) >= 1} />
             )}
             {shareRate && (
-              <MetricPill label="Share Rate" value={shareRate} highlight={parseFloat(shareRate) >= 0.5} />
+              <MetricPill label="Share / Views" value={shareRate} highlight={parseFloat(shareRate) >= 0.5} />
             )}
           </div>
         )}
 
-        {(reachPct || insights.clicks !== undefined) && (
+        {(viewPct || insights.clicks !== undefined) && (
           <div className="grid grid-cols-2 gap-2 mt-2">
-            {reachPct && followersCount && (
-              <MetricPill label={`Reach / ${fmt(followersCount)} followers`} value={reachPct} />
+            {viewPct && followersCount && (
+              <MetricPill label={`Views / ${fmt(followersCount)} followers`} value={viewPct} />
             )}
             {insights.clicks !== undefined && (
               <MetricPill label="Clicks" value={fmt(insights.clicks)} />
@@ -139,7 +134,7 @@ export default function PostAnalyzePage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!auth.isLoading && !auth.token) router.replace('/');
+    if (!auth.isLoading && !auth.token) router.replace('/login');
   }, [auth.isLoading, auth.token, router]);
 
   // Step 1: Fetch post data + insights in parallel
@@ -179,10 +174,9 @@ export default function PostAnalyzePage() {
       reactions,
       comments: post.comments?.summary.total_count ?? 0,
       shares: post.shares?.count ?? 0,
-      // Reach & delivery
-      impressions: insights.impressions,
-      reach: insights.reach,
-      engaged_users: insights.engagedUsers,
+      // Views & engagement
+      views: insights.views,
+      engagements: reactions + (post.comments?.summary.total_count ?? 0) + (post.shares?.count ?? 0),
       clicks: insights.clicks,
       // Page context (passed via searchParams from parent)
       followers_count: followersCount,

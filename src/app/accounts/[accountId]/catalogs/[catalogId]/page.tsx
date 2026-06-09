@@ -97,7 +97,7 @@ export default function CatalogDetailPage() {
   const [availFilter, setAvailFilter] = useState<'all' | 'in_stock' | 'out_of_stock'>('all');
 
   useEffect(() => {
-    if (!auth.isLoading && !auth.token) router.replace('/');
+    if (!auth.isLoading && !auth.token) router.replace('/login');
   }, [auth.isLoading, auth.token, router]);
 
   const { state, retry, loadMore, hasMore, loadingMore } = useCatalogProducts(catalogId, auth.token);

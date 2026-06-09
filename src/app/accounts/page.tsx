@@ -34,12 +34,9 @@ function sortAccounts(accounts: AdAccount[]): AdAccount[] {
 // ─── Metric cell ──────────────────────────────────────────────────────────────
 function AccountsHero({ count, activeCount }: { count?: number; activeCount: number }) {
   return (
-    <section className="relative mb-5 overflow-hidden rounded-[2rem] border border-border bg-white/90 p-4 shadow-[0_18px_50px_rgba(15,23,42,0.08)] sm:p-5">
-      <div className="absolute -right-12 -top-12 h-36 w-36 rounded-full bg-sky-100/80" />
-      <div className="absolute -bottom-14 left-8 h-32 w-32 rounded-full bg-violet-100/70" />
-
-      <div className="relative flex items-start gap-4">
-        <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-text-primary text-white shadow-[0_14px_34px_rgba(15,23,42,0.22)]">
+    <section className="meta-panel mb-5 overflow-hidden">
+      <div className="flex items-start gap-4 border-b border-border bg-bg-card p-4 sm:p-5">
+        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-text-primary text-white">
           <svg className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 8.25h19.5M4.5 19.5h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15A2.25 2.25 0 002.25 6.75v10.5A2.25 2.25 0 004.5 19.5zm2.25-4.5h4.5" />
           </svg>
@@ -60,7 +57,7 @@ function AccountsHero({ count, activeCount }: { count?: number; activeCount: num
         </div>
 
         {count !== undefined && (
-          <div className="hidden rounded-3xl border border-border bg-bg-secondary px-5 py-4 text-center sm:block">
+          <div className="hidden rounded-lg border border-border bg-bg-secondary px-5 py-4 text-center sm:block">
             <div className="text-3xl font-black tabular-nums text-text-primary">{count}</div>
             <div className="text-[10px] font-bold uppercase tracking-wide text-text-muted">Ad Accounts</div>
           </div>
@@ -72,11 +69,11 @@ function AccountsHero({ count, activeCount }: { count?: number; activeCount: num
 
 function MetricCell({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-2xl border border-border bg-white/80 px-3 py-3 shadow-[0_8px_24px_rgba(15,23,42,0.04)]">
-      <span className="block text-[10px] font-semibold text-text-muted uppercase tracking-wide">
+    <div className="meta-metric">
+      <span className="block text-[10px] font-bold uppercase text-text-muted">
         {label}
       </span>
-      <span className="mt-1.5 block text-base font-black text-text-primary tabular-nums">
+      <span className="mt-1 block text-base font-black text-text-primary tabular-nums">
         {value}
       </span>
     </div>
@@ -86,27 +83,26 @@ function MetricCell({ label, value }: { label: string; value: string }) {
 // ─── Skeleton ─────────────────────────────────────────────────────────────────
 function SkeletonCard() {
   return (
-    <div className="relative overflow-hidden rounded-[2rem] border border-border bg-white/90 p-3 shadow-[0_18px_50px_rgba(15,23,42,0.08)] animate-pulse">
-      <div className="absolute right-0 top-0 h-24 w-24 rounded-bl-[3rem] bg-bg-tertiary" />
-      <div className="relative rounded-[1.5rem] bg-[linear-gradient(135deg,#f8fafc_0%,#edf7ff_100%)] p-4">
+    <div className="meta-item animate-pulse">
+      <div className="absolute left-0 right-0 top-0 h-1.5 bg-bg-tertiary" />
+      <div className="meta-item-header p-4">
         <div className="flex items-start gap-3">
-          <div className="h-14 w-14 rounded-2xl bg-bg-tertiary flex-shrink-0" />
+          <div className="h-12 w-12 flex-shrink-0 rounded-lg bg-bg-tertiary" />
           <div className="flex-1 space-y-2 pt-1">
-            <div className="h-4 rounded-full bg-bg-tertiary w-4/5" />
-            <div className="h-3 rounded-full bg-bg-tertiary/70 w-1/2" />
-            <div className="h-7 rounded-full bg-white/90 w-3/4" />
+            <div className="h-4 w-4/5 rounded bg-bg-tertiary" />
+            <div className="h-3 w-1/2 rounded bg-bg-tertiary/70" />
+            <div className="h-7 w-3/4 rounded bg-bg-card" />
           </div>
         </div>
       </div>
-      <div className="mt-3 grid grid-cols-3 gap-2">
+      <div className="grid grid-cols-3 gap-2 p-4">
         {[...Array(3)].map((_, i) => (
-          <div key={i} className="h-16 rounded-2xl bg-bg-secondary" />
+          <div key={i} className="h-16 rounded-lg bg-bg-secondary" />
         ))}
       </div>
-      <div className="mt-3 h-10 rounded-2xl bg-bg-secondary" />
-      <div className="mt-3 grid grid-cols-2 gap-2">
-        <div className="h-11 rounded-2xl bg-bg-tertiary" />
-        <div className="h-11 rounded-2xl bg-bg-secondary" />
+      <div className="grid grid-cols-2 gap-2 border-t border-border p-4">
+        <div className="h-11 rounded-lg bg-bg-tertiary" />
+        <div className="h-11 rounded-lg bg-bg-secondary" />
       </div>
     </div>
   );
@@ -125,36 +121,36 @@ function AccountCard({ account }: { account: AdAccount }) {
     gray: "bg-slate-100 text-slate-600",
   };
   const haloStyle: Record<string, string> = {
-    green: "bg-emerald-400/20",
-    yellow: "bg-amber-400/20",
-    red: "bg-rose-400/20",
-    gray: "bg-slate-300/40",
+    green: "bg-status-green",
+    yellow: "bg-status-yellow",
+    red: "bg-status-red",
+    gray: "bg-text-muted/35",
   };
 
   return (
-    <article className="group relative overflow-hidden rounded-[2rem] border border-border bg-white/90 p-3 shadow-[0_18px_50px_rgba(15,23,42,0.08)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_24px_70px_rgba(15,23,42,0.12)]">
-      <div className={`absolute right-0 top-0 h-28 w-28 rounded-bl-[3.5rem] ${haloStyle[status.color]}`} />
+    <article className="meta-item meta-item-compact group">
+      <div className={`absolute right-0 top-0 h-1.5 w-full ${haloStyle[status.color]}`} />
 
-      <div className="relative rounded-[1.5rem] bg-[linear-gradient(135deg,#f8fafc_0%,#edf7ff_100%)] p-4">
+      <div className="meta-item-header p-4">
       <Link
         href={`/accounts/${account.id}?name=${encodeURIComponent(account.name)}&currency=${account.currency}`}
         className="flex items-start gap-3 active:opacity-80 transition-opacity"
       >
         <div
-          className={`w-14 h-14 rounded-2xl flex-shrink-0 flex items-center justify-center text-xl font-black ring-4 ring-white ${avatarStyle[status.color]}`}
+          className={`meta-compact-avatar flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-lg text-xl font-black ${avatarStyle[status.color]}`}
         >
           {account.name.charAt(0).toUpperCase()}
         </div>
         <div className="flex-1 min-w-0 pt-0.5">
-          <div className="mb-2 inline-flex items-center gap-1.5 rounded-full border border-white/80 bg-white/85 px-2.5 py-1 text-[11px] font-bold text-text-secondary shadow-sm">
+          <div className="mb-2 inline-flex items-center gap-1.5 rounded-md border border-border bg-bg-card px-2.5 py-1 text-[11px] font-bold text-text-secondary shadow-sm">
             <StatusDot color={status.color} />
             {status.label}
           </div>
-          <p className="text-base font-black leading-snug text-text-primary line-clamp-2">
+          <p className="meta-compact-title text-base font-black leading-snug text-text-primary line-clamp-2">
               {account.name}
           </p>
           {account.business && (
-            <div className="mt-1.5 inline-flex max-w-full items-center gap-1.5 rounded-full bg-accent/10 px-2.5 py-1 text-xs font-bold text-accent">
+            <div className="meta-compact-hide mt-1.5 inline-flex max-w-full items-center gap-1.5 rounded-md bg-accent/10 px-2.5 py-1 text-xs font-bold text-accent">
               <svg className="w-3 h-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21" />
               </svg>
@@ -162,7 +158,7 @@ function AccountCard({ account }: { account: AdAccount }) {
             </div>
           )}
           <div className="mt-1.5 flex items-center gap-1.5">
-            <code className="min-w-0 truncate rounded-full bg-white/85 px-2 py-1 font-mono text-[11px] text-text-muted">
+            <code className="min-w-0 truncate rounded-md bg-bg-card px-2 py-1 font-mono text-[11px] text-text-muted">
               {account.id}
             </code>
             <CopyButton value={account.id} />
@@ -171,7 +167,7 @@ function AccountCard({ account }: { account: AdAccount }) {
       </Link>
       </div>
 
-      <div className="mt-3 grid grid-cols-3 gap-2">
+      <div className="meta-compact-pad grid grid-cols-3 gap-2 p-4">
         <MetricCell label="Spent" value={fmt(account.amount_spent)} />
         <MetricCell label="Balance" value={fmt(account.balance)} />
         <MetricCell
@@ -185,7 +181,7 @@ function AccountCard({ account }: { account: AdAccount }) {
       </div>
 
       {account.timezone_name && (
-          <div className="mt-3 flex items-center gap-2 rounded-2xl border border-border bg-bg-secondary/80 px-3 py-2.5">
+          <div className="meta-compact-hide mx-4 mb-3 flex items-center gap-2 rounded-lg border border-border bg-bg-secondary/80 px-3 py-2.5">
             <svg
               className="w-3.5 h-3.5 text-text-muted flex-shrink-0"
               fill="none"
@@ -202,16 +198,16 @@ function AccountCard({ account }: { account: AdAccount }) {
             <span className="min-w-0 truncate text-xs font-semibold text-text-muted">
               {account.timezone_name}
             </span>
-            <span className="ml-auto rounded-full bg-white px-2 py-1 text-xs font-black text-text-secondary">
+            <span className="ml-auto rounded-md bg-bg-card px-2 py-1 text-xs font-black text-text-secondary">
               {account.currency}
             </span>
           </div>
       )}
 
-      <div className="mt-3 grid grid-cols-2 gap-2">
+      <div className="meta-compact-pad grid grid-cols-2 gap-2 border-t border-border p-4">
         <Link
           href={`/accounts/${account.id}/campaigns?accountName=${encodeURIComponent(account.name)}&currency=${account.currency}`}
-          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl bg-text-primary px-3 py-3 text-sm font-bold text-white shadow-[0_12px_30px_rgba(15,23,42,0.18)] transition-colors hover:bg-slate-800 active:bg-slate-900"
+          className="meta-action meta-action-primary"
         >
           <svg
             className="w-3.5 h-3.5"
@@ -230,7 +226,7 @@ function AccountCard({ account }: { account: AdAccount }) {
         </Link>
         <Link
           href={`/accounts/${account.id}?name=${encodeURIComponent(account.name)}&currency=${account.currency}`}
-          className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-2xl border border-border bg-white px-3 py-3 text-sm font-bold text-text-secondary transition-colors hover:bg-bg-secondary active:bg-bg-tertiary"
+          className="meta-action meta-action-secondary"
         >
           Account brief
           <svg
@@ -257,7 +253,7 @@ export default function AccountsPage() {
   const { state: auth } = useAuth();
   const router = useRouter();
   useEffect(() => {
-    if (!auth.isLoading && !auth.token) router.replace("/");
+    if (!auth.isLoading && !auth.token) router.replace("/login");
   }, [auth.isLoading, auth.token, router]);
 
   const { state, retry } = useAdAccounts(auth.token);
@@ -330,7 +326,7 @@ export default function AccountsPage() {
       {state.status === "success" && accounts.length > 0 && (
         <>
           {/* Account board */}
-          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          <div className="grid gap-4 md:grid-cols-2 2xl:grid-cols-3">
             {accounts.map((account) => (
               <AccountCard key={account.id} account={account} />
             ))}

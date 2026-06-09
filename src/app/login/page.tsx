@@ -4,6 +4,8 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import { FacebookLoginButton } from "@/components/facebook/FacebookLoginButton";
+import { STORAGE_KEYS } from "@/lib/constants";
+import { clearCookieValue, getCookieValue } from "@/lib/facebook-oauth";
 
 export default function LoginPage() {
   const { state } = useAuth();
@@ -11,20 +13,25 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (!state.isLoading && state.token) {
-      router.replace("/businesses");
+      const returnTo =
+        localStorage.getItem(STORAGE_KEYS.OAUTH_RETURN_TO) ??
+        getCookieValue(STORAGE_KEYS.OAUTH_RETURN_TO);
+      localStorage.removeItem(STORAGE_KEYS.OAUTH_RETURN_TO);
+      clearCookieValue(STORAGE_KEYS.OAUTH_RETURN_TO);
+      router.replace(returnTo?.startsWith("/") && returnTo !== "/login" ? returnTo : "/businesses");
     }
   }, [state.isLoading, state.token, router]);
 
   return (
     <main className="flex-1 flex items-center justify-center p-3 sm:p-8">
       <div className="w-full max-w-[430px]">
-        <div className="surface-raised rounded-[2rem] p-5 sm:p-8 shadow-2xl">
+        <div className="meta-panel p-5 sm:p-8">
           <div className="flex items-center gap-3">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src="/logo.png"
               alt="Logo"
-              className="w-14 h-14 rounded-2xl object-cover shadow-lg shadow-black/20"
+              className="w-14 h-14 rounded-lg object-cover"
             />
             <div className="min-w-0">
               <p className="text-xs font-bold uppercase tracking-[0.18em] text-accent">
@@ -45,7 +52,7 @@ export default function LoginPage() {
             <FacebookLoginButton />
           </div>
 
-          <div className="mt-5 rounded-3xl border border-border bg-bg-primary/40 p-4 text-left">
+          <div className="mt-5 rounded-lg border border-border bg-bg-secondary/60 p-4 text-left">
             <p className="text-xs font-bold text-text-muted uppercase tracking-wide mb-3">
               Access requested
             </p>

@@ -11,12 +11,9 @@ import type { Page } from '@/lib/types';
 
 function PagesHero({ count }: { count?: number }) {
   return (
-    <section className="relative mb-5 overflow-hidden rounded-[2rem] border border-border bg-white/90 p-4 shadow-[0_18px_50px_rgba(15,23,42,0.08)] sm:p-5">
-      <div className="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-cyan-100/80" />
-      <div className="absolute -bottom-12 left-8 h-28 w-28 rounded-full bg-emerald-100/80" />
-
-      <div className="relative flex items-start gap-4">
-        <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-text-primary text-white shadow-[0_14px_34px_rgba(15,23,42,0.22)]">
+    <section className="meta-panel mb-5 overflow-hidden">
+      <div className="flex items-start gap-4 border-b border-border bg-bg-card p-4 sm:p-5">
+        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-text-primary text-white">
           <svg className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 8.25h9m-9 3.75h6m-7.5 7.5h12A2.25 2.25 0 0020.25 17V7A2.25 2.25 0 0018 4.75H6A2.25 2.25 0 003.75 7v10A2.25 2.25 0 006 19.5z" />
           </svg>
@@ -33,7 +30,7 @@ function PagesHero({ count }: { count?: number }) {
           </p>
         </div>
         {count !== undefined && (
-          <div className="hidden rounded-3xl border border-border bg-bg-secondary px-5 py-4 text-center sm:block">
+          <div className="hidden rounded-lg border border-border bg-bg-secondary px-5 py-4 text-center sm:block">
             <div className="text-3xl font-black tabular-nums text-text-primary">{count}</div>
             <div className="text-[10px] font-bold uppercase tracking-wide text-text-muted">Pages</div>
           </div>
@@ -45,17 +42,19 @@ function PagesHero({ count }: { count?: number }) {
 
 function SkeletonCard() {
   return (
-    <div className="rounded-[2rem] border border-border bg-white/90 p-3 shadow-[0_18px_50px_rgba(15,23,42,0.08)] animate-pulse">
-      <div className="flex gap-3">
-        <div className="h-24 w-24 rounded-[1.5rem] bg-bg-tertiary" />
-        <div className="min-w-0 flex-1 py-1">
-          <div className="h-4 w-3/4 rounded-full bg-bg-tertiary" />
-          <div className="mt-2 h-3 w-1/2 rounded-full bg-bg-secondary" />
-          <div className="mt-4 grid grid-cols-2 gap-2">
-            <div className="h-11 rounded-2xl bg-bg-secondary" />
-            <div className="h-11 rounded-2xl bg-bg-secondary" />
+    <div className="meta-item animate-pulse">
+      <div className="meta-item-header p-4">
+        <div className="flex gap-3">
+          <div className="h-14 w-14 rounded-lg bg-bg-tertiary" />
+          <div className="min-w-0 flex-1 py-1">
+            <div className="h-4 w-3/4 rounded bg-bg-tertiary" />
+            <div className="mt-2 h-3 w-1/2 rounded bg-bg-secondary" />
           </div>
         </div>
+      </div>
+      <div className="grid grid-cols-2 gap-2 p-4">
+        <div className="h-14 rounded-lg bg-bg-secondary" />
+        <div className="h-14 rounded-lg bg-bg-secondary" />
       </div>
     </div>
   );
@@ -67,26 +66,26 @@ function PageCard({ page }: { page: Page }) {
   return (
     <Link
       href={`/pages/${page.id}?name=${encodeURIComponent(page.name)}`}
-      className="group relative overflow-hidden rounded-[2rem] border border-border bg-white/90 p-3 shadow-[0_18px_50px_rgba(15,23,42,0.08)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_24px_70px_rgba(15,23,42,0.12)]"
+      className="meta-item meta-item-compact group block"
     >
-      <div className="absolute right-0 top-0 h-24 w-24 rounded-bl-[3rem] bg-emerald-100/70" />
-      <div className="relative flex gap-3">
+      <div className="absolute left-0 right-0 top-0 h-1.5 bg-accent/60" />
+      <div className="meta-item-header flex gap-3 p-4">
         {page.picture?.data.url ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={page.picture.data.url}
             alt={page.name}
-            className="h-24 w-24 shrink-0 rounded-[1.5rem] object-cover ring-4 ring-white"
+            className="meta-compact-avatar h-14 w-14 shrink-0 rounded-lg object-cover"
           />
         ) : (
-          <div className="flex h-24 w-24 shrink-0 items-center justify-center rounded-[1.5rem] bg-accent/15 text-3xl font-black text-accent ring-4 ring-white">
+          <div className="meta-compact-avatar flex h-14 w-14 shrink-0 items-center justify-center rounded-lg bg-accent/15 text-2xl font-black text-accent">
             {page.name.charAt(0).toUpperCase()}
           </div>
         )}
 
         <div className="min-w-0 flex-1 py-1">
-          <div className="flex items-start gap-2 pr-7">
-          <p className="text-base font-black leading-snug text-text-primary line-clamp-2">{page.name}</p>
+          <div className="flex items-start gap-2 pr-8">
+          <p className="meta-compact-title text-base font-black leading-snug text-text-primary line-clamp-2">{page.name}</p>
           {isVerified && (
             <svg className="mt-0.5 h-4 w-4 flex-shrink-0 text-accent" fill="currentColor" viewBox="0 0 24 24">
               <path d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-.614 3.066 3.745 3.745 0 01-3.066.614 3.745 3.745 0 01-3.068 1.593c-1.268 0-2.39-.63-3.068-1.593a3.745 3.745 0 01-3.066-.614 3.745 3.745 0 01-.614-3.066A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 01.614-3.066 3.745 3.745 0 013.066-.614A3.745 3.745 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.745 3.745 0 013.066.614 3.745 3.745 0 01.614 3.066A3.744 3.744 0 0121 12z" />
@@ -94,7 +93,7 @@ function PageCard({ page }: { page: Page }) {
           )}
           </div>
         {page.business?.name && (
-          <div className="mt-1.5 inline-flex max-w-full items-center gap-1.5 rounded-full bg-accent/10 px-2.5 py-1 text-xs font-bold text-accent">
+          <div className="meta-compact-hide mt-1.5 inline-flex max-w-full items-center gap-1.5 rounded-md bg-accent/10 px-2.5 py-1 text-xs font-bold text-accent">
             <svg className="h-3 w-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21" />
             </svg>
@@ -102,20 +101,27 @@ function PageCard({ page }: { page: Page }) {
           </div>
         )}
         {page.category && (
-          <p className="mt-1.5 text-xs font-medium text-text-muted line-clamp-1">{page.category}</p>
+          <p className="mt-1.5 line-clamp-1 text-xs font-semibold uppercase text-text-muted">{page.category}</p>
         )}
-        <div className="mt-4 grid grid-cols-2 gap-2 text-xs text-text-secondary">
-          {page.fan_count !== undefined && (
-            <span className="rounded-2xl border border-border bg-bg-secondary px-3 py-2.5 font-black">{page.fan_count.toLocaleString()} likes</span>
-          )}
-          {page.followers_count !== undefined && (
-            <span className="rounded-2xl border border-border bg-bg-secondary px-3 py-2.5 font-black">{page.followers_count.toLocaleString()} followers</span>
-          )}
-        </div>
         </div>
       </div>
 
-      <div className="absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-full bg-white/90 text-text-muted shadow-sm transition-transform group-hover:translate-x-1">
+      <div className="meta-compact-pad grid grid-cols-2 gap-2 p-4">
+        {page.fan_count !== undefined && (
+          <span className="meta-metric">
+            <span className="block text-[10px] font-bold uppercase text-text-muted">Likes</span>
+            <span className="mt-1 block text-base font-black tabular-nums text-text-primary">{page.fan_count.toLocaleString()}</span>
+          </span>
+        )}
+        {page.followers_count !== undefined && (
+          <span className="meta-metric">
+            <span className="block text-[10px] font-bold uppercase text-text-muted">Followers</span>
+            <span className="mt-1 block text-base font-black tabular-nums text-text-primary">{page.followers_count.toLocaleString()}</span>
+          </span>
+        )}
+      </div>
+
+      <div className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-lg border border-border bg-bg-card text-text-muted shadow-sm transition-transform group-hover:translate-x-1">
       <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
       </svg>
@@ -129,7 +135,7 @@ export default function PagesPage() {
   const router = useRouter();
 
   useEffect(() => {
-    if (!auth.isLoading && !auth.token) router.replace('/');
+    if (!auth.isLoading && !auth.token) router.replace('/login');
   }, [auth.isLoading, auth.token, router]);
 
   const { state, retry, loadMore, hasMore, loadingMore } = usePages(auth.token);
@@ -177,7 +183,7 @@ export default function PagesPage() {
       {state.status === 'success' && state.data.length > 0 && (
         <>
           {/* Mobile + Desktop: card list (same layout, table not needed for pages) */}
-          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          <div className="grid gap-4 md:grid-cols-2 2xl:grid-cols-3">
             {state.data.map(page => (
               <PageCard key={page.id} page={page} />
             ))}

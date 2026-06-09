@@ -21,10 +21,9 @@ export interface PostAnalysisPayload {
   comments: number;
   shares: number;
 
-  // Reach & delivery (from post insights — may be undefined if permission not granted)
-  impressions?: number;
-  reach?: number;
-  engaged_users?: number;
+  // Views & delivery (from post insights — may be undefined if unavailable)
+  views?: number;
+  engagements?: number;
   clicks?: number;
 
   // Page context
@@ -64,34 +63,24 @@ function buildPrompt(post: PostAnalysisPayload): string {
     hourOfDay >= 18 && hourOfDay < 22 ? 'evening (6-10pm)' :
     'off-peak (10pm-6am)';
 
-  const totalEngagement = post.reactions + post.comments + post.shares;
+  const totalEngagement = post.engagements ?? (post.reactions + post.comments + post.shares);
 
   // Derived rates
-  const engagementRate = post.reach ? pct(totalEngagement, post.reach) : '—';
-  const reactionRate = post.reach ? pct(post.reactions, post.reach) : '—';
-  const commentRate = post.reach ? pct(post.comments, post.reach) : '—';
-  const shareRate = post.reach ? pct(post.shares, post.reach) : '—';
-  const clickRate = post.reach && post.clicks ? pct(post.clicks, post.reach) : '—';
-  const organicReachRate = post.impressions && post.reach
-    ? pct(post.reach, post.impressions)
-    : '—';
-  const engagedUserRate = post.reach && post.engaged_users
-    ? pct(post.engaged_users, post.reach)
-    : '—';
+  const engagementRate = post.views ? pct(totalEngagement, post.views) : '—';
+  const reactionRate = post.views ? pct(post.reactions, post.views) : '—';
+  const commentRate = post.views ? pct(post.comments, post.views) : '—';
+  const shareRate = post.views ? pct(post.shares, post.views) : '—';
+  const clickRate = post.views && post.clicks ? pct(post.clicks, post.views) : '—';
   const shareToReactionRatio =
     post.reactions > 0 ? (post.shares / post.reactions).toFixed(3) : '—';
   const commentToReactionRatio =
     post.reactions > 0 ? (post.comments / post.reactions).toFixed(3) : '—';
 
   // Follower-based rates (if available)
-  const impressionPerFollower = post.followers_count && post.impressions
-    ? pct(post.impressions, post.followers_count)
+  const viewsPerFollower = post.followers_count && post.views
+    ? pct(post.views, post.followers_count)
     : '—';
-  const reachPerFollower = post.followers_count && post.reach
-    ? pct(post.reach, post.followers_count)
-    : '—';
-
-  const hasInsights = post.reach !== undefined || post.impressions !== undefined;
+  const hasInsights = post.views !== undefined || post.clicks !== undefined;
 
   return `Analyze the following Facebook post using all available metrics.
 
@@ -121,25 +110,22 @@ Total engagement: ${fmt(totalEngagement)}
 Share/Reaction ratio: ${shareToReactionRatio} ${parseFloat(shareToReactionRatio) > 0.1 ? '✓ strong viral signal' : ''}
 Comment/Reaction ratio: ${commentToReactionRatio}
 
-${hasInsights ? `━━━ REACH & DELIVERY METRICS ━━━
-Impressions:   ${fmt(post.impressions)} ${impressionPerFollower !== '—' ? `(${impressionPerFollower} of followers)` : ''}
-Reach:         ${fmt(post.reach)} ${reachPerFollower !== '—' ? `(${reachPerFollower} of followers)` : ''}
-Organic reach rate: ${organicReachRate} (reach/impressions — lower = more re-shows to same people)
-Engaged users: ${fmt(post.engaged_users)} (${engagedUserRate} of reach)
-Clicks:        ${fmt(post.clicks)} (${clickRate} of reach)
+${hasInsights ? `━━━ VIEWS & DELIVERY METRICS ━━━
+Views:         ${fmt(post.views)} ${viewsPerFollower !== '—' ? `(${viewsPerFollower} of followers)` : ''}
+Clicks:        ${fmt(post.clicks)} (${clickRate} of views)
 
-Engagement rate: ${engagementRate} of reach
-Reaction rate:   ${reactionRate} of reach
-Comment rate:    ${commentRate} of reach
-Share rate:      ${shareRate} of reach
+Engagement rate: ${engagementRate} of views
+Reaction rate:   ${reactionRate} of views
+Comment rate:    ${commentRate} of views
+Share rate:      ${shareRate} of views
 
 BENCHMARKS (Facebook organic):
-- Good engagement rate: ≥ 1% of reach
-- Strong share rate: ≥ 0.5% of reach
-- Healthy reach rate: ≥ 30% of followers per post` : '⚠ Reach/impression insights not available — analyze based on engagement counts only'}
+- Good engagement per view: ≥ 1%
+- Strong share per view: ≥ 0.5%
+- Healthy visibility: views ≥ 30% of followers per post` : '⚠ Post view insights not available — analyze based on engagement counts only'}
 
 ━━━ ANALYSIS ANGLES ━━━
-Provide 4 angles: "Engagement Quality", "Content & Copywriting", "Reach & Virality", "Optimization Opportunities"
+Provide 4 angles: "Engagement Quality", "Content & Copywriting", "Views & Virality", "Optimization Opportunities"
 
 Return a JSON object with EXACT schema:
 {
@@ -172,22 +158,22 @@ Return a JSON object with EXACT schema:
           "title": "Short action title",
           "description": "Exact content improvement with example or template if helpful",
           "priority": "high|medium|low",
-          "metric": "comments|shares|reach"
+          "metric": "comments|shares|views"
         }
       ]
     },
     {
-      "name": "Reach & Virality",
+      "name": "Views & Virality",
       "level": "account",
       "score": <0-100>,
-      "strengths": ["reach or distribution strength"],
-      "issues": ["reach limitation or distribution problem"],
+      "strengths": ["view or distribution strength"],
+      "issues": ["visibility limitation or distribution problem"],
       "recommendations": [
         {
           "title": "Short action title",
-          "description": "How to improve organic reach or virality coefficient",
+          "description": "How to improve organic visibility or virality coefficient",
           "priority": "high|medium|low",
-          "metric": "reach|impressions|shares"
+          "metric": "views|shares"
         }
       ]
     },
@@ -202,7 +188,7 @@ Return a JSON object with EXACT schema:
           "title": "Short action title",
           "description": "Tactical improvement for next posts — be specific about timing, format, or structure",
           "priority": "high|medium|low",
-          "metric": "reach|engagement_rate|shares"
+          "metric": "views|engagement_rate|shares"
         }
       ]
     }
@@ -216,15 +202,14 @@ SCORING GUIDE:
 - 0-39: Poor performance or very low data
 
 IMPORTANT ANALYSIS RULES:
-- If engagement rate < 1% of reach: flag as major issue (Facebook avg is 0.5-1%)
-- If engagement rate > 3% of reach: strong performer
+- If engagement rate < 1% of views: flag as major issue
+- If engagement rate > 3% of views: strong performer
 - If shares > 5% of reactions: excellent viral coefficient → highlight as key strength
 - If comments < 2% of reactions: audience not inspired to respond → content/CTA issue
-- If reach < 20% of followers: algorithm suppression likely → investigate content signals
-- If organic reach rate (reach/impressions) < 60%: Facebook is re-showing to same people, audience fatigue
+- If views < 20% of followers: visibility is weak → investigate content signals
 - Post timing: evening 6-10pm and weekday lunchtimes typically perform best
 - Text-only posts with questions often get more comments than photo posts
-- Posts with external links typically get lower reach (Facebook algorithm penalty)
+- Posts with external links typically get lower visibility (Facebook algorithm penalty)
 
 Return only JSON, no markdown, no extra text.`;
 }

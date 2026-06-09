@@ -35,7 +35,7 @@ export default function CommentsPage() {
   const pageToken = usePageToken(pageId, auth.token);
 
   useEffect(() => {
-    if (!auth.isLoading && !auth.token) router.replace('/');
+    if (!auth.isLoading && !auth.token) router.replace('/login');
   }, [auth.isLoading, auth.token, router]);
 
   const [commentsState, setCommentsState] = useState<AsyncState<PageComment[]>>({ status: 'idle' });

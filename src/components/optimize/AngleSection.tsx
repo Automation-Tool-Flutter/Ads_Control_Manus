@@ -19,9 +19,9 @@ function ScoreRing({ score }: { score: number }) {
 
 export function AngleSection({ angle }: Props) {
   return (
-    <div className="space-y-5">
+    <div className="space-y-4">
       {/* Header */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-3 rounded-lg border border-border bg-bg-secondary/45 px-3 py-2.5">
         <div>
           <h3 className="text-base font-bold text-text-primary">
             {angle.name}
@@ -35,8 +35,8 @@ export function AngleSection({ angle }: Props) {
 
       {/* Strengths */}
       {angle.strengths.length > 0 && (
-        <div>
-          <p className="text-xs font-semibold text-status-green uppercase tracking-wider mb-2">
+        <div className="rounded-lg border border-status-green/20 bg-status-green/5 p-3">
+          <p className="mb-2 text-xs font-bold uppercase text-status-green">
             Strengths
           </p>
           <ul className="space-y-1.5">
@@ -45,8 +45,8 @@ export function AngleSection({ angle }: Props) {
                 key={i}
                 className="flex items-start gap-2 text-sm text-text-secondary"
               >
-                <span className="text-status-green mt-0.5 flex-shrink-0">
-                  ✓
+                <span className="mt-0.5 flex-shrink-0 text-[10px] font-black text-status-green">
+                  OK
                 </span>
                 {s}
               </li>
@@ -57,8 +57,8 @@ export function AngleSection({ angle }: Props) {
 
       {/* Issues */}
       {angle.issues.length > 0 && (
-        <div>
-          <p className="text-xs font-semibold text-status-yellow uppercase tracking-wider mb-2">
+        <div className="rounded-lg border border-status-yellow/25 bg-status-yellow/5 p-3">
+          <p className="mb-2 text-xs font-bold uppercase text-status-yellow">
             Areas for improvement
           </p>
           <ul className="space-y-1.5">
@@ -67,7 +67,7 @@ export function AngleSection({ angle }: Props) {
                 key={i}
                 className="flex items-start gap-2 text-sm text-text-secondary"
               >
-                <span className="text-status-yellow mt-0.5 flex-shrink-0">
+                <span className="mt-0.5 flex-shrink-0 font-black text-status-yellow">
                   !
                 </span>
                 {issue}
@@ -80,7 +80,7 @@ export function AngleSection({ angle }: Props) {
       {/* Recommendations */}
       {angle.recommendations.length > 0 && (
         <div>
-          <p className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-2">
+          <p className="mb-2 text-xs font-bold uppercase text-text-muted">
             Recommended
           </p>
           <div className="space-y-3">

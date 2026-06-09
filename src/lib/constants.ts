@@ -14,15 +14,18 @@ export const FB_LOGIN_CONFIG_ID =
   "";
 
 export const FB_PERMISSIONS = [
-  "public_profile",
-  "email",
   "ads_read",
   "ads_management",
   "business_management",
+  "email",
   "pages_show_list",
+  "pages_read_user_content",
   "pages_read_engagement",
+  "read_insights",
+  "pages_manage_posts",
+  "pages_manage_engagement",
+  "pages_manage_metadata",
   "pages_manage_ads",
-  "leads_retrieval",
   "catalog_management",
 ];
 
@@ -33,6 +36,8 @@ export const STORAGE_KEYS = {
   USER: "ads_user",
   GRANTED_SCOPES: "ads_granted_scopes",
   DENIED_SCOPES: "ads_denied_scopes",
+  OAUTH_STATE: "ads_oauth_state",
+  OAUTH_RETURN_TO: "ads_oauth_return_to",
 } as const;
 
 // Facebook error codes indicating the token is invalid/expired → auto-logout

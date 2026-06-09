@@ -19,7 +19,7 @@ interface Props {
 export function PriorityBadge({ priority }: Props) {
   return (
     <span
-      className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${colorClasses[priority]}`}
+      className={`inline-flex items-center rounded-md border px-2 py-0.5 text-xs font-bold ${colorClasses[priority]}`}
     >
       {labels[priority]}
     </span>

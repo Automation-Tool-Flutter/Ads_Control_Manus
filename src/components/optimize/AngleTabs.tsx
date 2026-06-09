@@ -12,17 +12,17 @@ export function AngleTabs({ angles }: Props) {
   const [activeIndex, setActiveIndex] = useState(0);
 
   return (
-    <div>
+    <div className="rounded-lg border border-border bg-bg-card shadow-sm">
       {/* Tab bar — horizontal scroll on mobile */}
-      <div className="flex overflow-x-auto gap-2 pb-1 -mx-4 px-4 mb-6 lg:hidden">
+      <div className="flex gap-2 overflow-x-auto border-b border-border bg-bg-secondary/55 px-3 py-3 lg:hidden">
         {angles.map((angle, i) => (
           <button
             key={angle.level}
             onClick={() => setActiveIndex(i)}
-            className={`flex-shrink-0 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+            className={`flex-shrink-0 rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
               activeIndex === i
-                ? 'bg-accent text-white'
-                : 'bg-bg-card border border-border text-text-secondary hover:text-text-primary hover:border-border/80'
+                ? 'bg-text-primary text-white shadow-lg shadow-slate-900/15'
+                : 'border border-border bg-bg-card text-text-secondary hover:border-border/80 hover:text-text-primary'
             }`}
           >
             {angle.name}
@@ -31,18 +31,18 @@ export function AngleTabs({ angles }: Props) {
       </div>
 
       {/* Mobile: show active tab content */}
-      <div className="lg:hidden">
+      <div className="p-4 lg:hidden">
         {angles[activeIndex] && (
-          <div className="bg-bg-card border border-border rounded-2xl p-5">
+          <div>
             <AngleSection angle={angles[activeIndex]} />
           </div>
         )}
       </div>
 
       {/* Desktop: all sections stacked */}
-      <div className="hidden lg:space-y-6 lg:block">
+      <div className="hidden divide-y divide-border lg:block">
         {angles.map((angle) => (
-          <div key={angle.level} className="bg-bg-card border border-border rounded-2xl p-5">
+          <div key={angle.level} className="p-4">
             <AngleSection angle={angle} />
           </div>
         ))}

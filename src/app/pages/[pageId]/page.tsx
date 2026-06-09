@@ -9,7 +9,7 @@ import { usePagePosts } from '@/hooks/usePagePosts';
 import { useAdAccounts } from '@/hooks/useAdAccounts';
 import type { AdAccount } from '@/lib/types';
 import { PageContainer } from '@/components/layout/PageContainer';
-import { Breadcrumb } from '@/components/ui/Breadcrumb';
+import { ControlHeader } from '@/components/layout/ControlHeader';
 import { ReauthError } from '@/components/ui/ReauthError';
 import { PostCard } from '@/components/pages/PostCard';
 import { ScheduledPostCard } from '@/components/pages/ScheduledPostCard';
@@ -63,7 +63,7 @@ export default function PageDetailPage() {
   const { toast } = useToast();
 
   useEffect(() => {
-    if (!auth.isLoading && !auth.token) router.replace('/');
+    if (!auth.isLoading && !auth.token) router.replace('/login');
   }, [auth.isLoading, auth.token, router]);
 
   const { state: pagesState } = usePages(auth.token);
@@ -157,81 +157,54 @@ export default function PageDetailPage() {
 
   return (
     <PageContainer>
-      <div className="mb-5">
-        <Breadcrumb
-          items={[
-            { label: 'Pages', href: '/pages' },
-            { label: page?.name ?? pageId },
-          ]}
-        />
-      </div>
-
-      {/* Page info card */}
-      {page && (
-        <div className="glass-card gradient-border-card rounded-2xl p-4 mb-5">
-          <div className="flex items-center gap-3 sm:gap-4 mb-3">
-            {page.picture?.data.url ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={page.picture.data.url} alt={page.name} className="w-16 h-16 rounded-xl object-cover flex-shrink-0" />
-            ) : (
-              <div className="w-16 h-16 rounded-xl bg-accent/20 flex items-center justify-center text-accent font-bold text-2xl flex-shrink-0">
-                {page.name.charAt(0).toUpperCase()}
-              </div>
-            )}
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-1.5 flex-wrap">
-                <h1 className="text-xl sm:text-2xl font-bold text-text-primary">{page.name}</h1>
-                {(page.verification_status === 'blue_verified' || page.verification_status === 'gray_verified') && (
-                  <svg className="w-5 h-5 text-accent" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-.614 3.066 3.745 3.745 0 01-3.066.614 3.745 3.745 0 01-3.068 1.593c-1.268 0-2.39-.63-3.068-1.593a3.745 3.745 0 01-3.066-.614 3.745 3.745 0 01-.614-3.066A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 01.614-3.066 3.745 3.745 0 013.066-.614A3.745 3.745 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.745 3.745 0 013.066.614 3.745 3.745 0 01.614 3.066A3.744 3.744 0 0121 12z" />
-                  </svg>
-                )}
-              </div>
-              {page.business?.name && (
-                <div className="flex items-center gap-1 mt-0.5">
-                  <svg className="w-3.5 h-3.5 text-accent/70 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21" />
-                  </svg>
-                  <p className="text-sm text-accent/80 font-medium">{page.business.name}</p>
-                </div>
-              )}
-              {page.category && <p className="text-sm text-text-muted mt-0.5">{page.category}</p>}
-            </div>
-          </div>
-          <div className="flex flex-wrap gap-4 text-sm text-text-secondary">
-            {page.fan_count !== undefined && (
-              <span><span className="font-semibold text-text-primary">{page.fan_count.toLocaleString()}</span> likes</span>
-            )}
-            {page.followers_count !== undefined && (
-              <span><span className="font-semibold text-text-primary">{page.followers_count.toLocaleString()}</span> followers</span>
-            )}
-          </div>
-
-          {/* Quick links */}
-          <div className="flex flex-wrap gap-2 mt-3 pt-3 border-t border-border/50">
+      <ControlHeader
+        breadcrumbs={[
+          { label: 'Pages', href: '/pages' },
+          { label: page?.name ?? pageId },
+        ]}
+        eyebrow="Content studio"
+        title={page?.name ?? 'Page workspace'}
+        description={page?.category ? `${page.category}. Manage publishing, scheduled content, comments, boosts, and GPT post review.` : 'Manage publishing, scheduled content, comments, boosts, and GPT post review.'}
+        badge="Meta Page + GPT"
+        stats={[
+          { label: 'likes', value: page?.fan_count !== undefined ? page.fan_count.toLocaleString() : '-', tone: 'neutral' },
+          { label: 'followers', value: page?.followers_count !== undefined ? page.followers_count.toLocaleString() : '-', tone: 'blue' },
+          { label: 'scheduled', value: scheduledState.status === 'success' ? scheduledState.data.length : '-', tone: 'amber' },
+        ]}
+        actions={(
+          <>
             <Link
               href={`/pages/${pageId}/insights`}
-              className="text-xs font-medium text-text-secondary hover:text-accent bg-bg-secondary hover:bg-accent/5 border border-border px-3 py-1.5 rounded-lg transition-colors"
+              className="inline-flex min-h-10 items-center justify-center rounded-xl border border-border bg-bg-card px-3 text-sm font-semibold text-text-secondary hover:text-text-primary"
             >
               Insights
             </Link>
             <Link
               href={`/pages/${pageId}/settings`}
-              className="text-xs font-medium text-text-secondary hover:text-accent bg-bg-secondary hover:bg-accent/5 border border-border px-3 py-1.5 rounded-lg transition-colors"
+              className="inline-flex min-h-10 items-center justify-center rounded-xl border border-border bg-bg-card px-3 text-sm font-semibold text-text-secondary hover:text-text-primary"
             >
               Settings
             </Link>
-          </div>
-        </div>
-      )}
+            <Link
+              href={`/pages/${pageId}/posts/new`}
+              className="hidden min-h-10 items-center justify-center rounded-xl bg-text-primary px-3 text-sm font-semibold text-white hover:bg-slate-800 sm:inline-flex"
+            >
+              Create post
+            </Link>
+          </>
+        )}
+      />
 
       {/* Posts section */}
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-base sm:text-lg font-semibold text-text-primary">Recent Posts</h2>
+        <div>
+          <p className="text-[11px] font-black uppercase tracking-[0.2em] text-accent">Publishing desk</p>
+          <h2 className="text-base sm:text-lg font-semibold text-text-primary">Recent Posts</h2>
+        </div>
         {/* Desktop create button */}
         <Link
           href={`/pages/${pageId}/posts/new`}
-          className="hidden sm:flex items-center gap-1.5 text-sm font-semibold text-white bg-accent hover:bg-accent/90 px-3 py-1.5 rounded-lg transition-colors"
+          className="hidden sm:flex items-center gap-1.5 text-sm font-semibold text-white bg-text-primary hover:bg-slate-800 px-3 py-1.5 rounded-lg transition-colors"
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />

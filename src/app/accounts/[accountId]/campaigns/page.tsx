@@ -8,6 +8,7 @@ import { useCampaigns } from '@/hooks/useCampaigns';
 import { useAccountCurrency } from '@/hooks/useAccountCurrency';
 import { useCampaignAnalysis } from '@/hooks/useCampaignAnalysis';
 import { PageContainer } from '@/components/layout/PageContainer';
+import { ControlHeader } from '@/components/layout/ControlHeader';
 import { StatusDot } from '@/components/ui/StatusBadge';
 import { CopyButton } from '@/components/ui/CopyButton';
 import { ErrorState } from '@/components/ui/ErrorState';
@@ -47,12 +48,12 @@ function sortCampaigns(campaigns: Campaign[]) {
 // ─── Metric cell ──────────────────────────────────────────────────────────────
 function MetricCell({ label, value, loading }: { label: string; value: string; loading: boolean }) {
   return (
-    <div className="flex flex-col gap-0.5">
-      <span className="text-[10px] text-text-muted uppercase tracking-wide">{label}</span>
+    <div className="meta-metric flex flex-col gap-0.5">
+      <span className="text-[10px] font-bold uppercase text-text-muted">{label}</span>
       {loading ? (
-        <span className="h-4 w-10 bg-white/8 rounded animate-pulse inline-block" />
+        <span className="inline-block h-4 w-10 animate-pulse rounded bg-white/8" />
       ) : (
-        <span className="text-sm font-semibold text-text-primary tabular-nums">{value}</span>
+        <span className="text-sm font-black text-text-primary tabular-nums">{value}</span>
       )}
     </div>
   );
@@ -111,15 +112,15 @@ function CampaignCard({
     : null;
 
   return (
-    <div className={`bg-bg-card border rounded-2xl overflow-hidden transition-colors ${selected ? 'border-accent/60' : 'border-border'}`}>
+    <div className={`meta-item meta-item-compact ${selected ? 'meta-item-selected' : ''}`}>
       {/* Header: name + controls */}
-      <div className="flex items-start justify-between gap-3 p-4 pb-3">
+      <div className="meta-item-header flex items-start justify-between gap-3 px-4 py-3">
         <Link href={`/accounts/${accountId}/campaigns/${campaign.id}?accountName=${encodeURIComponent(accountName)}&campaignName=${encodeURIComponent(campaign.name)}`} className="flex-1 min-w-0 active:opacity-70">
           <div className="flex items-center gap-1.5">
             <StatusDot color={status.color} />
-            <p className="font-semibold text-text-primary leading-snug line-clamp-2">{campaign.name}</p>
+            <p className="line-clamp-2 font-bold leading-snug text-text-primary">{campaign.name}</p>
           </div>
-          <p className="text-[11px] text-text-muted mt-0.5">{getObjectiveLabel(campaign.objective)}</p>
+          <p className="mt-1 text-[11px] font-semibold uppercase text-text-muted">{getObjectiveLabel(campaign.objective)}</p>
         </Link>
         <div className="flex items-center gap-2 flex-shrink-0 pt-0.5">
           <StatusToggle status={campaign.status} onToggle={async () => onToggleStatus()} />
@@ -134,8 +135,7 @@ function CampaignCard({
       </div>
 
       {/* Metrics grid */}
-      <div className="mx-4 border-t border-border/40" />
-      <div className="grid grid-cols-4 gap-3 px-4 py-3">
+      <div className="meta-compact-pad grid grid-cols-2 gap-2 px-4 py-3 min-[460px]:grid-cols-4">
         <MetricCell label="Spend"  value={formatSpend(insight?.spend, currency)}          loading={insightsLoading} />
         <MetricCell label="Impr"   value={formatCompact(insight?.impressions)}             loading={insightsLoading} />
         <MetricCell label="CTR"    value={insight?.ctr ? formatPercent(insight.ctr) : '—'} loading={insightsLoading} />
@@ -145,27 +145,25 @@ function CampaignCard({
       {/* Budget */}
       {budget && (
         <>
-          <div className="mx-4 border-t border-border/40" />
-          <div className="px-4 py-2">
-            <span className="text-xs text-text-muted">Budget: </span>
-            <span className="text-xs font-medium text-text-secondary">{budget}</span>
+          <div className="meta-compact-hide border-t border-border/60 px-4 py-2">
+            <span className="text-xs font-bold uppercase text-text-muted">Budget </span>
+            <span className="text-xs font-semibold text-text-secondary">{budget}</span>
           </div>
         </>
       )}
 
       {/* Actions */}
-      <div className="mx-4 border-t border-border/40" />
-      <div className="flex">
+      <div className="border-t border-border" />
+      <div className="flex divide-x divide-border">
         <Link
           href={`/accounts/${accountId}/campaigns/${campaign.id}?accountName=${encodeURIComponent(accountName)}&campaignName=${encodeURIComponent(campaign.name)}`}
-          className="flex-1 flex items-center justify-center py-3 text-text-secondary text-sm hover:bg-white/[0.03] active:bg-white/5 transition-colors"
+          className="meta-action flex-1 rounded-none text-text-secondary hover:bg-bg-secondary active:bg-bg-secondary"
         >
           Details
         </Link>
-        <div className="w-px bg-border/50" />
         <Link
           href={`/accounts/${accountId}/campaigns/${campaign.id}/adsets?accountName=${encodeURIComponent(accountName)}&currency=${encodeURIComponent(currency)}&campaignName=${encodeURIComponent(campaign.name)}`}
-          className="flex-1 flex items-center justify-center gap-1.5 py-3 text-accent text-sm font-semibold hover:bg-accent/5 active:bg-accent/10 transition-colors"
+          className="meta-action flex-1 rounded-none text-accent hover:bg-accent/5 active:bg-accent/10"
         >
           Ad Sets
           <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -189,7 +187,7 @@ export default function CampaignsPage() {
   const [dateFilter, setDateFilter] = useState<DatePreset | DateRange>('last_30d');
 
   useEffect(() => {
-    if (!auth.isLoading && !auth.token) router.replace('/');
+    if (!auth.isLoading && !auth.token) router.replace('/login');
   }, [auth.isLoading, auth.token, router]);
 
   const { state, insights, insightsLoading, insightsLoaded, loadInsights, retry } = useCampaigns(accountId, auth.token, dateFilter);
@@ -296,74 +294,36 @@ export default function CampaignsPage() {
 
   return (
     <PageContainer>
-      {/* Campaign mission header */}
-      <section className="neo-panel relative mb-6 overflow-hidden p-5 sm:p-7">
-        <div className="absolute right-[-4rem] top-[-6rem] h-56 w-56 rounded-full bg-accent/35 blur-3xl" />
-        <div className="absolute bottom-[-6rem] left-[32%] h-48 w-48 rounded-full bg-status-green/25 blur-3xl" />
-
-        <div className="relative">
-          <div className="flex flex-wrap items-center gap-2">
-            <Link
-              href="/accounts"
-              className="rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-black uppercase tracking-wide text-white/70 hover:text-white"
-            >
-              Accounts
-            </Link>
-            <span className="text-white/30">/</span>
-            <Link
-              href={`/accounts/${accountId}`}
-              className="max-w-[220px] truncate rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-black uppercase tracking-wide text-white/70 hover:text-white"
-            >
-              {accountName}
-            </Link>
-            <span className="text-white/30">/</span>
-            <span className="rounded-full bg-accent px-3 py-1.5 text-xs font-black uppercase tracking-wide text-white">
-              Campaign room
-            </span>
-          </div>
-
-          <div className="mt-7 grid gap-5 lg:grid-cols-[1fr_auto] lg:items-end">
-            <div>
-              <p className="text-[11px] font-black uppercase tracking-[0.24em] text-white/55">
-                Campaign operations
-              </p>
-              <h1 className="mt-2 text-4xl font-black leading-[0.95] text-white sm:text-6xl">
-                Delivery board
-              </h1>
-              <p className="mt-4 max-w-2xl text-sm leading-6 text-white/68 sm:text-base">
-                Monitor status, budget movement, delivery metrics, and AI review signals for this ad account.
-              </p>
+      <ControlHeader
+        breadcrumbs={[
+          { label: 'Accounts', href: '/accounts' },
+          { label: accountName, href: `/accounts/${accountId}` },
+          { label: 'Campaigns' },
+        ]}
+        eyebrow="Campaign operations"
+        title="Delivery board"
+        description="Monitor status, budget movement, delivery metrics, and GPT review signals for this ad account."
+        badge="Meta Ads + GPT"
+        stats={state.status === 'success' ? [
+          { label: 'total', value: campaigns.length, tone: 'neutral' },
+          { label: 'active', value: activeCount, tone: 'green' },
+          { label: 'selected', value: selectedIds.size, tone: selectedIds.size > 0 ? 'blue' : 'neutral' },
+        ] : []}
+      >
+        {state.status === 'success' && campaigns.length > 0 && (
+          <div className="flex items-center gap-2">
+            <div className="flex-1">
+              <DateFilter value={dateFilter} onChange={setDateFilter} disabled={insightsLoading} />
             </div>
-
-            {state.status === 'success' && (
-              <div className="grid grid-cols-2 gap-2 sm:w-[260px]">
-                <div className="rounded-3xl border border-white/15 bg-white/10 p-4 backdrop-blur">
-                  <p className="text-3xl font-black text-white tabular-nums">{campaigns.length}</p>
-                  <p className="mt-1 text-[10px] font-black uppercase tracking-wide text-white/55">total</p>
-                </div>
-                <div className="rounded-3xl border border-white/15 bg-white/10 p-4 backdrop-blur">
-                  <p className="text-3xl font-black text-white tabular-nums">{activeCount}</p>
-                  <p className="mt-1 text-[10px] font-black uppercase tracking-wide text-white/55">active</p>
-                </div>
-              </div>
+            {insightsLoading && (
+              <svg className="h-4 w-4 flex-shrink-0 animate-spin text-accent" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+              </svg>
             )}
           </div>
-
-          {state.status === 'success' && campaigns.length > 0 && (
-            <div className="mt-5 flex items-center gap-2 rounded-[1.5rem] border border-white/15 bg-white/10 p-2 backdrop-blur">
-              <div className="flex-1">
-                <DateFilter value={dateFilter} onChange={setDateFilter} disabled={insightsLoading} />
-              </div>
-              {insightsLoading && (
-                <svg className="h-4 w-4 flex-shrink-0 animate-spin text-white/60" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                </svg>
-              )}
-            </div>
-          )}
-        </div>
-      </section>
+        )}
+      </ControlHeader>
 
       {/* Mutation error */}
       {mutationError && (
@@ -490,7 +450,7 @@ export default function CampaignsPage() {
                     const isSelected = selectedIds.has(campaign.id);
 
                     return (
-                      <tr key={campaign.id} className={`transition-colors ${isSelected ? 'bg-accent/[0.04]' : 'hover:bg-white/[0.02]'}`}>
+                      <tr key={campaign.id} className={`transition-colors ${isSelected ? 'bg-accent/[0.06] shadow-[inset_3px_0_0_rgb(var(--c-accent))]' : 'hover:bg-bg-secondary/55'}`}>
                         {/* Checkbox */}
                         <td className="px-4 py-4">
                           <input
@@ -627,7 +587,7 @@ export default function CampaignsPage() {
 
       {/* Analysis modal */}
       {analysisState.step !== 'idle' && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
+        <div className="fixed inset-0 z-[80] flex items-end sm:items-center justify-center p-0 sm:p-4">
           {/* Backdrop */}
           <div
             className="absolute inset-0 bg-black/60 backdrop-blur-sm"
@@ -635,12 +595,12 @@ export default function CampaignsPage() {
           />
 
           {/* Panel */}
-          <div className="relative w-full sm:max-w-2xl max-h-[90dvh] flex flex-col bg-bg-card border border-border rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden">
+          <div className="relative w-full sm:max-w-2xl max-h-[90dvh] flex flex-col bg-bg-card border border-border rounded-t-lg sm:rounded-lg shadow-2xl overflow-hidden">
             {/* Header */}
             <div className="flex items-center justify-between px-5 py-4 border-b border-border flex-shrink-0">
               <div className="flex items-center gap-2">
                 <span className="text-accent text-lg leading-none">✦</span>
-                <h2 className="text-base font-semibold text-text-primary">AI Analysis</h2>
+                <h2 className="text-base font-semibold text-text-primary">GPT Analysis</h2>
               </div>
               {analysisState.step !== 'analyzing' && (
                 <button
@@ -667,8 +627,8 @@ export default function CampaignsPage() {
                     </div>
                   </div>
                   <div className="text-center">
-                    <p className="text-text-primary font-semibold mb-1">Analyzing campaigns…</p>
-                    <p className="text-text-muted text-sm">AI is processing your campaign data</p>
+                    <p className="text-text-primary font-semibold mb-1">Analyzing campaigns...</p>
+                    <p className="text-text-muted text-sm">GPT is processing your campaign data</p>
                   </div>
                 </div>
               )}
@@ -708,9 +668,9 @@ export default function CampaignsPage() {
               onClick={() => analyze(selectedCampaigns, insights, currency, dateFilter)}
               disabled={!insightsLoaded || analysisState.step === 'analyzing'}
               title={!insightsLoaded ? 'Load metrics first' : undefined}
-              className="flex items-center gap-1.5 px-3 py-2 bg-accent text-white text-sm font-medium rounded-lg disabled:opacity-50 transition-opacity"
+              className="flex items-center gap-1.5 px-3 py-2 bg-text-primary text-white text-sm font-medium rounded-lg disabled:opacity-50 transition-opacity"
             >
-              ✦ Analyze {selectedIds.size} campaign{selectedIds.size > 1 ? 's' : ''}
+              Analyze with GPT ({selectedIds.size})
             </button>
           </div>
         </div>

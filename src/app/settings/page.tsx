@@ -170,7 +170,7 @@ export default function SettingsPage() {
 
   useEffect(() => {
     if (!auth.isLoading && !auth.token) {
-      router.replace("/");
+      router.replace("/login");
     }
   }, [auth.isLoading, auth.token, router]);
 

@@ -8,7 +8,7 @@ import { useAdSets } from '@/hooks/useAdSets';
 import { useAccountCurrency } from '@/hooks/useAccountCurrency';
 import { useAdSetAnalysis } from '@/hooks/useAdSetAnalysis';
 import { PageContainer } from '@/components/layout/PageContainer';
-import { Breadcrumb } from '@/components/ui/Breadcrumb';
+import { ControlHeader } from '@/components/layout/ControlHeader';
 import { StatusDot } from '@/components/ui/StatusBadge';
 import { CopyButton } from '@/components/ui/CopyButton';
 import { ErrorState } from '@/components/ui/ErrorState';
@@ -46,12 +46,12 @@ function sortAdSets(adsets: AdSet[]) {
 // ─── Metric cell ──────────────────────────────────────────────────────────────
 function MetricCell({ label, value, loading }: { label: string; value: string; loading: boolean }) {
   return (
-    <div className="flex flex-col gap-0.5">
-      <span className="text-[10px] text-text-muted uppercase tracking-wide">{label}</span>
+    <div className="meta-metric flex flex-col gap-0.5">
+      <span className="text-[10px] font-bold uppercase text-text-muted">{label}</span>
       {loading ? (
-        <span className="h-4 w-10 bg-white/8 rounded animate-pulse inline-block" />
+        <span className="inline-block h-4 w-10 animate-pulse rounded bg-white/8" />
       ) : (
-        <span className="text-sm font-semibold text-text-primary tabular-nums">{value}</span>
+        <span className="text-sm font-black text-text-primary tabular-nums">{value}</span>
       )}
     </div>
   );
@@ -110,14 +110,15 @@ function AdSetCard({
     : null;
 
   return (
-    <div className="glass-card gradient-border-card rounded-2xl overflow-hidden">
+    <div className={`meta-item meta-item-compact ${selected ? 'meta-item-selected' : ''}`}>
       {/* Header: name + controls */}
-      <div className="flex items-start justify-between gap-3 p-4 pb-3">
+      <div className="meta-item-header flex items-start justify-between gap-3 px-4 py-3">
         <Link href={`/accounts/${accountId}/campaigns/${campaignId}/adsets/${adset.id}?accountName=${encodeURIComponent(accountName)}&campaignName=${encodeURIComponent(campaignName)}&adsetName=${encodeURIComponent(adset.name)}`} className="flex-1 min-w-0 active:opacity-70">
           <div className="flex items-center gap-1.5">
             <StatusDot color={status.color} />
-            <p className="font-semibold text-text-primary leading-snug line-clamp-2">{adset.name}</p>
+            <p className="line-clamp-2 font-bold leading-snug text-text-primary">{adset.name}</p>
           </div>
+          <code className="mt-1 block truncate font-mono text-[11px] text-text-muted">{adset.id}</code>
         </Link>
         <div className="flex items-center gap-2 flex-shrink-0 pt-0.5">
           <StatusToggle status={adset.status} onToggle={async () => onToggleStatus()} />
@@ -132,8 +133,7 @@ function AdSetCard({
       </div>
 
       {/* Metrics grid */}
-      <div className="mx-4 border-t border-border/40" />
-      <div className="grid grid-cols-4 gap-3 px-4 py-3">
+      <div className="meta-compact-pad grid grid-cols-2 gap-2 px-4 py-3 min-[460px]:grid-cols-4">
         <MetricCell label="Spend"  value={formatSpend(insight?.spend, currency)}           loading={insightsLoading} />
         <MetricCell label="Impr"   value={formatCompact(insight?.impressions)}              loading={insightsLoading} />
         <MetricCell label="CTR"    value={insight?.ctr ? formatPercent(insight.ctr) : '—'} loading={insightsLoading} />
@@ -143,19 +143,18 @@ function AdSetCard({
       {/* Budget */}
       {budget && (
         <>
-          <div className="mx-4 border-t border-border/40" />
-          <div className="px-4 py-2">
-            <span className="text-xs text-text-muted">Budget: </span>
-            <span className="text-xs font-medium text-text-secondary">{budget}</span>
+          <div className="meta-compact-hide border-t border-border/60 px-4 py-2">
+            <span className="text-xs font-bold uppercase text-text-muted">Budget </span>
+            <span className="text-xs font-semibold text-text-secondary">{budget}</span>
           </div>
         </>
       )}
 
       {/* Action */}
-      <div className="mx-4 border-t border-border/40" />
+      <div className="border-t border-border" />
       <Link
         href={`/accounts/${accountId}/campaigns/${campaignId}/adsets/${adset.id}?accountName=${encodeURIComponent(accountName)}&campaignName=${encodeURIComponent(campaignName)}&adsetName=${encodeURIComponent(adset.name)}`}
-        className="flex items-center justify-center gap-1.5 py-3 text-accent text-sm font-semibold hover:bg-accent/5 active:bg-accent/10 transition-colors"
+        className="meta-action w-full rounded-none text-accent hover:bg-accent/5 active:bg-accent/10"
       >
         View Details
         <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -179,7 +178,7 @@ export default function AdSetsPage() {
   const [dateFilter, setDateFilter] = useState<DatePreset | DateRange>('last_30d');
 
   useEffect(() => {
-    if (!auth.isLoading && !auth.token) router.replace('/');
+    if (!auth.isLoading && !auth.token) router.replace('/login');
   }, [auth.isLoading, auth.token, router]);
 
   const { state, insights, insightsLoading, insightsLoaded, loadInsights, retry } = useAdSets(campaignId, auth.token, dateFilter);
@@ -266,50 +265,41 @@ export default function AdSetsPage() {
 
   return (
     <PageContainer>
-      {/* Header */}
-      <div className="mb-5">
-        <Breadcrumb
-          items={[
+      <ControlHeader
+        breadcrumbs={[
             { label: 'Accounts', href: '/accounts' },
             { label: accountName, href: `/accounts/${accountId}` },
             { label: 'Campaigns', href: `/accounts/${accountId}/campaigns` },
             { label: campaignName, href: `/accounts/${accountId}/campaigns/${campaignId}` },
             { label: 'Ad Sets' },
-          ]}
-        />
-        <div className="flex items-start justify-between mt-3 flex-wrap gap-3">
-          <div>
-            <div className="flex items-center gap-2.5 mb-1">
-              <h1 className="text-xl sm:text-2xl font-bold text-text-primary">Ad Sets</h1>
-              {state.status === 'success' && (
-                <span className="bg-accent/15 text-accent text-xs font-semibold px-2 py-0.5 rounded-full">
-                  {adsets.length}
-                </span>
-              )}
-            </div>
-            <p className="text-text-secondary text-sm">
-              {state.status === 'success' && activeCount > 0
-                ? `${activeCount} active ad set${activeCount !== 1 ? 's' : ''}`
-                : 'All ad sets for this campaign'}
-            </p>
-          </div>
-
-          {/* Date filter */}
-          {state.status === 'success' && adsets.length > 0 && (
-            <div className="flex items-center gap-2 w-full sm:w-auto">
-              <div className="w-full sm:w-80">
+        ]}
+        eyebrow="Ad set operations"
+        title="Targeting board"
+        description={state.status === 'success' && activeCount > 0
+          ? `${activeCount} active ad set${activeCount !== 1 ? 's' : ''}. Review delivery, targeting, budget, and GPT optimization signals.`
+          : 'Review delivery, targeting, budget, and GPT optimization signals for this campaign.'}
+        badge="Meta Ads + GPT"
+        stats={state.status === 'success' ? [
+          { label: 'total', value: adsets.length, tone: 'neutral' },
+          { label: 'active', value: activeCount, tone: 'green' },
+          { label: 'selected', value: selectedIds.size, tone: selectedIds.size > 0 ? 'blue' : 'neutral' },
+        ] : []}
+      >
+        {/* Date filter */}
+        {state.status === 'success' && adsets.length > 0 && (
+          <div className="flex items-center gap-2 w-full sm:w-auto">
+            <div className="w-full sm:w-80">
                 <DateFilter value={dateFilter} onChange={setDateFilter} disabled={insightsLoading} />
-              </div>
-              {insightsLoading && (
-                <svg className="w-4 h-4 text-text-muted animate-spin flex-shrink-0" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                </svg>
-              )}
             </div>
-          )}
-        </div>
-      </div>
+            {insightsLoading && (
+              <svg className="w-4 h-4 text-accent animate-spin flex-shrink-0" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+              </svg>
+            )}
+          </div>
+        )}
+      </ControlHeader>
 
       {/* Mutation error */}
       {mutationError && (
@@ -430,7 +420,7 @@ export default function AdSetsPage() {
                     const insight = insights[adset.id];
                     const isSelected = selectedIds.has(adset.id);
                     return (
-                      <tr key={adset.id} className={`transition-colors ${isSelected ? 'bg-accent/[0.04]' : 'hover:bg-white/[0.02]'}`}>
+                      <tr key={adset.id} className={`transition-colors ${isSelected ? 'bg-accent/[0.06] shadow-[inset_3px_0_0_rgb(var(--c-accent))]' : 'hover:bg-bg-secondary/55'}`}>
                         {/* Checkbox */}
                         <td className="px-4 py-4">
                           <input
@@ -558,7 +548,7 @@ export default function AdSetsPage() {
 
       {/* Analysis modal */}
       {analysisState.step !== 'idle' && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
+        <div className="fixed inset-0 z-[80] flex items-end sm:items-center justify-center p-0 sm:p-4">
           {/* Backdrop */}
           <div
             className="absolute inset-0 bg-black/60 backdrop-blur-sm"
@@ -566,12 +556,12 @@ export default function AdSetsPage() {
           />
 
           {/* Panel */}
-          <div className="relative w-full sm:max-w-2xl max-h-[90dvh] flex flex-col bg-bg-card border border-border rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden">
+          <div className="relative w-full sm:max-w-2xl max-h-[90dvh] flex flex-col bg-bg-card border border-border rounded-t-lg sm:rounded-lg shadow-2xl overflow-hidden">
             {/* Header */}
             <div className="flex items-center justify-between px-5 py-4 border-b border-border flex-shrink-0">
               <div className="flex items-center gap-2">
                 <span className="text-accent text-lg leading-none">✦</span>
-                <h2 className="text-base font-semibold text-text-primary">AI Analysis</h2>
+                <h2 className="text-base font-semibold text-text-primary">GPT Analysis</h2>
               </div>
               {analysisState.step !== 'analyzing' && (
                 <button
@@ -597,8 +587,8 @@ export default function AdSetsPage() {
                     </div>
                   </div>
                   <div className="text-center">
-                    <p className="text-text-primary font-semibold mb-1">Analyzing ad sets…</p>
-                    <p className="text-text-muted text-sm">AI is processing your ad set data</p>
+                    <p className="text-text-primary font-semibold mb-1">Analyzing ad sets...</p>
+                    <p className="text-text-muted text-sm">GPT is processing your ad set data</p>
                   </div>
                 </div>
               )}
@@ -636,9 +626,9 @@ export default function AdSetsPage() {
               onClick={() => analyze(selectedAdSets, insights, currency, dateFilter)}
               disabled={!insightsLoaded || analysisState.step === 'analyzing'}
               title={!insightsLoaded ? 'Load metrics first' : undefined}
-              className="flex items-center gap-1.5 px-3 py-2 bg-accent text-white text-sm font-medium rounded-lg disabled:opacity-50 transition-opacity"
+              className="flex items-center gap-1.5 px-3 py-2 bg-text-primary text-white text-sm font-medium rounded-lg disabled:opacity-50 transition-opacity"
             >
-              ✦ Analyze {selectedIds.size} ad set{selectedIds.size > 1 ? 's' : ''}
+              Analyze with GPT ({selectedIds.size})
             </button>
           </div>
         </div>

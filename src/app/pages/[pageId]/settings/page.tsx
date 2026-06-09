@@ -55,7 +55,7 @@ export default function PageSettingsPage() {
   const [uploadingPicture, setUploadingPicture] = useState(false);
 
   useEffect(() => {
-    if (!auth.isLoading && !auth.token) router.replace('/');
+    if (!auth.isLoading && !auth.token) router.replace('/login');
   }, [auth.isLoading, auth.token, router]);
 
   const loadInfo = useCallback(async () => {

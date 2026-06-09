@@ -58,7 +58,7 @@ function SectionHeader({ title, count }: { title: string; count?: number }) {
         {title}
       </h3>
       {count !== undefined && (
-        <span className="rounded-full bg-bg-secondary px-3 py-1 text-xs font-black text-text-secondary">
+        <span className="rounded-md bg-bg-secondary px-3 py-1 text-xs font-black text-text-secondary">
           {count} total
         </span>
       )}
@@ -68,8 +68,8 @@ function SectionHeader({ title, count }: { title: string; count?: number }) {
 
 function EmptySection({ message }: { message: string }) {
   return (
-    <div className="flex flex-col items-center justify-center gap-2 rounded-[1.5rem] border border-dashed border-border bg-bg-secondary/70 py-10 text-center">
-      <div className="mb-1 flex h-10 w-10 items-center justify-center rounded-xl bg-white">
+    <div className="flex flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-border bg-bg-secondary/70 py-10 text-center">
+      <div className="mb-1 flex h-10 w-10 items-center justify-center rounded-lg bg-bg-card">
         <svg
           className="h-5 w-5 text-text-muted"
           fill="none"
@@ -154,7 +154,7 @@ function AdAccountsSection({ accounts }: { accounts: BusinessAdAccount[] }) {
                   </td>
                   <td className="py-3 px-3">
                     <span
-                      className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${a.ownership === "owned" ? "bg-accent/15 text-accent" : "bg-white/8 text-text-muted"}`}
+                      className={`rounded-md px-2 py-0.5 text-[10px] font-semibold ${a.ownership === "owned" ? "bg-accent/15 text-accent" : "bg-bg-secondary text-text-muted"}`}
                     >
                       {a.ownership}
                     </span>
@@ -167,16 +167,16 @@ function AdAccountsSection({ accounts }: { accounts: BusinessAdAccount[] }) {
       </div>
 
       {/* Mobile cards */}
-      <div className="sm:hidden divide-y divide-border/40">
+      <div className="grid gap-3 sm:hidden">
         {accounts.map((a) => {
           const st = getAccountStatus(a.account_status);
           return (
             <div
               key={a.id}
-              className="flex items-center gap-3 py-3 first:pt-0 last:pb-0"
+              className="meta-item meta-item-compact meta-compact-pad flex items-center gap-3 p-3"
             >
               <div
-                className={`w-1.5 h-8 rounded-full flex-shrink-0 ${a.ownership === "owned" ? "bg-accent/60" : "bg-white/15"}`}
+                className={`h-8 w-1.5 flex-shrink-0 rounded-full ${a.ownership === "owned" ? "bg-accent/60" : "bg-text-muted/25"}`}
               />
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-1.5">
@@ -200,7 +200,7 @@ function AdAccountsSection({ accounts }: { accounts: BusinessAdAccount[] }) {
                   {a.currency}
                 </span>
                 <span
-                  className={`text-[10px] font-medium px-1.5 py-0.5 rounded ${a.ownership === "owned" ? "bg-accent/10 text-accent" : "bg-white/8 text-text-muted"}`}
+                  className={`rounded-md px-1.5 py-0.5 text-[10px] font-medium ${a.ownership === "owned" ? "bg-accent/10 text-accent" : "bg-bg-secondary text-text-muted"}`}
                 >
                   {a.ownership}
                 </span>
@@ -223,9 +223,9 @@ function PagesSection({ pages }: { pages: BusinessPage[] }) {
         <Link
           key={p.id}
           href={`/pages/${p.id}`}
-          className="glass-card gradient-border-card rounded-xl p-3.5 flex items-center gap-3 hover:text-accent transition-colors group"
+          className="meta-item meta-item-compact meta-compact-pad group flex items-center gap-3 p-3.5 hover:text-accent"
         >
-          <div className="w-9 h-9 rounded-lg bg-accent/10 flex items-center justify-center flex-shrink-0">
+          <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-accent/10">
             <svg
               className="w-4 h-4 text-accent"
               fill="none"
@@ -273,13 +273,13 @@ function CatalogsSection({ catalogs }: { catalogs: Catalog[] }) {
   if (catalogs.length === 0)
     return <EmptySection message="No product catalogs" />;
   return (
-    <div className="divide-y divide-border/40">
-      {catalogs.map((c) => (
-        <div
-          key={c.id}
-          className="flex items-center gap-3 py-3 first:pt-0 last:pb-0"
-        >
-          <div className="w-9 h-9 rounded-lg bg-white/5 flex items-center justify-center flex-shrink-0">
+      <div className="grid gap-3">
+        {catalogs.map((c) => (
+          <div
+            key={c.id}
+            className="meta-item meta-item-compact meta-compact-pad flex items-center gap-3 p-3"
+          >
+          <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-bg-secondary">
             <svg
               className="w-4 h-4 text-text-muted"
               fill="none"
@@ -312,7 +312,7 @@ function CatalogsSection({ catalogs }: { catalogs: Catalog[] }) {
               </span>
             )}
             {c.vertical && (
-              <span className="text-[10px] bg-white/8 text-text-muted px-1.5 py-0.5 rounded">
+              <span className="rounded-md bg-bg-secondary px-1.5 py-0.5 text-[10px] text-text-muted">
                 {c.vertical}
               </span>
             )}
@@ -333,23 +333,23 @@ function InstagramSection({
   if (accounts.length === 0)
     return <EmptySection message="No Instagram accounts" />;
   return (
-    <div className="divide-y divide-border/40">
+    <div className="grid gap-3">
       {accounts.map((a) => {
         const pictureUrl = a.profile_picture_url ?? a.profile_pic;
         return (
           <div
             key={a.id}
-            className="flex items-center gap-3 py-3 first:pt-0 last:pb-0"
+            className="meta-item meta-item-compact meta-compact-pad flex items-center gap-3 p-3"
           >
             {pictureUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={pictureUrl}
                 alt={a.username ?? a.name ?? ""}
-                className="w-9 h-9 rounded-full object-cover flex-shrink-0"
+                className="h-9 w-9 flex-shrink-0 rounded-lg object-cover"
               />
             ) : (
-            <div className="w-9 h-9 rounded-full bg-white/8 flex items-center justify-center flex-shrink-0">
+            <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-bg-secondary">
               <svg
                 className="w-4 h-4 text-text-muted"
                 fill="currentColor"
@@ -380,13 +380,13 @@ function InstagramSection({
 // ─── Users Section ─────────────────────────────────────────────────────────────
 
 function roleBadgeClass(role?: string): string {
-  if (!role) return "bg-white/8 text-text-muted";
+  if (!role) return "bg-bg-secondary text-text-muted";
   if (role === "ADMIN") return "bg-accent/15 text-accent";
   if (role === "ADVERTISER") return "bg-status-green/15 text-status-green";
   if (role.startsWith("FINANCE"))
     return "bg-status-yellow/15 text-status-yellow";
-  if (role === "ANALYST") return "bg-white/10 text-text-secondary";
-  return "bg-white/8 text-text-muted";
+  if (role === "ANALYST") return "bg-bg-secondary text-text-secondary";
+  return "bg-bg-secondary text-text-muted";
 }
 
 function roleLabel(role?: string): string {
@@ -449,9 +449,9 @@ function UserCard({ u }: { u: BusinessUser }) {
   ].filter(Boolean) as { label: string; content: React.ReactNode }[];
 
   return (
-    <div className="glass-card rounded-xl overflow-hidden">
+    <div className="meta-item meta-item-compact">
       <div className="p-4 flex items-start gap-3">
-        <div className="w-12 h-12 rounded-full bg-accent/15 text-accent flex items-center justify-center text-base font-bold flex-shrink-0">
+        <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-lg bg-accent/15 text-base font-bold text-accent">
           {initials}
         </div>
         <div className="flex-1 min-w-0 pt-0.5">
@@ -459,7 +459,7 @@ function UserCard({ u }: { u: BusinessUser }) {
             {u.name}
           </p>
           <span
-            className={`text-[10px] font-semibold px-2 py-0.5 rounded-full mt-1 inline-block ${roleBadgeClass(u.role)}`}
+            className={`mt-1 inline-block rounded-md px-2 py-0.5 text-[10px] font-semibold ${roleBadgeClass(u.role)}`}
           >
             {roleLabel(u.role)}
           </span>
@@ -474,7 +474,7 @@ function UserCard({ u }: { u: BusinessUser }) {
         >
           {infoItems.map((item) => (
             <div key={item.label} className="px-3 py-2.5">
-              <p className="text-[9px] text-text-muted uppercase tracking-wider mb-1">
+              <p className="mb-1 text-[9px] font-bold uppercase text-text-muted">
                 {item.label}
               </p>
               {item.content}
@@ -503,7 +503,7 @@ function UsersSection({ users }: { users: BusinessUser[] }) {
       {hidden > 0 && !expanded && (
         <button
           onClick={() => setExpanded(true)}
-          className="mt-3 w-full py-2 text-xs font-medium text-text-secondary border border-border/60 rounded-xl hover:bg-white/[0.03] transition-colors"
+          className="meta-action meta-action-secondary mt-3 w-full text-xs"
         >
           Show {hidden} more user{hidden > 1 ? "s" : ""}
         </button>
@@ -511,7 +511,7 @@ function UsersSection({ users }: { users: BusinessUser[] }) {
       {expanded && users.length > USERS_PAGE_SIZE && (
         <button
           onClick={() => setExpanded(false)}
-          className="mt-3 w-full py-2 text-xs font-medium text-text-secondary border border-border/60 rounded-xl hover:bg-white/[0.03] transition-colors"
+          className="meta-action meta-action-secondary mt-3 w-full text-xs"
         >
           Show less
         </button>
@@ -542,48 +542,44 @@ function OverviewChart({
   const total = CHART_ITEMS.reduce((s, i) => s + counts[i.key], 0);
 
   return (
-    <section className="rounded-[2rem] border border-border bg-white/90 p-3 shadow-[0_18px_50px_rgba(15,23,42,0.08)]">
-      <div className="mb-3 flex items-center justify-between gap-3 px-1">
+    <section className="meta-item p-3 sm:p-4">
+      <div className="mb-3 flex items-center justify-between gap-3">
         <div>
           <p className="text-[11px] font-black uppercase tracking-wide text-accent">
             Asset Overview
           </p>
-          <h2 className="mt-1 text-lg font-black text-text-primary">
+          <h2 className="mt-0.5 text-base font-black text-text-primary sm:text-lg">
             Connected Workspace
           </h2>
         </div>
-        <div className="rounded-2xl bg-text-primary px-4 py-2 text-right text-white">
-          <div className="text-2xl font-black tabular-nums">{total}</div>
-          <div className="text-[10px] font-bold uppercase tracking-wide text-white/70">
+        <div className="rounded-md border border-border bg-bg-secondary px-3 py-1.5 text-right">
+          <span className="text-lg font-black tabular-nums text-text-primary">{total}</span>
+          <span className="ml-1.5 text-[10px] font-bold uppercase tracking-wide text-text-muted">
             Total
-          </div>
+          </span>
         </div>
       </div>
 
-      <div className="grid gap-2 sm:grid-cols-5">
+      <div className="flex gap-1.5 overflow-x-auto rounded-lg border border-border bg-bg-secondary p-1 scrollbar-none sm:grid sm:grid-cols-5 sm:overflow-visible">
         {CHART_ITEMS.map((seg) => {
             const active = activeTab === seg.key;
             const count = counts[seg.key];
-            const pct = total === 0 ? 0 : Math.round((count / total) * 100);
             return (
               <button
                 key={seg.key}
                 onClick={() => onTabChange(seg.key)}
-              className={`rounded-[1.25rem] border p-3 text-left transition-all ${
+              className={`flex min-h-9 shrink-0 items-center justify-center gap-1.5 rounded-md px-3 text-xs font-black transition-colors sm:min-w-0 sm:flex-1 ${
                 active
-                  ? "border-text-primary bg-bg-secondary shadow-[0_12px_28px_rgba(15,23,42,0.08)]"
-                  : "border-border bg-white hover:bg-bg-secondary"
+                  ? "bg-bg-card text-text-primary shadow-sm"
+                  : "text-text-muted hover:bg-bg-card/70 hover:text-text-secondary"
               }`}
               >
-              <span className="mb-3 block h-1.5 w-10 rounded-full" style={{ backgroundColor: seg.color }} />
-              <span className="block text-[11px] font-bold uppercase tracking-wide text-text-muted">
+              <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: seg.color }} />
+              <span className="whitespace-nowrap">
                   {seg.label}
                 </span>
-              <span className="mt-1 block text-2xl font-black tabular-nums text-text-primary">
+              <span className={`rounded px-1.5 py-0.5 text-[10px] tabular-nums ${active ? "bg-accent/12 text-accent" : "bg-bg-card text-text-muted"}`}>
                   {count}
-                </span>
-              <span className="mt-1 block text-xs font-semibold text-text-muted">
-                  {pct}%
                 </span>
               </button>
             );
@@ -604,7 +600,7 @@ export default function BusinessDetailPage() {
   const [activeTab, setActiveTab] = useState<Tab>("adAccounts");
 
   useEffect(() => {
-    if (!auth.isLoading && !auth.token) router.replace("/");
+    if (!auth.isLoading && !auth.token) router.replace("/login");
   }, [auth.isLoading, auth.token, router]);
 
   const { state, retry } = useBusinessDetail(businessId, auth.token);
@@ -616,7 +612,7 @@ export default function BusinessDetailPage() {
       <div className="mb-4">
         <Link
           href="/businesses"
-          className="inline-flex items-center gap-2 rounded-full border border-border bg-white px-3 py-2 text-xs font-bold text-text-secondary shadow-sm transition-colors hover:bg-bg-secondary"
+          className="meta-action meta-action-secondary text-xs"
         >
           <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
@@ -661,28 +657,25 @@ export default function BusinessDetailPage() {
           return (
             <div className="space-y-4">
               {/* ── Identity card ─────────────────────────────────────────── */}
-              <section className="relative overflow-hidden rounded-[2rem] border border-border bg-white/90 p-4 shadow-[0_18px_50px_rgba(15,23,42,0.08)] sm:p-5">
-                <div className="absolute -right-12 -top-12 h-36 w-36 rounded-full bg-emerald-100/80" />
-                <div className="absolute -bottom-14 left-12 h-32 w-32 rounded-full bg-sky-100/80" />
-
-                <div className="relative flex items-start gap-4">
+              <section className="meta-item p-4 sm:p-5">
+                <div className="flex items-start gap-4">
                   {detail.profile_picture_uri ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
                       src={detail.profile_picture_uri}
                       alt={detail.name}
-                      className="h-16 w-16 flex-shrink-0 rounded-2xl object-cover ring-4 ring-white"
+                      className="h-14 w-14 flex-shrink-0 rounded-lg object-cover"
                     />
                   ) : (
                     <div
-                      className={`flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-2xl text-2xl font-black ring-4 ring-white ${avatarStyle[verStatus.color]}`}
+                      className={`flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-lg text-2xl font-black ${avatarStyle[verStatus.color]}`}
                     >
                       {detail.name.charAt(0).toUpperCase()}
                     </div>
                   )}
 
                   <div className="min-w-0 flex-1">
-                    <div className="mb-2 inline-flex items-center gap-1.5 rounded-full border border-white/80 bg-white/85 px-2.5 py-1 text-[11px] font-bold text-text-secondary shadow-sm">
+                    <div className="mb-2 inline-flex items-center gap-1.5 rounded-md border border-border bg-bg-card px-2.5 py-1 text-[11px] font-bold text-text-secondary shadow-sm">
                       <StatusDot color={verStatus.color} />
                       {verStatus.label}
                     </div>
@@ -690,7 +683,7 @@ export default function BusinessDetailPage() {
                       {detail.name}
                     </h1>
                     <div className="mt-2 flex max-w-full items-center gap-1.5">
-                      <code className="min-w-0 truncate rounded-full bg-white/85 px-2.5 py-1.5 font-mono text-[11px] text-text-muted">
+                      <code className="min-w-0 truncate rounded-md bg-bg-secondary px-2.5 py-1.5 font-mono text-[11px] text-text-muted">
                         {detail.id}
                       </code>
                       <CopyButton value={detail.id} />
@@ -703,8 +696,8 @@ export default function BusinessDetailPage() {
                   detail.primary_page) && (
                   <div className="relative mt-4 grid gap-2 sm:grid-cols-3">
                     {detail.created_time && (
-                      <div className="rounded-2xl border border-border bg-white/80 px-3 py-3">
-                        <p className="text-[10px] font-bold uppercase tracking-wide text-text-muted">
+                      <div className="meta-metric">
+                        <p className="text-[10px] font-bold uppercase text-text-muted">
                           Created
                         </p>
                         <p className="mt-1 text-sm font-black text-text-primary">
@@ -713,8 +706,8 @@ export default function BusinessDetailPage() {
                       </div>
                     )}
                     {detail.timezone_id !== undefined && (
-                      <div className="rounded-2xl border border-border bg-white/80 px-3 py-3">
-                        <p className="text-[10px] font-bold uppercase tracking-wide text-text-muted">
+                      <div className="meta-metric">
+                        <p className="text-[10px] font-bold uppercase text-text-muted">
                           Timezone ID
                         </p>
                         <p className="mt-1 text-sm font-black text-text-primary">
@@ -723,8 +716,8 @@ export default function BusinessDetailPage() {
                       </div>
                     )}
                     {detail.primary_page && (
-                      <div className="rounded-2xl border border-border bg-white/80 px-3 py-3">
-                        <p className="text-[10px] font-bold uppercase tracking-wide text-text-muted">
+                      <div className="meta-metric">
+                        <p className="text-[10px] font-bold uppercase text-text-muted">
                           Primary Page
                         </p>
                         <Link
@@ -747,17 +740,17 @@ export default function BusinessDetailPage() {
               />
 
               {/* ── Tab bar + content ─────────────────────────────────────── */}
-              <section className="overflow-hidden rounded-[2rem] border border-border bg-white/90 p-3 shadow-[0_18px_50px_rgba(15,23,42,0.08)]">
+              <section className="meta-item p-2.5 sm:p-3">
                 {/* Tab bar */}
-                <div className="flex gap-2 overflow-x-auto overflow-y-hidden rounded-[1.5rem] bg-bg-secondary p-2 scrollbar-none">
+                <div className="flex gap-1.5 overflow-x-auto overflow-y-hidden rounded-lg bg-bg-secondary p-1 scrollbar-none">
                   {TAB_KEYS.map((key) => {
                     const active = activeTab === key;
                     return (
                       <button
                         key={key}
                         onClick={() => setActiveTab(key)}
-                        className={`flex flex-shrink-0 items-center justify-center gap-1.5 rounded-2xl px-4 py-2.5 text-sm font-bold whitespace-nowrap transition-colors sm:flex-1
-                        ${active ? "bg-white text-text-primary shadow-sm" : "text-text-muted hover:bg-white/60 hover:text-text-secondary"}`}
+                        className={`flex min-h-9 flex-shrink-0 items-center justify-center gap-1.5 rounded-md px-3 text-xs font-black whitespace-nowrap transition-colors sm:flex-1
+                        ${active ? "bg-bg-card text-text-primary shadow-sm" : "text-text-muted hover:bg-bg-card/70 hover:text-text-secondary"}`}
                       >
                         {TAB_LABELS[key]}
                         <span

@@ -16,20 +16,25 @@ export function RecommendationCard({ recommendation }: Props) {
 
   return (
     <div
-      className={`bg-bg-card border border-border border-l-4 ${borderColors[priority]} rounded-xl p-4`}
+      className={`meta-item border-l-4 ${borderColors[priority]}`}
     >
-      <div className="flex items-start justify-between gap-3 mb-2">
-        <p className="font-semibold text-text-primary text-sm leading-snug flex-1 min-w-0">{title}</p>
+      <div className="meta-item-header flex items-start justify-between gap-3 px-4 py-3">
+        <div className="flex min-w-0 flex-1 items-start gap-2">
+          <span className="mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-md bg-accent/10 text-[10px] font-black text-accent">
+            GPT
+          </span>
+          <p className="min-w-0 flex-1 text-sm font-bold leading-snug text-text-primary">{title}</p>
+        </div>
         <div className="flex items-center gap-2 flex-shrink-0">
           {metric && (
-            <span className="bg-accent/10 text-accent border border-accent/20 px-2 py-0.5 rounded-full text-xs font-medium">
+            <span className="rounded-md border border-accent/20 bg-accent/10 px-2 py-0.5 text-xs font-bold text-accent">
               {metric}
             </span>
           )}
           <PriorityBadge priority={priority} />
         </div>
       </div>
-      <p className="text-text-secondary text-sm leading-relaxed">{description}</p>
+      <p className="px-4 py-3 text-sm leading-relaxed text-text-secondary">{description}</p>
     </div>
   );
 }

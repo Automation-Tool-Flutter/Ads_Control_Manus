@@ -6,9 +6,8 @@ import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAccountDetail } from '@/hooks/useAccountDetail';
 import { PageContainer } from '@/components/layout/PageContainer';
-import { Breadcrumb } from '@/components/ui/Breadcrumb';
+import { ControlHeader } from '@/components/layout/ControlHeader';
 import { StatusBadge } from '@/components/ui/StatusBadge';
-import { DetailInfoGrid } from '@/components/ui/DetailInfoGrid';
 import { InsightsPanel } from '@/components/ui/InsightsPanel';
 import { LoadingState } from '@/components/ui/LoadingState';
 import { ErrorState } from '@/components/ui/ErrorState';
@@ -24,7 +23,7 @@ export default function AccountDetailPage() {
 
   useEffect(() => {
     if (!auth.isLoading && !auth.token) {
-      router.replace('/');
+      router.replace('/login');
     }
   }, [auth.isLoading, auth.token, router]);
 
@@ -34,17 +33,21 @@ export default function AccountDetailPage() {
 
   return (
     <PageContainer>
-      <div className="mb-6">
-        <Breadcrumb
-          items={[
+      <ControlHeader
+        breadcrumbs={[
             { label: 'Accounts', href: '/accounts' },
             { label: state.status === 'success' ? state.data.name : accountName },
-          ]}
-        />
-        <h1 className="text-xl sm:text-2xl font-bold text-text-primary mt-3">
-          Account Details
-        </h1>
-      </div>
+        ]}
+        eyebrow="Meta ads account"
+        title={state.status === 'success' ? state.data.name : 'Account Details'}
+        description="Inspect account health, spend controls, delivery entry points, and GPT optimization from one operating surface."
+        badge="Meta + GPT"
+        stats={state.status === 'success' ? [
+          { label: 'spent', value: formatCurrency(state.data.amount_spent, state.data.currency), tone: 'blue' },
+          { label: 'balance', value: formatCurrency(state.data.balance, state.data.currency), tone: 'neutral' },
+          { label: 'cap', value: state.data.spend_cap ? formatCurrency(state.data.spend_cap, state.data.currency) : 'Open', tone: 'green' },
+        ] : []}
+      />
 
       {state.status === 'loading' && <LoadingState message="Loading account info..." />}
 
@@ -53,9 +56,10 @@ export default function AccountDetailPage() {
       )}
 
       {state.status === 'success' && (
-        <div className="space-y-6">
+        <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_20rem]">
+          <div className="space-y-5">
           {/* Info card */}
-          <div className="glass-card gradient-border-card rounded-2xl p-4">
+          <div className="meta-item p-4">
             <div className="flex items-start justify-between gap-3 mb-3">
               <div className="flex-1 min-w-0">
                 <h2 className="text-base font-bold text-text-primary truncate">{state.data.name}</h2>
@@ -69,19 +73,19 @@ export default function AccountDetailPage() {
 
             {/* Key metrics row */}
             <div className="grid grid-cols-3 gap-2 mb-3">
-              <div className="bg-bg-secondary rounded-xl p-2.5">
+              <div className="meta-metric">
                 <p className="text-[10px] text-text-muted uppercase tracking-wide mb-1">Spent</p>
                 <p className="text-sm font-bold text-text-primary truncate">
                   {formatCurrency(state.data.amount_spent, state.data.currency)}
                 </p>
               </div>
-              <div className="bg-bg-secondary rounded-xl p-2.5">
+              <div className="meta-metric">
                 <p className="text-[10px] text-text-muted uppercase tracking-wide mb-1">Balance</p>
                 <p className="text-sm font-bold text-text-primary truncate">
                   {formatCurrency(state.data.balance, state.data.currency)}
                 </p>
               </div>
-              <div className="bg-bg-secondary rounded-xl p-2.5">
+              <div className="meta-metric">
                 <p className="text-[10px] text-text-muted uppercase tracking-wide mb-1">Spend Cap</p>
                 <p className="text-sm font-bold text-text-primary truncate">
                   {state.data.spend_cap ? formatCurrency(state.data.spend_cap, state.data.currency) : '—'}
@@ -100,7 +104,7 @@ export default function AccountDetailPage() {
           </div>
 
           {/* Insights */}
-          <div className="glass-card gradient-border-card rounded-2xl p-4">
+          <div className="meta-item p-4">
             <InsightsPanel
               objectId={accountId}
               level="account"
@@ -108,15 +112,17 @@ export default function AccountDetailPage() {
               token={auth.token}
             />
           </div>
+          </div>
 
+          <aside className="space-y-3">
           {/* AI Optimize CTA */}
           <Link
             href={`/accounts/${accountId}/optimize`}
-            className="flex items-center justify-between bg-gradient-to-r from-accent/10 to-accent/5 border border-accent/30 rounded-2xl p-5 hover:from-accent/15 hover:to-accent/10 transition-colors group"
+            className="meta-item flex items-center justify-between gap-3 border-accent/40 bg-accent/10 p-5 transition-colors hover:bg-accent/15 group"
           >
             <div>
               <div className="flex items-center gap-2 mb-1">
-                <p className="font-semibold text-text-primary">AI Analysis & Optimization</p>
+                <p className="font-semibold text-text-primary">GPT Optimization</p>
                 <span className="bg-accent text-white text-xs font-bold px-1.5 py-0.5 rounded-md">AI</span>
               </div>
               <p className="text-text-secondary text-sm">Get AI-powered optimization insights across 5 dimensions</p>
@@ -135,7 +141,7 @@ export default function AccountDetailPage() {
           {/* Link to campaigns */}
           <Link
             href={`/accounts/${accountId}/campaigns${state.status === 'success' ? `?accountName=${encodeURIComponent(state.data.name)}&currency=${state.data.currency}` : ''}`}
-            className="flex items-center justify-between glass-card gradient-border-card rounded-2xl p-5 hover:bg-white/[0.02] transition-colors group"
+            className="meta-item flex items-center justify-between gap-3 p-5 transition-colors group"
           >
             <div>
               <p className="font-semibold text-text-primary">Campaigns</p>
@@ -155,7 +161,7 @@ export default function AccountDetailPage() {
           {/* Link to product catalogs */}
           <Link
             href={`/accounts/${accountId}/catalogs`}
-            className="flex items-center justify-between glass-card gradient-border-card rounded-2xl p-5 hover:bg-white/[0.02] transition-colors group"
+            className="meta-item flex items-center justify-between gap-3 p-5 transition-colors group"
           >
             <div>
               <p className="font-semibold text-text-primary">Product Catalogs</p>
@@ -171,6 +177,7 @@ export default function AccountDetailPage() {
               <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
             </svg>
           </Link>
+          </aside>
         </div>
       )}
     </PageContainer>

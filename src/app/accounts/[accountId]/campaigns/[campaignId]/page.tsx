@@ -43,7 +43,7 @@ export default function CampaignDetailPage() {
 
   useEffect(() => {
     if (!auth.isLoading && !auth.token) {
-      router.replace("/");
+      router.replace("/login");
     }
   }, [auth.isLoading, auth.token, router]);
 

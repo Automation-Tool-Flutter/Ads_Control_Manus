@@ -24,7 +24,7 @@ export function StepProgress({ step }: Props) {
   if (step === 'idle' || step === 'done' || step === 'error') return null;
 
   return (
-    <div className="bg-bg-card border border-border rounded-2xl p-5">
+    <div className="rounded-lg border border-border bg-bg-card p-4 shadow-sm">
       <div className="flex items-center justify-between gap-2">
         {STEPS.map((s, i) => {
           const status = getStepStatus(s.key, step);
@@ -45,9 +45,9 @@ export function StepProgress({ step }: Props) {
                   className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 transition-all ${
                     status === 'done'
                       ? 'bg-accent text-white'
-                      : status === 'active'
-                      ? 'bg-accent/20 border-2 border-accent text-accent'
-                      : 'bg-bg-card border-2 border-border text-text-muted'
+                    : status === 'active'
+                      ? 'border-2 border-accent bg-accent/12 text-accent'
+                      : 'border-2 border-border bg-bg-card text-text-muted'
                   }`}
                 >
                   {status === 'done' ? (

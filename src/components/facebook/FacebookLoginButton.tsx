@@ -1,40 +1,25 @@
 'use client';
 
 import { useState } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
-import { useToast } from '@/components/ui/Toaster';
 
 interface Props {
   className?: string;
 }
 
 export function FacebookLoginButton({ className = '' }: Props) {
-  const { login } = useAuth();
-  const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
-  async function handleLogin() {
-    setError(null);
+  function handleLoginStart() {
     setIsLoading(true);
-    try {
-      const user = await login();
-      toast(`Welcome, ${user.name}!`, 'success');
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Login failed';
-      setError(msg);
-      toast(msg, 'error');
-    } finally {
-      setIsLoading(false);
-    }
   }
 
   return (
     <div className={`flex flex-col gap-2 ${className}`}>
-      <button
-        onClick={handleLogin}
-        disabled={isLoading}
-        className="w-full mobile-action flex items-center justify-center gap-3 px-5 bg-accent hover:bg-accent/90 disabled:opacity-60 disabled:cursor-not-allowed text-white font-bold rounded-full transition-all shadow-xl shadow-accent/25 active:scale-[0.98]"
+      <a
+        href="/api/auth/facebook/start"
+        onClick={handleLoginStart}
+        aria-disabled={isLoading}
+        className="w-full mobile-action flex items-center justify-center gap-3 px-5 bg-accent hover:bg-accent/90 aria-disabled:opacity-60 aria-disabled:cursor-not-allowed text-white font-bold rounded-full transition-all shadow-xl shadow-accent/25 active:scale-[0.98]"
       >
         {isLoading ? (
           <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -44,11 +29,7 @@ export function FacebookLoginButton({ className = '' }: Props) {
           </svg>
         )}
         {isLoading ? 'Signing in...' : 'Continue with Facebook'}
-      </button>
-
-      {error && (
-        <p className="text-status-red text-sm text-center px-2">{error}</p>
-      )}
+      </a>
     </div>
   );
 }

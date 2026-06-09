@@ -57,7 +57,7 @@ export default function EditScheduledPostPage() {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    if (!auth.isLoading && !auth.token) router.replace('/');
+    if (!auth.isLoading && !auth.token) router.replace('/login');
   }, [auth.isLoading, auth.token, router]);
 
   // Revoke object URLs on unmount
