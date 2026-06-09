@@ -3,6 +3,7 @@ import {
   FB_API_VERSION,
   FB_APP_ID,
   FB_LOGIN_CONFIG_ID,
+  FB_OAUTH_REDIRECT_URI,
   FB_PERMISSIONS,
   GRAPH_API_BASE,
 } from "@/lib/constants";
@@ -51,9 +52,11 @@ export function createFacebookOAuthState() {
   return Math.random().toString(36).slice(2) + Date.now().toString(36);
 }
 
-export function getFacebookOAuthRedirectUri() {
+export function getFacebookOAuthRedirectUri(origin?: string) {
+  if (FB_OAUTH_REDIRECT_URI) return FB_OAUTH_REDIRECT_URI;
+  if (origin) return new URL("/login", origin).toString();
   if (typeof window === "undefined") return "";
-  return `${window.location.origin}/login`;
+  return new URL("/login", window.location.origin).toString();
 }
 
 export function buildFacebookOAuthUrl({ redirectUri, state, rerequest }: OAuthUrlParams) {

@@ -3,6 +3,7 @@ import { STORAGE_KEYS } from "@/lib/constants";
 import {
   buildFacebookOAuthUrl,
   createFacebookOAuthState,
+  getFacebookOAuthRedirectUri,
 } from "@/lib/facebook-oauth";
 
 export const dynamic = "force-dynamic";
@@ -28,7 +29,7 @@ export function GET(request: NextRequest) {
   const requestUrl = new URL(request.url);
   const origin = getRequestOrigin(request);
   const state = createFacebookOAuthState();
-  const redirectUri = new URL("/login", origin).toString();
+  const redirectUri = getFacebookOAuthRedirectUri(origin);
   const returnTo = requestUrl.searchParams.get("returnTo");
   const oauthUrl = buildFacebookOAuthUrl({
     redirectUri,
@@ -37,7 +38,7 @@ export function GET(request: NextRequest) {
   });
 
   const response = NextResponse.redirect(oauthUrl);
-  const secure = requestUrl.protocol === "https:";
+  const secure = new URL(origin).protocol === "https:";
 
   response.cookies.set(STORAGE_KEYS.OAUTH_STATE, state, {
     path: "/",

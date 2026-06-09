@@ -12,6 +12,10 @@ export const FB_LOGIN_CONFIG_ID =
   process.env.NEXT_PUBLIC_FACEBOOK_LOGIN_CONFIG_ID ||
   process.env.NEXT_PUBLIC_FB_LOGIN_CONFIG_ID ||
   "";
+export const FB_OAUTH_REDIRECT_URI =
+  process.env.NEXT_PUBLIC_FACEBOOK_OAUTH_REDIRECT_URI ||
+  process.env.NEXT_PUBLIC_FB_OAUTH_REDIRECT_URI ||
+  "";
 
 export const FB_PERMISSIONS = [
   "ads_read",
