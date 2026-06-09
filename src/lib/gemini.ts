@@ -13,6 +13,15 @@ export class GeminiError extends Error {
   }
 }
 
+function getGeminiApiKey() {
+  return (
+    process.env.GEMINI_API_KEY ||
+    process.env.GOOGLE_API_KEY ||
+    process.env.GOOGLE_GENERATIVE_AI_API_KEY ||
+    ""
+  );
+}
+
 /**
  * Calls the Gemini API and returns the parsed JSON response.
  * Throws GeminiError on any failure (API key missing, network error, bad response).
@@ -22,9 +31,9 @@ export async function callGemini<T>(
   userPrompt: string,
   config?: { temperature?: number; maxOutputTokens?: number; responseMimeType?: string },
 ): Promise<T> {
-  const apiKey = process.env.GEMINI_API_KEY;
+  const apiKey = getGeminiApiKey();
   if (!apiKey) {
-    throw new GeminiError('GEMINI_API_KEY is not configured.', 500);
+    throw new GeminiError('Gemini API key is not configured on the server.', 500);
   }
 
   const requestBody = {
