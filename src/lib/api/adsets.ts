@@ -2,6 +2,7 @@ import { graphFetch } from './client';
 import { presetToRange } from '../utils';
 import { META_NATIVE_PRESETS } from '../constants';
 import type { AdSet, AdSetInsight, DatePreset, DateRange } from '../types';
+import { META_CONVERSION_INSIGHT_FIELDS } from '../campaign-kpis';
 
 interface AdSetWithInsights extends AdSet {
   insights?: { data: AdSetInsight[] };
@@ -19,10 +20,10 @@ export async function getAdSets(
 ): Promise<{ adsets: AdSet[]; insights: Record<string, AdSetInsight> }> {
   let insightsParam: string;
   if (typeof dateFilter === 'string' && META_NATIVE_PRESETS.has(dateFilter)) {
-    insightsParam = `insights.date_preset(${dateFilter}){adset_id,spend,impressions,reach,frequency,clicks,ctr,cpc,cpm}`;
+    insightsParam = `insights.date_preset(${dateFilter}){adset_id,spend,impressions,reach,frequency,clicks,ctr,cpc,cpm,${META_CONVERSION_INSIGHT_FIELDS}}`;
   } else {
     const range = typeof dateFilter === 'string' ? presetToRange(dateFilter) : dateFilter;
-    insightsParam = `insights.time_range(${JSON.stringify(range)}){adset_id,spend,impressions,reach,frequency,clicks,ctr,cpc,cpm}`;
+    insightsParam = `insights.time_range(${JSON.stringify(range)}){adset_id,spend,impressions,reach,frequency,clicks,ctr,cpc,cpm,${META_CONVERSION_INSIGHT_FIELDS}}`;
   }
 
   const result = await graphFetch<AdSetsResponse>(

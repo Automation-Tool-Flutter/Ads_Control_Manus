@@ -38,7 +38,7 @@ export default function PrivacyPage() {
           <li>Provide and operate the ad management service</li>
           <li>Display campaign data and insights at your request</li>
           <li>Improve the user experience</li>
-          <li>AI analysis via Gemini (data is anonymized where possible)</li>
+          <li>AI analysis in Meta Ads AI (data is anonymized where possible)</li>
           <li>Communicate important service updates</li>
         </ul>
       </section>
@@ -54,8 +54,8 @@ export default function PrivacyPage() {
             and legal authorities when legally required
           </li>
           <li>
-            Campaign data is sent to the Google Gemini API for analysis (subject
-            to Google&apos;s privacy policy)
+            Meta Ads AI sends campaign data to an external AI service provider
+            for analysis, subject to that provider&apos;s privacy policy
           </li>
         </ul>
       </section>
@@ -79,7 +79,7 @@ export default function PrivacyPage() {
           5. Facebook &amp; Instagram Platforms
         </h2>
         <p className="text-text-secondary text-sm leading-relaxed">
-          Ads Manager - AI Support uses the Meta Graph API to access your
+          Meta Ads AI uses the Meta Graph API to access your
           Facebook and Instagram data under your authorization. Data collected
           includes: account information, ad data, page data and insights. You
           can revoke access at any time at{" "}

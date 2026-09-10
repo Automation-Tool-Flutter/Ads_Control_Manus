@@ -17,7 +17,7 @@ export default function TermsPage() {
           1. Acceptance of Terms
         </h2>
         <p className="text-text-secondary text-sm leading-relaxed">
-          By accessing and using Ads Manager - AI Support, you agree to be bound
+          By accessing and using Meta Ads AI, you agree to be bound
           by these terms. If you do not agree, please do not use the service.
         </p>
       </section>
@@ -27,10 +27,10 @@ export default function TermsPage() {
           2. Service Description
         </h2>
         <p className="text-text-secondary text-sm leading-relaxed">
-          Ads Manager - AI Support provides a Facebook advertising management
+          Meta Ads AI provides a Facebook advertising management
           platform, including: Ad Account, Campaign and Ad Set management,
           Facebook Pages, creating &amp; scheduling posts, viewing Page Insights
-          and AI-powered optimization via Gemini.
+          and AI-powered optimization within Meta Ads AI.
         </p>
       </section>
 
@@ -70,7 +70,7 @@ export default function TermsPage() {
           5. Limitation of Liability
         </h2>
         <p className="text-text-secondary text-sm leading-relaxed">
-          Ads Manager - AI Support is not liable for: data loss caused by Meta
+          Meta Ads AI is not liable for: data loss caused by Meta
           API errors, service interruptions beyond our control, or advertising
           decisions made based on AI recommendations.
         </p>

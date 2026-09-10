@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback } from 'react';
+import { collectAnalysis } from '@/lib/action-center';
 import type { DatePreset } from '@/lib/types';
 import type {
   OptimizeState,
@@ -49,6 +50,7 @@ export function useOptimizeData(accountId: string, token: string | null) {
           const entry: OptimizeCacheEntry = JSON.parse(cached);
           if (Date.now() - entry.timestamp < CACHE_TTL_MS) {
             setState({ step: 'done', analysis: entry.analysis, error: null });
+            collectAnalysis(accountId, entry.analysis, new Date(entry.timestamp).toISOString());
             return;
           }
         } catch {
@@ -103,12 +105,12 @@ export function useOptimizeData(accountId: string, token: string | null) {
         collectedAt: new Date().toISOString(),
       };
 
-      // Step 3: Analyzing with Gemini
+      // Step 3: Analyzing with OpenAI
       setState({ step: 'analyzing', analysis: null, error: null });
 
       let analysis: GeminiAnalysis;
       try {
-        const res = await fetch('/api/gemini', {
+        const res = await fetch('/api/openai-analysis', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload),
@@ -123,7 +125,7 @@ export function useOptimizeData(accountId: string, token: string | null) {
         analysis = json as GeminiAnalysis;
       } catch (err) {
         const message =
-          err instanceof Error ? err.message : 'Failed to analyze with Gemini AI.';
+          err instanceof Error ? err.message : 'Meta Ads AI could not complete the analysis.';
         setState({ step: 'error', analysis: null, error: message });
         return;
       }
@@ -140,6 +142,7 @@ export function useOptimizeData(accountId: string, token: string | null) {
         // sessionStorage full or unavailable — skip caching
       }
 
+      collectAnalysis(accountId, analysis);
       setState({ step: 'done', analysis, error: null });
     },
     [accountId, token]

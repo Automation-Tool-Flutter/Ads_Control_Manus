@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { callGemini, GeminiError } from '@/lib/gemini';
+import { callOpenAI, OpenAIError } from '@/lib/openai';
 
 const SYSTEM_PROMPT = `You are an expert Facebook content writer. \
 Your job is to generate 3 different Facebook post variations based on the given topic and tone. \
@@ -13,7 +13,7 @@ function buildPrompt(topic: string, tone: string, language: string): string {
     tone === 'promotional' ? 'promotional, strong call-to-action' :
     'casual, friendly, natural';
 
-  const langNote = language === 'vi' ? 'Write in Vietnamese.' : 'Write in English.';
+  const langNote = 'Write in English.';
 
   return `Topic / keywords: "${topic}"
 Tone: ${toneLabel}
@@ -37,9 +37,9 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const result = await callGemini<{ suggestions: string[] }>(
+    const result = await callOpenAI<{ suggestions: string[] }>(
       SYSTEM_PROMPT,
-      buildPrompt(payload.topic, payload.tone ?? 'casual', payload.language ?? 'vi'),
+      buildPrompt(payload.topic, payload.tone ?? 'casual', 'en'),
       { temperature: 0.8, maxOutputTokens: 4096 },
     );
 
@@ -49,7 +49,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ suggestions: result.suggestions });
   } catch (err) {
-    if (err instanceof GeminiError) return NextResponse.json({ error: err.message }, { status: err.status });
+    if (err instanceof OpenAIError) return NextResponse.json({ error: err.message }, { status: err.status });
     return NextResponse.json({ error: 'Analysis failed.' }, { status: 500 });
   }
 }

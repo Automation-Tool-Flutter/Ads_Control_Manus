@@ -28,36 +28,7 @@ function getVerificationStatus(status?: string): StatusInfo {
 }
 
 function BusinessesHero({ count }: { count?: number }) {
-  return (
-    <section className="meta-panel mb-5 overflow-hidden">
-      <div className="flex items-start gap-4 border-b border-border bg-bg-card p-4 sm:p-5">
-        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-text-primary text-white">
-          <svg className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21" />
-          </svg>
-        </div>
-
-        <div className="min-w-0 flex-1">
-          <div className="mb-2 inline-flex rounded-full bg-accent/10 px-3 py-1 text-[11px] font-black uppercase tracking-wide text-accent">
-            Asset Map
-          </div>
-          <h1 className="text-2xl font-black leading-tight text-text-primary sm:text-3xl">
-            Business Portfolio
-          </h1>
-          <p className="mt-2 max-w-xl text-sm font-medium leading-6 text-text-secondary">
-            Navigate portfolios, connected Pages, catalogs, users, and ad accounts from a cleaner control surface.
-          </p>
-        </div>
-
-        {count !== undefined && (
-          <div className="hidden rounded-lg border border-border bg-bg-secondary px-5 py-4 text-center sm:block">
-            <div className="text-3xl font-black tabular-nums text-text-primary">{count}</div>
-            <div className="text-[10px] font-bold uppercase tracking-wide text-text-muted">Businesses</div>
-          </div>
-        )}
-      </div>
-    </section>
-  );
+  return <WorkspaceHero title="Business assets" count={count} countLabel="Businesses" />;
 }
 
 function StatChips({ summary }: { summary: BusinessSummary }) {
@@ -385,3 +356,4 @@ export default function BusinessesPage() {
     </PageContainer>
   );
 }
+import { WorkspaceHero } from '@/components/layout/WorkspaceHero';

@@ -48,10 +48,25 @@ export function dateFilterLabel(filter: DatePreset | DateRange): string {
 
 // ─── Currency ─────────────────────────────────────────────────────────────────
 
+export function currencyRawDivisor(currency = 'USD'): number {
+  return currency.toUpperCase() === 'VND' ? 1 : 100;
+}
+
+export function rawBudgetToAmount(raw: string | number, currency = 'USD'): number {
+  const value = typeof raw === 'string' ? Number(raw) : raw;
+  return Number.isFinite(value) ? value / currencyRawDivisor(currency) : 0;
+}
+
+export function amountToRawBudget(amount: string | number, currency = 'USD'): string {
+  const value = typeof amount === 'string' ? Number(amount.replace(/,/g, '')) : amount;
+  if (!Number.isFinite(value)) return '';
+  return String(Math.round(value * currencyRawDivisor(currency)));
+}
+
 export function formatCurrency(amountCents: string | number, currency = 'USD'): string {
   const amount = typeof amountCents === 'string' ? parseFloat(amountCents) : amountCents;
   if (isNaN(amount)) return '—';
-  const value = amount / 100;
+  const value = rawBudgetToAmount(amount, currency);
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency,

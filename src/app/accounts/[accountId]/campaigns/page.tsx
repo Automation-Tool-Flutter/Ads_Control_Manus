@@ -1,4 +1,6 @@
 'use client';
+import { Modal } from '@/components/ui/Modal';
+import { usePublishAIView } from '@/hooks/useAIViewContext';
 
 import { useEffect, useState, useRef } from 'react';
 import { useRouter, useParams, useSearchParams } from 'next/navigation';
@@ -18,10 +20,12 @@ import { BudgetEditor } from '@/components/ui/BudgetEditor';
 import { DateFilter } from '@/components/ui/DateFilter';
 import { ScoreCard } from '@/components/optimize/ScoreCard';
 import { AngleTabs } from '@/components/optimize/AngleTabs';
+import { CampaignActionPreview } from '@/components/optimize/CampaignActionPreview';
+import { ObjectiveAssessmentPanel } from '@/components/optimize/ObjectiveAssessmentPanel';
+import { deriveCampaignKpis, formatKpi } from '@/lib/campaign-kpis';
 import {
   formatCurrency,
   formatSpend,
-  formatCompact,
   formatPercent,
   getCampaignStatus,
   getObjectiveLabel,
@@ -30,7 +34,10 @@ import { updateCampaignStatus, updateCampaignBudget } from '@/lib/api/mutations'
 import { useToast } from '@/components/ui/Toaster';
 import { GraphApiError, cacheInvalidatePrefix } from '@/lib/api/client';
 import { GRAPH_API_BASE } from '@/lib/constants';
+import { insightToLearningMetrics } from '@/lib/api/aiLearning';
+import { upsertLearningRecord } from '@/lib/learning-store';
 import type { Campaign, DatePreset, DateRange } from '@/lib/types';
+import type { Recommendation } from '@/lib/types/optimize';
 import type { CampaignInsight } from '@/hooks/useCampaigns';
 
 const STATUS_PRIORITY: Record<string, number> = {
@@ -110,6 +117,7 @@ function CampaignCard({
     : campaign.lifetime_budget
     ? `${formatCurrency(campaign.lifetime_budget, currency)} lifetime`
     : null;
+  const primaryKpi = deriveCampaignKpis(campaign.objective, insight).primary;
 
   return (
     <div className={`meta-item meta-item-compact ${selected ? 'meta-item-selected' : ''}`}>
@@ -120,24 +128,27 @@ function CampaignCard({
             <StatusDot color={status.color} />
             <p className="line-clamp-2 font-bold leading-snug text-text-primary">{campaign.name}</p>
           </div>
-          <p className="mt-1 text-[11px] font-semibold uppercase text-text-muted">{getObjectiveLabel(campaign.objective)}</p>
+          <p className="meta-card-status">{status.label}<span aria-hidden="true">·</span>{getObjectiveLabel(campaign.objective)}</p>
         </Link>
         <div className="flex items-center gap-2 flex-shrink-0 pt-0.5">
           <StatusToggle status={campaign.status} onToggle={async () => onToggleStatus()} />
+          <label className="meta-card-select">
           <input
             type="checkbox"
+            aria-label={`Select ${campaign.name}`}
             checked={selected}
             onChange={onSelect}
             onClick={e => e.stopPropagation()}
             className="w-4 h-4 rounded accent-accent cursor-pointer"
           />
+          </label>
         </div>
       </div>
 
       {/* Metrics grid */}
       <div className="meta-compact-pad grid grid-cols-2 gap-2 px-4 py-3 min-[460px]:grid-cols-4">
         <MetricCell label="Spend"  value={formatSpend(insight?.spend, currency)}          loading={insightsLoading} />
-        <MetricCell label="Impr"   value={formatCompact(insight?.impressions)}             loading={insightsLoading} />
+        <MetricCell label={primaryKpi.label} value={formatKpi(primaryKpi, currency)}        loading={insightsLoading} />
         <MetricCell label="CTR"    value={insight?.ctr ? formatPercent(insight.ctr) : '—'} loading={insightsLoading} />
         <MetricCell label="CPC"    value={formatSpend(insight?.cpc, currency)}             loading={insightsLoading} />
       </div>
@@ -145,7 +156,7 @@ function CampaignCard({
       {/* Budget */}
       {budget && (
         <>
-          <div className="meta-compact-hide border-t border-border/60 px-4 py-2">
+          <div className="meta-budget-row meta-compact-hide border-t border-border/60 px-4 py-2">
             <span className="text-xs font-bold uppercase text-text-muted">Budget </span>
             <span className="text-xs font-semibold text-text-secondary">{budget}</span>
           </div>
@@ -153,8 +164,7 @@ function CampaignCard({
       )}
 
       {/* Actions */}
-      <div className="border-t border-border" />
-      <div className="flex divide-x divide-border">
+      <div className="meta-card-actions flex gap-2">
         <Link
           href={`/accounts/${accountId}/campaigns/${campaign.id}?accountName=${encodeURIComponent(accountName)}&campaignName=${encodeURIComponent(campaign.name)}`}
           className="meta-action flex-1 rounded-none text-text-secondary hover:bg-bg-secondary active:bg-bg-secondary"
@@ -197,6 +207,11 @@ export default function CampaignsPage() {
   const [overrides, setOverrides] = useState<Record<string, Partial<Campaign>>>({});
   const [mutationError, setMutationError] = useState<{ message: string; code?: number } | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  usePublishAIView(dateFilter, selectedIds);
+  const [pendingRecommendation, setPendingRecommendation] = useState<Recommendation | null>(null);
+  const [applyingRecommendation, setApplyingRecommendation] = useState(false);
+  const [targetMetric, setTargetMetric] = useState('roas');
+  const [targetValue, setTargetValue] = useState('');
 
   // Checkbox header ref for indeterminate state
   const checkAllRef = useRef<HTMLInputElement>(null);
@@ -240,6 +255,100 @@ export default function CampaignsPage() {
     } catch (err) {
       handleMutationError(err, () => applyOverride(campaign.id, { daily_budget: campaign.daily_budget }));
     }
+  }
+
+  async function handleApplyRecommendation() {
+    const action = pendingRecommendation?.action;
+    if (!auth.token || !action || !action.canApply || action.type === 'none') return;
+
+    const campaign = rawCampaigns.find(item => item.id === action.entityId);
+    if (!campaign) {
+      toast('The campaign in this recommendation is no longer available.', 'error');
+      return;
+    }
+
+    setApplyingRecommendation(true);
+    let rollback = () => {};
+
+    try {
+      if (action.type === 'pause_campaign' || action.type === 'activate_campaign') {
+        const newStatus = action.type === 'pause_campaign' ? 'PAUSED' : 'ACTIVE';
+        if (campaign.status === newStatus) {
+          setPendingRecommendation(null);
+          toast(`Campaign is already ${newStatus.toLowerCase()}.`, 'info');
+          return;
+        }
+        const previousStatus = campaign.status;
+        rollback = () => applyOverride(campaign.id, { status: previousStatus });
+        applyOverride(campaign.id, { status: newStatus });
+        await updateCampaignStatus(campaign.id, newStatus, auth.token);
+      } else if (action.type === 'update_campaign_budget') {
+        const currentBudget = Number(campaign.daily_budget);
+        const proposedBudget = Number(action.proposedDailyBudget);
+        if (!Number.isFinite(currentBudget) || currentBudget <= 0) {
+          throw new Error('This campaign does not have an editable daily budget.');
+        }
+        if (!Number.isInteger(proposedBudget) || proposedBudget <= 0) {
+          throw new Error('AI proposed an invalid daily budget.');
+        }
+        if (action.currentDailyBudget !== campaign.daily_budget) {
+          throw new Error('The campaign budget changed after this analysis. Run the analysis again.');
+        }
+        const changeRatio = Math.abs(proposedBudget - currentBudget) / currentBudget;
+        if (changeRatio > 0.205) {
+          throw new Error('Budget change exceeds the 20% limit. Run the analysis again.');
+        }
+
+        const previousBudget = campaign.daily_budget;
+        rollback = () => applyOverride(campaign.id, { daily_budget: previousBudget });
+        applyOverride(campaign.id, { daily_budget: String(proposedBudget) });
+        await updateCampaignBudget(campaign.id, String(proposedBudget), auth.token);
+      }
+
+      cacheInvalidatePrefix(`${GRAPH_API_BASE}/act_${accountId}/campaigns`);
+      cacheInvalidatePrefix(`${GRAPH_API_BASE}/${campaign.id}`);
+      const baselineContext = insightToLearningMetrics(insights[campaign.id], campaign.objective);
+      const currentBudget = Number(campaign.daily_budget ?? 0);
+      const proposedBudget = Number(action.proposedDailyBudget || currentBudget);
+      const appliedAt = new Date().toISOString();
+      upsertLearningRecord({
+        id: `recommendation:${campaign.id}:${Date.now()}`, accountId, source: 'recommendation', sourceId: action.type,
+        entityType: 'campaign', entityId: campaign.id, entityName: campaign.name, href: `/accounts/${accountId}/campaigns/${campaign.id}`,
+        objective: campaign.objective, objectiveFamily: baselineContext.objectiveKpis.objectiveFamily,
+        recommendationTitle: pendingRecommendation?.title ?? action.reason, actionType: action.type === 'update_campaign_budget' ? 'update_campaign_budget' : action.type === 'pause_campaign' ? 'pause_entity' : 'activate_entity',
+        changePercent: currentBudget > 0 ? (proposedBudget - currentBudget) / currentBudget * 100 : 0,
+        accepted: true, userOutcome: 'applied', appliedAt, baselineContext, checkpoints: [],
+      });
+      setPendingRecommendation(null);
+      toast('AI recommendation applied successfully.', 'success');
+      retry();
+      resetAnalysis();
+    } catch (error) {
+      handleMutationError(error, rollback);
+    } finally {
+      setApplyingRecommendation(false);
+    }
+  }
+
+  function handleIgnoreRecommendation() {
+    const action = pendingRecommendation?.action;
+    if (!action) return;
+    const campaign = rawCampaigns.find(item => item.id === action.entityId);
+    if (campaign) {
+      const baselineContext = insightToLearningMetrics(insights[campaign.id], campaign.objective);
+      const currentBudget = Number(campaign.daily_budget ?? 0);
+      const proposedBudget = Number(action.proposedDailyBudget || currentBudget);
+      upsertLearningRecord({
+        id: `recommendation:${campaign.id}:${Date.now()}`, accountId, source: 'recommendation', sourceId: action.type,
+        entityType: 'campaign', entityId: campaign.id, entityName: campaign.name, href: `/accounts/${accountId}/campaigns/${campaign.id}`,
+        objective: campaign.objective, objectiveFamily: baselineContext.objectiveKpis.objectiveFamily,
+        recommendationTitle: pendingRecommendation?.title ?? action.reason, actionType: action.type === 'update_campaign_budget' ? 'update_campaign_budget' : action.type === 'pause_campaign' ? 'pause_entity' : 'activate_entity',
+        changePercent: currentBudget > 0 ? (proposedBudget - currentBudget) / currentBudget * 100 : 0,
+        accepted: false, userOutcome: 'unknown', appliedAt: new Date().toISOString(), baselineContext, checkpoints: [],
+      });
+    }
+    setPendingRecommendation(null);
+    toast('Recommendation marked as skipped.', 'info');
   }
 
   function toggleSelect(id: string) {
@@ -368,7 +477,7 @@ export default function CampaignsPage() {
       {state.status === 'success' && campaigns.length > 0 && (
         <>
           {/* Mobile select-all */}
-          <div className="sm:hidden flex items-center justify-end px-1 mb-2">
+          <div className="touch-record-select flex items-center justify-end px-1 mb-2">
             <label className="flex items-center gap-2 text-sm text-text-secondary cursor-pointer select-none">
               {someSelected && (
                 <span className="text-xs text-text-muted">{selectedIds.size} selected</span>
@@ -385,7 +494,7 @@ export default function CampaignsPage() {
           </div>
 
           {/* Mobile cards */}
-          <div className="sm:hidden space-y-3">
+          <div className="touch-record-list space-y-3">
             {campaigns.map(campaign => (
               <CampaignCard
                 key={campaign.id}
@@ -403,7 +512,7 @@ export default function CampaignsPage() {
           </div>
 
           {/* Desktop table */}
-          <div className="hidden sm:block glass-card gradient-border-card rounded-2xl overflow-hidden">
+          <div className="pointer-record-table glass-card gradient-border-card rounded-2xl overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
@@ -423,7 +532,7 @@ export default function CampaignsPage() {
                       { label: 'Campaign',    cls: '' },
                       { label: 'Budget',      cls: 'w-32' },
                       { label: 'Spend',       cls: 'w-24' },
-                      { label: 'Impressions', cls: 'w-24' },
+                      { label: 'Primary KPI', cls: 'w-32' },
                       { label: 'CTR',         cls: 'w-20' },
                       { label: 'CPC',         cls: 'w-20' },
                       { label: '',            cls: 'w-28' },
@@ -513,14 +622,15 @@ export default function CampaignsPage() {
                           )}
                         </td>
 
-                        {/* Impressions */}
+                        {/* Objective-aware primary KPI */}
                         <td className="px-4 py-4 whitespace-nowrap">
                           {insightsLoading ? (
                             <span className="h-4 w-12 bg-white/8 rounded animate-pulse inline-block" />
                           ) : (
-                            <span className="text-sm text-text-secondary tabular-nums">
-                              {formatCompact(insight?.impressions)}
-                            </span>
+                            (() => {
+                              const primary = deriveCampaignKpis(campaign.objective, insight).primary;
+                              return <div><span className="text-sm font-semibold text-text-primary tabular-nums">{formatKpi(primary, currency)}</span><span className="block text-[10px] text-text-muted">{primary.label}</span></div>;
+                            })()
                           )}
                         </td>
 
@@ -587,13 +697,7 @@ export default function CampaignsPage() {
 
       {/* Analysis modal */}
       {analysisState.step !== 'idle' && (
-        <div className="fixed inset-0 z-[80] flex items-end sm:items-center justify-center p-0 sm:p-4">
-          {/* Backdrop */}
-          <div
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-            onClick={analysisState.step === 'analyzing' ? undefined : resetAnalysis}
-          />
-
+        <Modal open label="AI analysis" onClose={resetAnalysis} busy={analysisState.step === 'analyzing'}>
           {/* Panel */}
           <div className="relative w-full sm:max-w-2xl max-h-[90dvh] flex flex-col bg-bg-card border border-border rounded-t-lg sm:rounded-lg shadow-2xl overflow-hidden">
             {/* Header */}
@@ -605,6 +709,7 @@ export default function CampaignsPage() {
               {analysisState.step !== 'analyzing' && (
                 <button
                   onClick={resetAnalysis}
+                  aria-label="Close AI analysis"
                   className="text-text-muted hover:text-text-primary transition-colors p-1 rounded-lg hover:bg-white/5"
                 >
                   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -652,29 +757,74 @@ export default function CampaignsPage() {
                     score={analysisState.analysis.overallScore}
                     summary={analysisState.analysis.summary}
                   />
-                  <AngleTabs angles={analysisState.analysis.angles} />
+                  <ObjectiveAssessmentPanel assessments={analysisState.analysis.objectiveAssessments} />
+                  <AngleTabs
+                    angles={analysisState.analysis.angles}
+                    onPreviewAction={setPendingRecommendation}
+                  />
                 </div>
               )}
             </div>
           </div>
-        </div>
+        </Modal>
       )}
 
       {/* Action bar */}
       {selectedIds.size > 0 && (
-        <div className="sticky bottom-4 flex justify-center mt-4 pointer-events-none">
-          <div className="pointer-events-auto bg-bg-card border border-border rounded-2xl px-4 py-3 flex items-center gap-3 shadow-lg">
+        <div className="mobile-selection-bar sticky bottom-4 flex justify-center mt-4 pointer-events-none">
+          <div className="pointer-events-auto bg-bg-card border border-border rounded-2xl px-4 py-3 flex flex-wrap items-center justify-center gap-2 shadow-lg">
+            <select
+              value={targetMetric}
+              onChange={event => setTargetMetric(event.target.value)}
+              className="rounded-lg border border-border bg-bg-secondary px-2.5 py-2 text-xs text-text-primary"
+              aria-label="Target KPI"
+            >
+              <option value="roas">ROAS target</option>
+              <option value="cpa">CPA target</option>
+              <option value="cpl">CPL target</option>
+              <option value="cost_per_lpv">Cost / LPV target</option>
+              <option value="cost_per_engagement">Cost / engagement target</option>
+              <option value="cost_per_thruplay">Cost / ThruPlay target</option>
+              <option value="cpm">CPM target</option>
+            </select>
+            <input
+              type="number"
+              min="0"
+              step="any"
+              value={targetValue}
+              onChange={event => setTargetValue(event.target.value)}
+              placeholder="Optional value"
+              inputMode="decimal"
+              aria-label="Optional target KPI value"
+              className="w-28 rounded-lg border border-border bg-bg-secondary px-2.5 py-2 text-xs text-text-primary placeholder:text-text-muted"
+            />
             <button
-              onClick={() => analyze(selectedCampaigns, insights, currency, dateFilter)}
+              onClick={() => analyze(
+                selectedCampaigns,
+                insights,
+                currency,
+                dateFilter,
+                auth.token,
+                targetValue && Number(targetValue) >= 0 ? { metric: targetMetric, value: Number(targetValue) } : undefined,
+              )}
               disabled={!insightsLoaded || analysisState.step === 'analyzing'}
               title={!insightsLoaded ? 'Load metrics first' : undefined}
-              className="flex items-center gap-1.5 px-3 py-2 bg-text-primary text-white text-sm font-medium rounded-lg disabled:opacity-50 transition-opacity"
+              className="selection-analyze flex items-center gap-1.5 px-3 py-2 bg-text-primary text-white text-sm font-medium rounded-lg disabled:opacity-50 transition-opacity"
             >
               Analyze with GPT ({selectedIds.size})
             </button>
           </div>
         </div>
       )}
+
+      <CampaignActionPreview
+        recommendation={pendingRecommendation}
+        currency={currency}
+        applying={applyingRecommendation}
+        onApply={handleApplyRecommendation}
+        onIgnore={handleIgnoreRecommendation}
+        onClose={() => setPendingRecommendation(null)}
+      />
     </PageContainer>
   );
 }

@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { useToast } from './Toaster';
 
 interface Props {
   value: string;
@@ -8,22 +9,28 @@ interface Props {
 }
 
 export function CopyButton({ value, className = '' }: Props) {
+  const { toast } = useToast();
+  const timer = useRef<ReturnType<typeof setTimeout>>();
+  useEffect(() => () => clearTimeout(timer.current), []);
   const [copied, setCopied] = useState(false);
 
   async function handleCopy() {
     try {
       await navigator.clipboard.writeText(value);
       setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      clearTimeout(timer.current);
+      timer.current = setTimeout(() => setCopied(false), 2000);
+      toast('Copied to clipboard.', 'success');
     } catch {
-      // fallback
+      toast('Copy failed. Touch and hold the text to copy it manually.', 'error');
     }
   }
 
   return (
-    <button
+    <button type="button"
+      aria-label={copied ? "Copied to clipboard" : "Copy to clipboard"}
       onClick={handleCopy}
-      className={`text-text-muted hover:text-text-secondary transition-colors p-1 rounded hover:bg-white/5 ${className}`}
+      className={`copy-button text-text-muted hover:text-text-secondary transition-colors p-1 rounded hover:bg-white/5 ${className}`}
       title="Copy"
     >
       {copied ? (

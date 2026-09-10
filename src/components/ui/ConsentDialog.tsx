@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Modal } from '@/components/ui/Modal';
+import { useState } from 'react';
 
 interface ConsentDialogProps {
   open: boolean;
@@ -41,22 +42,16 @@ function CheckboxReadonly() {
 export function ConsentDialog({ open, onClose }: ConsentDialogProps) {
   const [features, setFeatures] = useState(true);
 
-  useEffect(() => {
-    document.body.style.overflow = open ? 'hidden' : '';
-    return () => { document.body.style.overflow = ''; };
-  }, [open]);
 
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-[80] flex items-end justify-center overflow-x-hidden px-2 pb-[calc(0.75rem+env(safe-area-inset-bottom))] sm:items-center sm:p-4">
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
-
+    <Modal open={open} label="Email preferences" onClose={onClose}>
       <div className="relative flex max-h-[min(78dvh,620px)] w-full max-w-[calc(100vw-1rem)] min-w-0 flex-col overflow-hidden rounded-2xl border border-border bg-bg-card shadow-2xl sm:w-auto sm:min-w-[480px] sm:max-w-lg">
         {/* Header */}
         <div className="min-w-0 border-b border-border px-4 pb-3 pt-4 sm:px-6 sm:pb-4 sm:pt-6">
           <h3 className="max-w-full break-words text-[15px] font-semibold leading-snug text-text-primary sm:text-base">
-            Choose the emails you'd like to receive from Ads Manager
+            Choose the emails you'd like to receive from Meta Ads AI
           </h3>
           <p className="mt-1 max-w-full break-words text-xs leading-relaxed text-text-muted">
             You can change these preferences at any time in Settings.
@@ -127,6 +122,6 @@ export function ConsentDialog({ open, onClose }: ConsentDialogProps) {
           </button>
         </div>
       </div>
-    </div>
+    </Modal>
   );
 }

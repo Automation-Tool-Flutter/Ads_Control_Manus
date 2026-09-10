@@ -1,4 +1,6 @@
 'use client';
+import { Modal } from '@/components/ui/Modal';
+import { usePublishAIView } from '@/hooks/useAIViewContext';
 
 import { useEffect, useState, useRef } from 'react';
 import { useRouter, useParams, useSearchParams } from 'next/navigation';
@@ -188,6 +190,7 @@ export default function AdSetsPage() {
   const [overrides, setOverrides] = useState<Record<string, Partial<AdSet>>>({});
   const [mutationError, setMutationError] = useState<{ message: string; code?: number } | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  usePublishAIView(dateFilter, selectedIds);
 
   const checkAllRef = useRef<HTMLInputElement>(null);
 
@@ -344,7 +347,7 @@ export default function AdSetsPage() {
       {state.status === 'success' && adsets.length > 0 && (
         <>
           {/* Mobile select-all */}
-          <div className="sm:hidden flex items-center justify-end px-1 mb-2">
+          <div className="touch-record-select flex items-center justify-end px-1 mb-2">
             <label className="flex items-center gap-2 text-sm text-text-secondary cursor-pointer select-none">
               {someSelected && (
                 <span className="text-xs text-text-muted">{selectedIds.size} selected</span>
@@ -361,7 +364,7 @@ export default function AdSetsPage() {
           </div>
 
           {/* Mobile cards */}
-          <div className="sm:hidden space-y-3">
+          <div className="touch-record-list space-y-3">
             {adsets.map(adset => (
               <AdSetCard
                 key={adset.id}
@@ -381,7 +384,7 @@ export default function AdSetsPage() {
           </div>
 
           {/* Desktop table */}
-          <div className="hidden sm:block glass-card gradient-border-card rounded-2xl overflow-hidden">
+          <div className="pointer-record-table glass-card gradient-border-card rounded-2xl overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
@@ -548,13 +551,7 @@ export default function AdSetsPage() {
 
       {/* Analysis modal */}
       {analysisState.step !== 'idle' && (
-        <div className="fixed inset-0 z-[80] flex items-end sm:items-center justify-center p-0 sm:p-4">
-          {/* Backdrop */}
-          <div
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-            onClick={analysisState.step === 'analyzing' ? undefined : resetAnalysis}
-          />
-
+        <Modal open label="AI analysis" onClose={resetAnalysis} busy={analysisState.step === 'analyzing'}>
           {/* Panel */}
           <div className="relative w-full sm:max-w-2xl max-h-[90dvh] flex flex-col bg-bg-card border border-border rounded-t-lg sm:rounded-lg shadow-2xl overflow-hidden">
             {/* Header */}
@@ -566,6 +563,7 @@ export default function AdSetsPage() {
               {analysisState.step !== 'analyzing' && (
                 <button
                   onClick={resetAnalysis}
+                  aria-label="Close AI analysis"
                   className="text-text-muted hover:text-text-primary transition-colors p-1 rounded-lg hover:bg-white/5"
                 >
                   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -615,18 +613,18 @@ export default function AdSetsPage() {
               )}
             </div>
           </div>
-        </div>
+        </Modal>
       )}
 
       {/* Action bar */}
       {selectedIds.size > 0 && (
-        <div className="sticky bottom-4 flex justify-center mt-4 pointer-events-none">
+        <div className="mobile-selection-bar sticky bottom-4 flex justify-center mt-4 pointer-events-none">
           <div className="pointer-events-auto bg-bg-card border border-border rounded-2xl px-4 py-3 flex items-center gap-3 shadow-lg">
             <button
               onClick={() => analyze(selectedAdSets, insights, currency, dateFilter)}
               disabled={!insightsLoaded || analysisState.step === 'analyzing'}
               title={!insightsLoaded ? 'Load metrics first' : undefined}
-              className="flex items-center gap-1.5 px-3 py-2 bg-text-primary text-white text-sm font-medium rounded-lg disabled:opacity-50 transition-opacity"
+              className="selection-analyze flex items-center gap-1.5 px-3 py-2 bg-text-primary text-white text-sm font-medium rounded-lg disabled:opacity-50 transition-opacity"
             >
               Analyze with GPT ({selectedIds.size})
             </button>

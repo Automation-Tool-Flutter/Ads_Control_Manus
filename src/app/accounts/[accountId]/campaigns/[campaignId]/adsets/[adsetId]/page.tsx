@@ -1,4 +1,5 @@
 'use client';
+import { usePublishAIView } from '@/hooks/useAIViewContext';
 
 import { useEffect, useState } from 'react';
 import { useRouter, useParams, useSearchParams } from 'next/navigation';
@@ -40,6 +41,7 @@ export default function AdSetDetailPage() {
   const searchParams = useSearchParams();
   const accountName = searchParams.get('accountName') ?? accountId;
   const campaignName = searchParams.get('campaignName') ?? campaignId;
+  const focusedAdId = searchParams.get('adId');
 
   useEffect(() => {
     if (!auth.isLoading && !auth.token) {
@@ -52,6 +54,7 @@ export default function AdSetDetailPage() {
   const currency = useAccountCurrency(accountId, auth.token);
   const { state: analysisState, analyze, reset: resetAnalysis } = useAdSetAnalysis(campaignId);
   const [dateFilter, setDateFilter] = useState<DatePreset | DateRange>('last_30d');
+  usePublishAIView(dateFilter, undefined, searchParams.get('adId') ?? undefined);
   const { state: chartState, aggregateState } = useDailyInsights(adsetId, dateFilter, 'adset', auth.token);
 
   // Reset analysis when date filter changes
@@ -59,6 +62,12 @@ export default function AdSetDetailPage() {
     if (analysisState.step === 'done') resetAnalysis();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dateFilter]);
+
+  useEffect(() => {
+    if (focusedAdId && adsState.status === 'success') {
+      document.getElementById(`ad-${focusedAdId}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, [focusedAdId, adsState.status]);
 
   if (auth.isLoading || state.status === 'idle') return null;
 
@@ -328,7 +337,7 @@ export default function AdSetDetailPage() {
                         const imgSrc = ad.creative?.image_url || ad.creative?.thumbnail_url;
                         const cta = ad.creative?.call_to_action_type;
                         return (
-                          <tr key={ad.id} className="hover:bg-white/[0.02] transition-colors align-top">
+                          <tr id={`ad-${ad.id}`} key={ad.id} className={`transition-colors align-top ${focusedAdId === ad.id ? 'bg-accent/10 ring-1 ring-inset ring-accent/40' : 'hover:bg-white/[0.02]'}`}>
                             {/* Thumbnail */}
                             <td className="px-4 py-3">
                               {imgSrc ? (
@@ -397,7 +406,7 @@ export default function AdSetDetailPage() {
                     const imgSrc = ad.creative?.image_url || ad.creative?.thumbnail_url;
                     const cta = ad.creative?.call_to_action_type;
                     return (
-                      <div key={ad.id} className="bg-white/[0.02] border border-border/50 rounded-xl overflow-hidden">
+                      <div id={`ad-${ad.id}`} key={ad.id} className={`border rounded-xl overflow-hidden ${focusedAdId === ad.id ? 'border-accent bg-accent/10 ring-1 ring-accent/30' : 'border-border/50 bg-white/[0.02]'}`}>
                         {/* Creative image */}
                         {imgSrc && (
                           // eslint-disable-next-line @next/next/no-img-element

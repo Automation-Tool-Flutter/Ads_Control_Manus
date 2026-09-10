@@ -1,7 +1,8 @@
-import { graphFetch } from './client';
+import { graphFetch, graphFetchAll } from './client';
 import { presetToRange } from '../utils';
 import { META_NATIVE_PRESETS } from '../constants';
 import type { InsightsData, DatePreset, DateRange, InsightsLevel } from '../types';
+import { META_CONVERSION_INSIGHT_FIELDS } from '../campaign-kpis';
 
 interface InsightsResponse {
   data: InsightsData[];
@@ -14,7 +15,7 @@ export async function getInsights(
   token: string
 ): Promise<InsightsData> {
   const params: Record<string, string> = {
-    fields: 'impressions,reach,clicks,spend,ctr,cpc,cpm,frequency',
+    fields: `impressions,reach,clicks,spend,ctr,cpc,cpm,frequency,${META_CONVERSION_INSIGHT_FIELDS}`,
     level,
     time_increment: 'all_days',
   };
@@ -26,7 +27,7 @@ export async function getInsights(
     params.time_range = JSON.stringify(range);
   }
 
-  const result = await graphFetch<InsightsResponse>(`/${objectId}/insights`, params, token);
+  const result = await graphFetch<InsightsResponse>(`/${objectId}/insights`, params, token, { cache: false });
   return result.data?.[0] ?? {};
 }
 
@@ -37,7 +38,7 @@ export async function getDailyInsights(
   token: string
 ): Promise<InsightsData[]> {
   const params: Record<string, string> = {
-    fields: 'impressions,reach,clicks,spend,ctr,cpc,cpm,date_start,date_stop',
+    fields: `impressions,reach,clicks,spend,ctr,cpc,cpm,frequency,date_start,date_stop,${META_CONVERSION_INSIGHT_FIELDS}`,
     level,
     time_increment: '1',
   };
@@ -49,6 +50,5 @@ export async function getDailyInsights(
     params.time_range = JSON.stringify(range);
   }
 
-  const result = await graphFetch<InsightsResponse>(`/${objectId}/insights`, params, token);
-  return result.data ?? [];
+  return graphFetchAll<InsightsData>(`/${objectId}/insights`, { ...params, limit: '200' }, token, { cache: false });
 }

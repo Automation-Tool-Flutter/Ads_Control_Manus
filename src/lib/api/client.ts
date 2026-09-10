@@ -18,11 +18,13 @@ export class GraphApiError extends Error {
 const inFlight = new Map<string, Promise<unknown>>();
 
 // ─── Persistent cache (localStorage) ─────────────────────────────────────────
-// Cache persists indefinitely — only invalidated by explicit mutation operations.
+// A short TTL prevents performance metrics from remaining stale indefinitely.
 const CACHE_PREFIX = 'gfc:';
+export const CACHE_TTL_MS = 2 * 60 * 1000;
 
 interface CacheEntry {
   data: unknown;
+  cachedAt: number;
 }
 
 function cacheGet(key: string): unknown | null {
@@ -30,6 +32,7 @@ function cacheGet(key: string): unknown | null {
     const raw = localStorage.getItem(CACHE_PREFIX + key);
     if (!raw) return null;
     const entry: CacheEntry = JSON.parse(raw);
+    if (!Number.isFinite(entry.cachedAt) || Date.now() - entry.cachedAt > CACHE_TTL_MS) return null;
     return entry.data;
   } catch {
     return null;
@@ -38,7 +41,7 @@ function cacheGet(key: string): unknown | null {
 
 function cacheSet(key: string, data: unknown) {
   try {
-    const entry: CacheEntry = { data };
+    const entry: CacheEntry = { data, cachedAt: Date.now() };
     localStorage.setItem(CACHE_PREFIX + key, JSON.stringify(entry));
   } catch {
     // localStorage full or unavailable — ignore
@@ -81,7 +84,8 @@ export function cacheInvalidatePrefix(prefix: string) {
 export async function graphFetch<T>(
   path: string,
   params: Record<string, string>,
-  token: string
+  token: string,
+  options: { cache?: boolean } = {},
 ): Promise<T> {
   const url = new URL(`${GRAPH_API_BASE}${path}`);
   url.searchParams.set('access_token', token);
@@ -90,7 +94,8 @@ export async function graphFetch<T>(
   }
 
   const cacheKey = url.toString();
-  const cached = cacheGet(cacheKey);
+  const useCache = options.cache !== false;
+  const cached = useCache ? cacheGet(cacheKey) : null;
   if (cached !== null) {
     return cached as T;
   }
@@ -136,11 +141,32 @@ export async function graphFetch<T>(
       throw new GraphApiError(response.status, `HTTP ${response.status}: ${response.statusText}`);
     }
 
-    cacheSet(cacheKey, json);
+    if (useCache) cacheSet(cacheKey, json);
     return json as T;
   })();
 
   inFlight.set(cacheKey, requestPromise);
-  requestPromise.finally(() => inFlight.delete(cacheKey));
+  // Handle both branches without creating an unhandled rejected promise.
+  void requestPromise.then(() => inFlight.delete(cacheKey), () => inFlight.delete(cacheKey));
   return requestPromise;
+}
+
+export async function graphFetchAll<T>(
+  path: string, params: Record<string, string>, token: string,
+  options: { cache?: boolean; maxPages?: number } = {},
+): Promise<T[]> {
+  const rows: T[] = [];
+  const seen = new Set<string>();
+  let after: string | undefined;
+  for (let page = 0; page < (options.maxPages ?? 30); page++) {
+    const result = await graphFetch<{ data: T[]; paging?: { next?: string; cursors?: { after?: string } } }>(
+      path, { ...params, ...(after ? { after } : {}) }, token, options,
+    );
+    rows.push(...(result.data ?? []));
+    if (!result.paging?.next) return rows;
+    const cursor = result.paging.cursors?.after;
+    if (!cursor || seen.has(cursor)) throw new Error('Meta returned an incomplete pagination cursor. Refresh and try again.');
+    seen.add(cursor); after = cursor;
+  }
+  throw new Error('This result is too large to load completely. Use a smaller reporting period.');
 }

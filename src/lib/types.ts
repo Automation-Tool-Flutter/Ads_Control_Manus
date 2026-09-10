@@ -55,6 +55,18 @@ export interface CampaignInsight {
   ctr?: string;
   cpc?: string;
   cpm?: string;
+  reach?: string;
+  frequency?: string;
+  actions?: InsightActionValue[];
+  action_values?: InsightActionValue[];
+  cost_per_action_type?: InsightActionValue[];
+  purchase_roas?: InsightActionValue[];
+  website_purchase_roas?: InsightActionValue[];
+  outbound_clicks?: InsightActionValue[];
+  inline_post_engagement?: string;
+  cost_per_inline_post_engagement?: string;
+  video_thruplay_watched_actions?: InsightActionValue[];
+  cost_per_thruplay?: InsightActionValue[];
 }
 
 export interface AdSetInsight {
@@ -67,6 +79,16 @@ export interface AdSetInsight {
   ctr?: string;
   cpc?: string;
   cpm?: string;
+  actions?: InsightActionValue[];
+  action_values?: InsightActionValue[];
+  cost_per_action_type?: InsightActionValue[];
+  purchase_roas?: InsightActionValue[];
+  website_purchase_roas?: InsightActionValue[];
+  outbound_clicks?: InsightActionValue[];
+  inline_post_engagement?: string;
+  cost_per_inline_post_engagement?: string;
+  video_thruplay_watched_actions?: InsightActionValue[];
+  cost_per_thruplay?: InsightActionValue[];
 }
 
 // ─── Ad Set ──────────────────────────────────────────────────────────────────
@@ -124,6 +146,11 @@ export interface AuthState {
 
 // ─── Insights ────────────────────────────────────────────────────────────────
 
+export interface InsightActionValue {
+  action_type: string;
+  value: string;
+}
+
 export type DatePreset = 'today' | 'yesterday' | 'last_3d' | 'last_7d' | 'last_14d' | 'last_30d' | 'this_month' | 'last_month' | 'maximum';
 export type DateRange = { since: string; until: string };
 export type InsightsLevel = 'account' | 'campaign' | 'adset' | 'ad';
@@ -137,6 +164,16 @@ export interface InsightsData {
   cpc?: string;
   cpm?: string;
   frequency?: string;
+  actions?: InsightActionValue[];
+  action_values?: InsightActionValue[];
+  cost_per_action_type?: InsightActionValue[];
+  purchase_roas?: InsightActionValue[];
+  website_purchase_roas?: InsightActionValue[];
+  outbound_clicks?: InsightActionValue[];
+  inline_post_engagement?: string;
+  cost_per_inline_post_engagement?: string;
+  video_thruplay_watched_actions?: InsightActionValue[];
+  cost_per_thruplay?: InsightActionValue[];
   date_start?: string;
   date_stop?: string;
 }
@@ -390,6 +427,7 @@ export interface Ad {
     thumbnail_url?: string;
     image_url?: string;
     call_to_action_type?: string;
+    object_story_id?: string;
   };
   preview_shareable_link?: string;
 }

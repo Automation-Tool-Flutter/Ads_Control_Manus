@@ -6,8 +6,9 @@ import type {
   AdInsightsRow,
   AdSetTargetingRow,
 } from '../types/optimize';
+import { META_CONVERSION_INSIGHT_FIELDS } from '../campaign-kpis';
 
-const INSIGHT_FIELDS = 'impressions,reach,clicks,spend,ctr,cpc,cpm,frequency';
+const INSIGHT_FIELDS = `impressions,reach,clicks,spend,ctr,cpc,cpm,frequency,${META_CONVERSION_INSIGHT_FIELDS}`;
 
 interface InsightsBulkResponse<T> {
   data: T[];

@@ -10,7 +10,7 @@ export default function Home() {
   const router = useRouter();
 
   useEffect(() => {
-    if (!state.isLoading && state.token) router.replace("/businesses");
+    if (!state.isLoading && state.token) router.replace("/accounts");
     if (!state.isLoading && !state.token) router.replace("/login");
   }, [state.isLoading, state.token, router]);
 
@@ -39,7 +39,7 @@ function LandingPage() {
                 Turn ad work into a control room.
               </h1>
               <p className="mt-6 max-w-2xl text-base leading-7 text-white/68 sm:text-lg">
-                Ads Control reorganizes Meta accounts, campaigns, Pages,
+                Meta Ads AI reorganizes Meta accounts, campaigns, Pages,
                 content, comments, insights, and AI recommendations into one
                 focused operating system.
               </p>

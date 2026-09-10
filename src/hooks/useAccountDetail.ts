@@ -7,26 +7,24 @@ import { useVisibilityRefetch } from './useVisibilityRefetch';
 
 export function useAccountDetail(accountId: string, token: string | null) {
   const [state, setState] = useState<AsyncState<AccountDetail>>({ status: 'idle' });
-  const isFetching = useRef(false);
+  const requestId = useRef(0);
 
   const fetch = useCallback(async () => {
-    if (!accountId || !token || isFetching.current) return;
-    isFetching.current = true;
-    setState(prev => prev.status === 'success' ? prev : { status: 'loading' });
+    const id = ++requestId.current;
+    if (!accountId || !token) { setState({ status: 'idle' }); return; }
+    setState(prev => prev.status === 'success' && prev.data.id === accountId ? prev : { status: 'loading' });
     try {
       const data = await getAccountDetail(accountId, token);
-      setState({ status: 'success', data });
+      if (requestId.current === id) setState({ status: 'success', data });
     } catch (err) {
-      setState({
+      if (requestId.current === id) setState({
         status: 'error',
         error: err instanceof Error ? err.message : 'Failed to load account info',
       });
-    } finally {
-      isFetching.current = false;
     }
   }, [accountId, token]);
 
-  useEffect(() => { fetch(); }, [fetch]);
+  useEffect(() => { fetch(); return () => { requestId.current++; }; }, [fetch]);
 
   useVisibilityRefetch(fetch);
 

@@ -174,6 +174,12 @@ export default function PageDetailPage() {
         actions={(
           <>
             <Link
+              href={`/pages/${pageId}/creative-intelligence`}
+              className="inline-flex min-h-10 items-center justify-center rounded-xl border border-accent/30 bg-accent/10 px-3 text-sm font-semibold text-accent hover:bg-accent/15"
+            >
+              Creative AI
+            </Link>
+            <Link
               href={`/pages/${pageId}/insights`}
               className="inline-flex min-h-10 items-center justify-center rounded-xl border border-border bg-bg-card px-3 text-sm font-semibold text-text-secondary hover:text-text-primary"
             >

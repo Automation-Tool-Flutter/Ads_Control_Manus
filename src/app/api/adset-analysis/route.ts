@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import type { GeminiAnalysis } from "@/lib/types/optimize";
-import { callGemini, GeminiError } from "@/lib/gemini";
+import { callOpenAI, OpenAIError } from "@/lib/openai";
 
 const SYSTEM_PROMPT = `You are a senior Facebook Ads performance analyst with deep expertise in ad set optimization, \
 audience targeting, bid strategy, and media buying efficiency. Your analysis must be data-driven, specific, and \
@@ -177,14 +177,14 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const analysis = await callGemini<GeminiAnalysis>(
+    const analysis = await callOpenAI<GeminiAnalysis>(
       SYSTEM_PROMPT,
       buildPrompt(body, body.adsets.length === 1),
-      { temperature: 0.3, maxOutputTokens: 3072 },
+      { maxOutputTokens: 3072 },
     );
     return NextResponse.json(analysis);
   } catch (err) {
-    if (err instanceof GeminiError) return NextResponse.json({ error: err.message }, { status: err.status });
+    if (err instanceof OpenAIError) return NextResponse.json({ error: err.message }, { status: err.status });
     return NextResponse.json({ error: "Analysis failed." }, { status: 500 });
   }
 }

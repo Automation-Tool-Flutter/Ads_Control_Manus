@@ -2,6 +2,7 @@ import { graphFetch } from './client';
 import { presetToRange } from '../utils';
 import { META_NATIVE_PRESETS } from '../constants';
 import type { CampaignInsight, DatePreset, DateRange } from '../types';
+import { META_CONVERSION_INSIGHT_FIELDS } from '../campaign-kpis';
 
 interface InsightsResponse {
   data: CampaignInsight[];
@@ -14,7 +15,7 @@ export async function getCampaignInsights(
 ): Promise<CampaignInsight[]> {
   const params: Record<string, string> = {
     level: 'campaign',
-    fields: 'campaign_id,spend,impressions,clicks,ctr,cpc,cpm',
+    fields: `campaign_id,spend,impressions,reach,frequency,clicks,ctr,cpc,cpm,${META_CONVERSION_INSIGHT_FIELDS}`,
   };
 
   if (typeof dateFilter === 'string' && META_NATIVE_PRESETS.has(dateFilter)) {

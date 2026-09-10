@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useCallback, useState, useEffect, useRef } from 'react';
+import { createContext, useContext, useCallback, useState, useEffect } from 'react';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -52,33 +52,20 @@ const STYLES: Record<ToastType, string> = {
   info:    'bg-accent/15 border-accent/30 text-accent',
 };
 
-const DURATION = 3500;
-
 function ToastEl({ item, onRemove }: { item: ToastItem; onRemove: (id: number) => void }) {
-  const [visible, setVisible] = useState(false);
-
+  const [paused, setPaused] = useState(false);
   useEffect(() => {
-    // Slide in
-    const showTimer = setTimeout(() => setVisible(true), 10);
-    // Start fade out
-    const hideTimer = setTimeout(() => setVisible(false), DURATION - 400);
-    // Remove from DOM
-    const removeTimer = setTimeout(() => onRemove(item.id), DURATION);
-    return () => {
-      clearTimeout(showTimer);
-      clearTimeout(hideTimer);
-      clearTimeout(removeTimer);
-    };
-  }, [item.id, onRemove]);
-
+    if (paused) return;
+    const timer = setTimeout(() => onRemove(item.id), item.type === 'error' ? 9000 : 5000);
+    return () => clearTimeout(timer);
+  }, [item.id, item.type, onRemove, paused]);
   return (
-    <div
-      className={`flex items-center gap-2.5 px-4 py-3 rounded-xl border text-sm font-medium shadow-lg backdrop-blur-sm transition-all duration-300 ${STYLES[item.type]} ${
-        visible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2'
-      }`}
-    >
+    <div className={`toast-item flex items-center gap-2 rounded-xl border bg-bg-card px-3 py-2 text-sm shadow-lg ${STYLES[item.type]}`}
+      onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)}
+      onFocusCapture={() => setPaused(true)} onBlurCapture={() => setPaused(false)}>
       {ICONS[item.type]}
-      <span className="text-text-primary">{item.message}</span>
+      <span role={item.type === 'error' ? 'alert' : 'status'} className="min-w-0 flex-1 break-words text-text-primary">{item.message}</span>
+      <button type="button" onClick={() => onRemove(item.id)} aria-label="Dismiss notification" className="rounded-lg text-lg text-text-secondary">×</button>
     </div>
   );
 }
@@ -96,15 +83,15 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
 
   const toast = useCallback((message: string, type: ToastType = 'info') => {
     const id = ++_nextId;
-    setToasts(prev => [...prev, { id, type, message }]);
+    setToasts(prev => [...prev.slice(-2), { id, type, message }]);
   }, []);
 
   return (
     <ToastContext.Provider value={{ toast }}>
       {children}
 
-      {/* Toast stack — bottom-center on mobile, bottom-right on desktop */}
-      <div className="fixed top-20 left-1/2 -translate-x-1/2 z-[9999] flex flex-col gap-2 items-center w-[calc(100vw-2rem)] sm:w-auto max-w-sm pointer-events-none">
+      {/* Safe-area-aware notifications with explicit dismissal. */}
+      <div className="toast-stack">
         {toasts.map(item => (
           <ToastEl key={item.id} item={item} onRemove={remove} />
         ))}

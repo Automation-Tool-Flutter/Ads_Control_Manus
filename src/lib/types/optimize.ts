@@ -1,4 +1,5 @@
 import type { InsightsData, AccountDetail, DatePreset } from '../types';
+import type { ObjectiveFamily } from '../campaign-kpis';
 
 // ─── Facebook Bulk Insights Rows ─────────────────────────────────────────────
 
@@ -38,7 +39,7 @@ export interface AdSetTargetingRow {
   };
 }
 
-// ─── Payload gửi Gemini ──────────────────────────────────────────────────────
+// ─── Payload sent to the AI analysis endpoint ───────────────────────────────
 
 export interface OptimizePayload {
   account: AccountDetail;
@@ -52,16 +53,37 @@ export interface OptimizePayload {
   collectedAt: string;
 }
 
-// ─── Gemini Response Schema ───────────────────────────────────────────────────
+// ─── AI response schema ──────────────────────────────────────────────────────
 
 export type Priority = 'high' | 'medium' | 'low';
 export type AngleLevel = 'account' | 'campaign' | 'adset' | 'ad' | 'audience';
+
+export type CampaignActionType =
+  | 'pause_campaign'
+  | 'activate_campaign'
+  | 'update_campaign_budget'
+  | 'none';
+
+export interface RecommendationAction {
+  type: CampaignActionType;
+  entityType: 'campaign';
+  entityId: string;
+  entityName: string;
+  currentDailyBudget: string;
+  proposedDailyBudget: string;
+  reason: string;
+  risk: Priority;
+  confidence: number;
+  expectedImpact: string;
+  canApply: boolean;
+}
 
 export interface Recommendation {
   title: string;
   description: string;
   priority: Priority;
   metric?: string;
+  action?: RecommendationAction;
 }
 
 export interface AngleResult {
@@ -73,9 +95,30 @@ export interface AngleResult {
   recommendations: Recommendation[];
 }
 
+export type ObjectiveAssessmentStatus = 'on_track' | 'near_target' | 'off_track' | 'insufficient_data';
+
+export interface ObjectiveAssessment {
+  campaignId: string;
+  campaignName: string;
+  objectiveFamily: ObjectiveFamily;
+  primaryKpi: string;
+  primaryValue: string;
+  secondaryKpis: string[];
+  target: string;
+  status: ObjectiveAssessmentStatus;
+  confidence: number;
+  rationale: string;
+}
+
+export interface KpiTarget {
+  metric: string;
+  value: number;
+}
+
 export interface GeminiAnalysis {
   summary: string;
   overallScore: number;
+  objectiveAssessments?: ObjectiveAssessment[];
   angles: AngleResult[];
 }
 

@@ -1,4 +1,4 @@
-import { graphFetch } from './client';
+import { graphFetchAll } from './client';
 import type { AdAccount } from '../types';
 
 interface AdAccountsResponse {
@@ -7,7 +7,7 @@ interface AdAccountsResponse {
 }
 
 export async function getAdAccounts(token: string): Promise<AdAccount[]> {
-  const result = await graphFetch<AdAccountsResponse>(
+  const result = await graphFetchAll<AdAccount>(
     '/me/adaccounts',
     {
       fields: 'id,name,account_status,currency,amount_spent,balance,spend_cap,timezone_name,business',
@@ -15,5 +15,5 @@ export async function getAdAccounts(token: string): Promise<AdAccount[]> {
     },
     token
   );
-  return result.data ?? [];
+  return result;
 }

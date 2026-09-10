@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useId } from 'react';
+import { amountToRawBudget, rawBudgetToAmount } from '@/lib/utils';
 
 interface BudgetEditorProps {
   value: string | undefined; // raw value in smallest currency unit (cents/đồng)
@@ -13,79 +14,95 @@ function formatForDisplay(raw: string | undefined, currency: string): string {
   if (!raw) return '—';
   const num = parseInt(raw, 10);
   if (isNaN(num)) return '—';
-  // Meta returns budget in cents for USD, in VND directly
-  const divisor = currency === 'VND' ? 1 : 100;
-  return (num / divisor).toLocaleString();
+  return rawBudgetToAmount(num, currency).toLocaleString();
 }
 
 export function BudgetEditor({ value, currency = 'VND', onSave, disabled }: BudgetEditorProps) {
   const [editing, setEditing] = useState(false);
   const [inputVal, setInputVal] = useState('');
   const [loading, setLoading] = useState(false);
+  const errorId = useId();
+  const [error, setError] = useState('');
+  const saving = useRef(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (editing) {
-      const divisor = currency === 'VND' ? 1 : 100;
-      const num = value ? parseInt(value, 10) / divisor : 0;
+      const num = value ? rawBudgetToAmount(value, currency) : 0;
       setInputVal(isNaN(num) ? '' : String(num));
-      setTimeout(() => inputRef.current?.select(), 0);
+      setError('');
+      const frame = requestAnimationFrame(() => inputRef.current?.select());
+      return () => cancelAnimationFrame(frame);
     }
   }, [editing, value, currency]);
 
   async function handleSave() {
-    const num = parseFloat(inputVal.replace(/,/g, ''));
-    if (isNaN(num) || num < 0) return;
+    if (saving.current || disabled) return;
+    const num = Number(inputVal.replace(/,/g, ''));
+    if (!inputVal.trim() || !Number.isFinite(num) || num < 0) { setError('Enter a valid amount of zero or more.'); return; }
+    saving.current = true;
+    setError('');
     setLoading(true);
     try {
-      const divisor = currency === 'VND' ? 1 : 100;
-      await onSave(String(Math.round(num * divisor)));
+      await onSave(amountToRawBudget(num, currency));
       setEditing(false);
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'Could not save the budget. Try again.');
     } finally {
+      saving.current = false;
       setLoading(false);
     }
   }
 
   function handleKeyDown(e: React.KeyboardEvent) {
-    if (e.key === 'Enter') handleSave();
-    if (e.key === 'Escape') setEditing(false);
+    if (e.key === 'Enter') { e.preventDefault(); void handleSave(); }
+    if (e.key === 'Escape' && !loading) { e.stopPropagation(); setEditing(false); }
   }
 
   if (editing) {
     return (
-      <div className="flex items-center gap-1.5">
+      <div className="budget-editor flex flex-wrap items-center gap-2">
         <input
           ref={inputRef}
           type="number"
           inputMode="decimal"
+          enterKeyHint="done"
+          aria-label={`Budget amount in ${currency}`}
+          aria-invalid={Boolean(error)}
+          aria-describedby={error ? errorId : undefined}
+          min="0"
+          step="any"
           value={inputVal}
-          onChange={e => setInputVal(e.target.value)}
+          onChange={e => { setInputVal(e.target.value); setError(''); }}
           onKeyDown={handleKeyDown}
-          disabled={loading}
+          disabled={loading || disabled}
           className="w-28 px-2 py-1 text-sm font-medium bg-bg-secondary border border-accent rounded-lg text-text-primary focus:outline-none focus:ring-1 focus:ring-accent"
         />
-        <button
+        <button type="button"
           onClick={handleSave}
-          disabled={loading}
+          disabled={loading || disabled}
           className="text-xs font-semibold text-accent hover:text-accent/80 px-2 py-1 bg-accent/10 rounded-lg transition-colors disabled:opacity-50"
         >
           {loading ? '...' : 'Save'}
         </button>
-        <button
+        <button type="button"
+          disabled={loading}
           onClick={() => setEditing(false)}
           className="text-xs text-text-muted hover:text-text-secondary px-2 py-1 transition-colors"
         >
           Cancel
         </button>
+        {error && <p id={errorId} role="alert" className="w-full text-xs leading-5 text-status-red">{error}</p>}
       </div>
     );
   }
 
   return (
-    <button
+    <button type="button"
       onClick={() => !disabled && setEditing(true)}
       disabled={disabled}
-      className="group flex items-center gap-1.5 text-sm font-medium text-text-primary hover:text-accent transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+      aria-label={`Edit budget, currently ${formatForDisplay(value, currency)} ${currency}`}
+      className="budget-edit-trigger group flex items-center gap-1.5 text-sm font-medium text-text-primary hover:text-accent transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
     >
       <span>{formatForDisplay(value, currency)} {value ? currency : ''}</span>
       {!disabled && (

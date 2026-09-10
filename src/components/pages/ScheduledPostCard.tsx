@@ -9,7 +9,7 @@ interface ScheduledPostCardProps {
 }
 
 function formatScheduledTime(unix: number): string {
-  return new Date(unix * 1000).toLocaleString('vi-VN', {
+  return new Date(unix * 1000).toLocaleString('en-US', {
     dateStyle: 'medium',
     timeStyle: 'short',
   });

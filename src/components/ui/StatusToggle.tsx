@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
+import { useToast } from './Toaster';
 
 interface StatusToggleProps {
   status: 'ACTIVE' | 'PAUSED' | string;
@@ -9,15 +10,21 @@ interface StatusToggleProps {
 }
 
 export function StatusToggle({ status, onToggle, disabled }: StatusToggleProps) {
+  const { toast } = useToast();
+  const pending = useRef(false);
   const [loading, setLoading] = useState(false);
   const isActive = status === 'ACTIVE';
 
   async function handleToggle() {
-    if (loading || disabled) return;
+    if (pending.current || disabled) return;
+    pending.current = true;
     setLoading(true);
     try {
       await onToggle(isActive ? 'PAUSED' : 'ACTIVE');
+    } catch (error) {
+      toast(error instanceof Error ? error.message : 'Could not update status. Try again.', 'error');
     } finally {
+      pending.current = false;
       setLoading(false);
     }
   }
@@ -26,11 +33,15 @@ export function StatusToggle({ status, onToggle, disabled }: StatusToggleProps) 
     <button
       onClick={handleToggle}
       disabled={loading || disabled}
-      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-bg-secondary ${
-        isActive ? 'bg-status-green' : 'bg-gray-500/60'
-      } ${loading || disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
-      title={isActive ? 'Click to pause' : 'Click to activate'}
+      type="button"
+      role="switch"
+      aria-checked={isActive}
+      aria-busy={loading}
+      aria-label={isActive ? 'Pause delivery' : 'Activate delivery'}
+      className={`status-toggle focus-visible:ring-2 focus-visible:ring-accent ${loading || disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+      title={isActive ? 'Pause delivery' : 'Activate delivery'}
     >
+      <span className={`status-toggle-track ${isActive ? 'bg-status-green' : 'bg-gray-500/60'}`} aria-hidden="true">
       <span
         className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${
           isActive ? 'translate-x-6' : 'translate-x-1'
@@ -44,6 +55,7 @@ export function StatusToggle({ status, onToggle, disabled }: StatusToggleProps) 
           </svg>
         </span>
       )}
+      </span>
     </button>
   );
 }

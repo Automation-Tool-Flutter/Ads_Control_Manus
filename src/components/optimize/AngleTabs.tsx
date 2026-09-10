@@ -1,14 +1,15 @@
 'use client';
 
 import { useState } from 'react';
-import type { AngleResult } from '@/lib/types/optimize';
+import type { AngleResult, Recommendation } from '@/lib/types/optimize';
 import { AngleSection } from './AngleSection';
 
 interface Props {
   angles: AngleResult[];
+  onPreviewAction?: (recommendation: Recommendation) => void;
 }
 
-export function AngleTabs({ angles }: Props) {
+export function AngleTabs({ angles, onPreviewAction }: Props) {
   const [activeIndex, setActiveIndex] = useState(0);
 
   return (
@@ -34,7 +35,7 @@ export function AngleTabs({ angles }: Props) {
       <div className="p-4 lg:hidden">
         {angles[activeIndex] && (
           <div>
-            <AngleSection angle={angles[activeIndex]} />
+            <AngleSection angle={angles[activeIndex]} onPreviewAction={onPreviewAction} />
           </div>
         )}
       </div>
@@ -43,7 +44,7 @@ export function AngleTabs({ angles }: Props) {
       <div className="hidden divide-y divide-border lg:block">
         {angles.map((angle) => (
           <div key={angle.level} className="p-4">
-            <AngleSection angle={angle} />
+            <AngleSection angle={angle} onPreviewAction={onPreviewAction} />
           </div>
         ))}
       </div>

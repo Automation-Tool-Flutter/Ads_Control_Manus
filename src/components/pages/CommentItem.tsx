@@ -98,7 +98,7 @@ function ReplyLikeButton({
 }
 
 function formatTime(dateStr: string): string {
-  return new Date(dateStr).toLocaleString("vi-VN", {
+  return new Date(dateStr).toLocaleString("en-US", {
     day: "2-digit",
     month: "2-digit",
     year: "numeric",

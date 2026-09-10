@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/contexts/AuthContext";
@@ -33,38 +33,14 @@ function sortAccounts(accounts: AdAccount[]): AdAccount[] {
 
 // ─── Metric cell ──────────────────────────────────────────────────────────────
 function AccountsHero({ count, activeCount }: { count?: number; activeCount: number }) {
-  return (
-    <section className="meta-panel mb-5 overflow-hidden">
-      <div className="flex items-start gap-4 border-b border-border bg-bg-card p-4 sm:p-5">
-        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-text-primary text-white">
-          <svg className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 8.25h19.5M4.5 19.5h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15A2.25 2.25 0 002.25 6.75v10.5A2.25 2.25 0 004.5 19.5zm2.25-4.5h4.5" />
-          </svg>
-        </div>
-
-        <div className="min-w-0 flex-1">
-          <div className="mb-2 inline-flex rounded-full bg-accent/10 px-3 py-1 text-[11px] font-black uppercase tracking-wide text-accent">
-            Finance Desk
-          </div>
-          <h1 className="text-2xl font-black leading-tight text-text-primary sm:text-3xl">
-            Ad Account Center
-          </h1>
-          <p className="mt-2 max-w-xl text-sm font-medium leading-6 text-text-secondary">
-            {activeCount > 0
-              ? `${activeCount} account${activeCount !== 1 ? "s are" : " is"} ready for campaign work. Track spend, balance, caps, and delivery entry points.`
-              : "Select an ad account to inspect budgets, status, and campaign operations."}
-          </p>
-        </div>
-
-        {count !== undefined && (
-          <div className="hidden rounded-lg border border-border bg-bg-secondary px-5 py-4 text-center sm:block">
-            <div className="text-3xl font-black tabular-nums text-text-primary">{count}</div>
-            <div className="text-[10px] font-bold uppercase tracking-wide text-text-muted">Ad Accounts</div>
-          </div>
-        )}
-      </div>
-    </section>
-  );
+  return <section className="accounts-overview mb-5" aria-labelledby="accounts-title">
+    <h1 id="accounts-title" className="sr-only lg:not-sr-only lg:mb-4 lg:text-3xl lg:font-semibold lg:text-text-primary">Ad accounts</h1>
+    <div className="accounts-overview-stats">
+      <div><span>Connected accounts</span><strong>{count ?? '—'}</strong></div>
+      <div><span>Active accounts</span><strong>{count === undefined ? '—' : activeCount}</strong></div>
+    </div>
+    <p className="mt-3 text-sm leading-5 text-text-secondary">Choose an account to view campaigns and AI insights.</p>
+  </section>;
 }
 
 function MetricCell({ label, value }: { label: string; value: string }) {
@@ -84,7 +60,6 @@ function MetricCell({ label, value }: { label: string; value: string }) {
 function SkeletonCard() {
   return (
     <div className="meta-item animate-pulse">
-      <div className="absolute left-0 right-0 top-0 h-1.5 bg-bg-tertiary" />
       <div className="meta-item-header p-4">
         <div className="flex items-start gap-3">
           <div className="h-12 w-12 flex-shrink-0 rounded-lg bg-bg-tertiary" />
@@ -114,41 +89,23 @@ function AccountCard({ account }: { account: AdAccount }) {
   const fmt = (v?: string) =>
     v && v !== "0" ? formatCurrency(v, account.currency) : "-";
 
-  const avatarStyle: Record<string, string> = {
-    green: "bg-emerald-100 text-emerald-700",
-    yellow: "bg-amber-100 text-amber-700",
-    red: "bg-rose-100 text-rose-700",
-    gray: "bg-slate-100 text-slate-600",
-  };
-  const haloStyle: Record<string, string> = {
-    green: "bg-status-green",
-    yellow: "bg-status-yellow",
-    red: "bg-status-red",
-    gray: "bg-text-muted/35",
-  };
-
   return (
     <article className="meta-item meta-item-compact group">
-      <div className={`absolute right-0 top-0 h-1.5 w-full ${haloStyle[status.color]}`} />
-
       <div className="meta-item-header p-4">
       <Link
         href={`/accounts/${account.id}?name=${encodeURIComponent(account.name)}&currency=${account.currency}`}
         className="flex items-start gap-3 active:opacity-80 transition-opacity"
       >
         <div
-          className={`meta-compact-avatar flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-lg text-xl font-black ${avatarStyle[status.color]}`}
+          className="meta-card-avatar flex flex-shrink-0 items-center justify-center font-semibold"
         >
           {account.name.charAt(0).toUpperCase()}
         </div>
         <div className="flex-1 min-w-0 pt-0.5">
-          <div className="mb-2 inline-flex items-center gap-1.5 rounded-md border border-border bg-bg-card px-2.5 py-1 text-[11px] font-bold text-text-secondary shadow-sm">
-            <StatusDot color={status.color} />
-            {status.label}
-          </div>
           <p className="meta-compact-title text-base font-black leading-snug text-text-primary line-clamp-2">
               {account.name}
           </p>
+          <div className="meta-card-status"><StatusDot color={status.color} /><span>{status.label}</span><span aria-hidden="true">·</span><span>{account.currency}</span></div>
           {account.business && (
             <div className="meta-compact-hide mt-1.5 inline-flex max-w-full items-center gap-1.5 rounded-md bg-accent/10 px-2.5 py-1 text-xs font-bold text-accent">
               <svg className="w-3 h-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -167,7 +124,7 @@ function AccountCard({ account }: { account: AdAccount }) {
       </Link>
       </div>
 
-      <div className="meta-compact-pad grid grid-cols-3 gap-2 p-4">
+      <div className="meta-account-metrics meta-compact-pad grid grid-cols-3 gap-2 p-4">
         <MetricCell label="Spent" value={fmt(account.amount_spent)} />
         <MetricCell label="Balance" value={fmt(account.balance)} />
         <MetricCell
@@ -204,9 +161,9 @@ function AccountCard({ account }: { account: AdAccount }) {
           </div>
       )}
 
-      <div className="meta-compact-pad grid grid-cols-2 gap-2 border-t border-border p-4">
+      <div className="meta-card-actions meta-compact-pad grid grid-cols-2 gap-2">
         <Link
-          href={`/accounts/${account.id}/campaigns?accountName=${encodeURIComponent(account.name)}&currency=${account.currency}`}
+          href={`/accounts/${account.id}?name=${encodeURIComponent(account.name)}&currency=${account.currency}`}
           className="meta-action meta-action-primary"
         >
           <svg
@@ -222,13 +179,13 @@ function AccountCard({ account }: { account: AdAccount }) {
               d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z"
             />
           </svg>
-          Open campaigns
+          AI Dashboard
         </Link>
         <Link
-          href={`/accounts/${account.id}?name=${encodeURIComponent(account.name)}&currency=${account.currency}`}
+          href={`/accounts/${account.id}/campaigns?accountName=${encodeURIComponent(account.name)}&currency=${account.currency}`}
           className="meta-action meta-action-secondary"
         >
-          Account brief
+          Campaigns
           <svg
             className="w-3.5 h-3.5"
             fill="none"
@@ -250,6 +207,8 @@ function AccountCard({ account }: { account: AdAccount }) {
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 export default function AccountsPage() {
+  const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
   const { state: auth } = useAuth();
   const router = useRouter();
   useEffect(() => {
@@ -260,8 +219,12 @@ export default function AccountsPage() {
 
   if (auth.isLoading || state.status === "idle") return null;
 
-  const accounts = state.status === "success" ? sortAccounts(state.data) : [];
-  const activeCount = accounts.filter((a) =>
+  const allAccounts = state.status === "success" ? sortAccounts(state.data) : [];
+  const accounts = allAccounts.filter(account => {
+    const text = [account.name,account.id,account.business?.name,account.currency].join(' ').toLowerCase();
+    return text.includes(search.trim().toLowerCase()) && (statusFilter === 'all' || (statusFilter === 'active' ? [1,8].includes(account.account_status) : ![1,8].includes(account.account_status)));
+  });
+  const activeCount = allAccounts.filter((a) =>
     [1, 8].includes(a.account_status),
   ).length;
 
@@ -271,6 +234,12 @@ export default function AccountsPage() {
         count={state.status === "success" ? state.data.length : undefined}
         activeCount={activeCount}
       />
+      {state.status === 'success' && <div className="meta-toolbar mb-5 flex flex-wrap items-center gap-3 p-3">
+        <input aria-label="Search ad accounts" placeholder="Search name, ID, business, or currency…" value={search} onChange={event => setSearch(event.target.value)} className="min-w-[180px] flex-1 rounded-xl border border-border bg-bg-secondary/30 px-3 py-2.5 text-sm text-text-primary" />
+        <select aria-label="Filter accounts by status" value={statusFilter} onChange={event => setStatusFilter(event.target.value)} className="rounded-xl border border-border bg-bg-card px-3 py-2.5 text-sm text-text-primary"><option value="all">All statuses</option><option value="active">Active</option><option value="attention">Needs attention</option></select>
+        <span className="text-xs text-text-muted">{accounts.length} of {allAccounts.length} accounts</span>
+        {(search || statusFilter !== 'all') && <button onClick={() => {setSearch('');setStatusFilter('all');}} className="text-xs font-semibold text-accent">Reset filters</button>}
+      </div>}
 
       {/* Loading */}
       {state.status === "loading" && (
@@ -294,7 +263,7 @@ export default function AccountsPage() {
       )}
 
       {/* Empty */}
-      {state.status === "success" && accounts.length === 0 && (
+      {state.status === "success" && allAccounts.length === 0 && (
         <div className="flex flex-col items-center justify-center py-16 gap-4 text-center">
           <div className="w-16 h-16 rounded-2xl bg-accent/10 flex items-center justify-center">
             <svg
@@ -323,6 +292,9 @@ export default function AccountsPage() {
       )}
 
       {/* List */}
+      {state.status === "success" && allAccounts.length > 0 && accounts.length === 0 && (
+        <div className="rounded-2xl border border-border bg-bg-card p-10 text-center"><h2 className="font-semibold text-text-primary">No matching accounts</h2><p className="mt-2 text-sm text-text-muted">Try another name, account ID, or status filter.</p><button onClick={() => { setSearch(''); setStatusFilter('all'); }} className="mt-4 text-sm font-semibold text-accent">Clear filters</button></div>
+      )}
       {state.status === "success" && accounts.length > 0 && (
         <>
           {/* Account board */}

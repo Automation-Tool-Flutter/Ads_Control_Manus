@@ -13,7 +13,7 @@ export default function DataDeletionPage() {
 
       <section>
         <p className="text-text-secondary text-sm leading-relaxed mb-6">
-          Ads Manager - AI Support does not store your personal data on our
+          Meta Ads AI does not store your personal data on our
           servers. Your Facebook access token is stored exclusively in your
           browser&apos;s localStorage and is never transmitted to or retained by
           our systems.
@@ -25,8 +25,7 @@ export default function DataDeletionPage() {
           How to Delete Your Data
         </h2>
         <p className="text-text-secondary text-sm mb-4">
-          To remove all access and data associated with Ads Manager - AI
-          Support, follow these steps:
+          To remove all access and data associated with Meta Ads AI, follow these steps:
         </p>
         <ol className="list-decimal list-inside text-text-secondary text-sm space-y-4">
           <li className="leading-relaxed">
@@ -37,7 +36,7 @@ export default function DataDeletionPage() {
             </strong>
           </li>
           <li className="leading-relaxed">
-            Find <strong>&quot;Ads Manager - AI Support&quot;</strong> in the
+            Find this app (it may still be listed as <strong>&quot;Ads Manager - AI Support&quot;</strong>) in the
             list and click <strong>Remove</strong>
           </li>
           <li className="leading-relaxed">

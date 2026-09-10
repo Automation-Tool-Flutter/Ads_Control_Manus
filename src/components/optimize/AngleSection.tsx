@@ -1,8 +1,9 @@
-import type { AngleResult } from "@/lib/types/optimize";
+import type { AngleResult, Recommendation } from "@/lib/types/optimize";
 import { RecommendationCard } from "./RecommendationCard";
 
 interface Props {
   angle: AngleResult;
+  onPreviewAction?: (recommendation: Recommendation) => void;
 }
 
 function ScoreRing({ score }: { score: number }) {
@@ -17,7 +18,7 @@ function ScoreRing({ score }: { score: number }) {
   );
 }
 
-export function AngleSection({ angle }: Props) {
+export function AngleSection({ angle, onPreviewAction }: Props) {
   return (
     <div className="space-y-4">
       {/* Header */}
@@ -85,7 +86,7 @@ export function AngleSection({ angle }: Props) {
           </p>
           <div className="space-y-3">
             {angle.recommendations.map((rec, i) => (
-              <RecommendationCard key={i} recommendation={rec} />
+              <RecommendationCard key={i} recommendation={rec} onPreviewAction={onPreviewAction} />
             ))}
           </div>
         </div>

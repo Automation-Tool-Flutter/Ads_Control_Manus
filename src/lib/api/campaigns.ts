@@ -1,7 +1,8 @@
-import { graphFetch } from './client';
+import { graphFetchAll } from './client';
 import { presetToRange } from '../utils';
 import { META_NATIVE_PRESETS } from '../constants';
 import type { Campaign, CampaignInsight, DatePreset, DateRange } from '../types';
+import { META_CONVERSION_INSIGHT_FIELDS } from '../campaign-kpis';
 
 interface CampaignWithInsights extends Campaign {
   insights?: { data: CampaignInsight[] };
@@ -19,25 +20,25 @@ export async function getCampaigns(
 ): Promise<{ campaigns: Campaign[]; insights: Record<string, CampaignInsight> }> {
   let insightsParam: string;
   if (typeof dateFilter === 'string' && META_NATIVE_PRESETS.has(dateFilter)) {
-    insightsParam = `insights.date_preset(${dateFilter}){campaign_id,spend,impressions,clicks,ctr,cpc,cpm}`;
+    insightsParam = `insights.date_preset(${dateFilter}){campaign_id,spend,impressions,reach,frequency,clicks,ctr,cpc,cpm,${META_CONVERSION_INSIGHT_FIELDS}}`;
   } else {
     const range = typeof dateFilter === 'string' ? presetToRange(dateFilter) : dateFilter;
-    insightsParam = `insights.time_range(${JSON.stringify(range)}){campaign_id,spend,impressions,clicks,ctr,cpc,cpm}`;
+    insightsParam = `insights.time_range(${JSON.stringify(range)}){campaign_id,spend,impressions,reach,frequency,clicks,ctr,cpc,cpm,${META_CONVERSION_INSIGHT_FIELDS}}`;
   }
 
-  const result = await graphFetch<CampaignsResponse>(
+  const result = await graphFetchAll<CampaignWithInsights>(
     `/${accountId}/campaigns`,
     {
       fields: `id,name,status,objective,daily_budget,lifetime_budget,budget_remaining,start_time,${insightsParam}`,
       limit: '50',
     },
-    token
+    token, { cache: false }
   );
 
   const campaigns: Campaign[] = [];
   const insights: Record<string, CampaignInsight> = {};
 
-  for (const { insights: embedded, ...campaign } of result.data ?? []) {
+  for (const { insights: embedded, ...campaign } of result) {
     campaigns.push(campaign);
     if (embedded?.data?.[0]) {
       insights[campaign.id] = embedded.data[0];

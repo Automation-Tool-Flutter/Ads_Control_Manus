@@ -10,34 +10,7 @@ import { ReauthError } from '@/components/ui/ReauthError';
 import type { Page } from '@/lib/types';
 
 function PagesHero({ count }: { count?: number }) {
-  return (
-    <section className="meta-panel mb-5 overflow-hidden">
-      <div className="flex items-start gap-4 border-b border-border bg-bg-card p-4 sm:p-5">
-        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-text-primary text-white">
-          <svg className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 8.25h9m-9 3.75h6m-7.5 7.5h12A2.25 2.25 0 0020.25 17V7A2.25 2.25 0 0018 4.75H6A2.25 2.25 0 003.75 7v10A2.25 2.25 0 006 19.5z" />
-          </svg>
-        </div>
-        <div className="min-w-0 flex-1">
-          <div className="mb-2 inline-flex rounded-full bg-accent/10 px-3 py-1 text-[11px] font-black uppercase tracking-wide text-accent">
-            Content Workspace
-          </div>
-          <h1 className="text-2xl font-black leading-tight text-text-primary sm:text-3xl">
-            Page Library
-          </h1>
-          <p className="mt-2 max-w-xl text-sm font-medium leading-6 text-text-secondary">
-            Review connected Pages, publishing access, audience size, and content workflows from one clean workspace.
-          </p>
-        </div>
-        {count !== undefined && (
-          <div className="hidden rounded-lg border border-border bg-bg-secondary px-5 py-4 text-center sm:block">
-            <div className="text-3xl font-black tabular-nums text-text-primary">{count}</div>
-            <div className="text-[10px] font-bold uppercase tracking-wide text-text-muted">Pages</div>
-          </div>
-        )}
-      </div>
-    </section>
-  );
+  return <WorkspaceHero title="Page" count={count} countLabel="Connected Pages" />;
 }
 
 function SkeletonCard() {
@@ -203,3 +176,4 @@ export default function PagesPage() {
     </PageContainer>
   );
 }
+import { WorkspaceHero } from '@/components/layout/WorkspaceHero';

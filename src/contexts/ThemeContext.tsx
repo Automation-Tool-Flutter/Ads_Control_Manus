@@ -27,8 +27,8 @@ function getSystemPreference(): 'dark' | 'light' {
 
 // Must match the header's bg-secondary color for each theme.
 const THEME_COLOR = {
-  dark:  '#0a1020',
-  light: '#f7f9fc',
+  dark:  '#102334',
+  light: '#ffffff',
 } as const;
 
 function applyTheme(theme: Theme): 'dark' | 'light' {

@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
+import Link from "next/link";
 import { useAuth } from "@/contexts/AuthContext";
 import { useOptimizeData } from "@/hooks/useOptimizeData";
 import { PageContainer } from "@/components/layout/PageContainer";
@@ -102,6 +103,17 @@ export default function OptimizePage() {
               </span>
             </div>
           </div>
+
+          <Link
+            href={`/accounts/${accountId}/budget-optimizer`}
+            className="meta-item block border-status-green/30 bg-status-green/5 p-4 transition-colors hover:bg-status-green/10"
+          >
+            <p className="text-[10px] font-black uppercase text-status-green">Next tool</p>
+            <p className="mt-1 font-bold text-text-primary">Open Budget Optimizer →</p>
+            <p className="mt-1 text-xs leading-relaxed text-text-muted">
+              Build Conservative, Balanced, or Aggressive campaign allocation plans.
+            </p>
+          </Link>
         </aside>
       </div>
     </PageContainer>

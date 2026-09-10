@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useId } from 'react';
+import { Modal } from './Modal';
 
 interface ConfirmDialogProps {
   open: boolean;
@@ -15,62 +16,27 @@ interface ConfirmDialogProps {
 }
 
 export function ConfirmDialog({
-  open,
-  title,
-  description,
-  confirmLabel = 'Confirm',
-  cancelLabel = 'Cancel',
-  destructive = false,
-  loading = false,
-  onConfirm,
-  onCancel,
+  open, title, description, confirmLabel = 'Confirm', cancelLabel = 'Cancel',
+  destructive = false, loading = false, onConfirm, onCancel,
 }: ConfirmDialogProps) {
-  useEffect(() => {
-    if (open) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
-    return () => { document.body.style.overflow = ''; };
-  }, [open]);
-
-  if (!open) return null;
-
+  const descriptionId = useId();
   return (
-    <div className="fixed inset-0 z-[80] flex items-end sm:items-center justify-center">
-      {/* Backdrop */}
-      <div
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-        onClick={onCancel}
-      />
-
-      {/* Dialog — bottom sheet on mobile, centered on desktop */}
-      <div className="relative w-full sm:w-auto sm:min-w-[360px] sm:max-w-md bg-bg-card border border-border rounded-t-2xl sm:rounded-2xl p-6 shadow-2xl">
-        <h3 className="text-base font-semibold text-text-primary mb-2">{title}</h3>
-        {description && (
-          <p className="text-sm text-text-secondary mb-5">{description}</p>
-        )}
-        <div className="flex flex-col-reverse sm:flex-row gap-2 sm:gap-3 sm:justify-end">
-          <button
-            onClick={onCancel}
-            disabled={loading}
-            className="flex-1 sm:flex-none px-4 py-2.5 sm:py-2 text-sm font-medium text-text-secondary bg-bg-secondary hover:bg-white/[0.06] border border-border rounded-xl transition-colors disabled:opacity-50 min-h-[44px] sm:min-h-0"
-          >
+    <Modal open={open} label={title} onClose={onCancel} busy={loading}>
+      <div className="w-full sm:max-w-md rounded-2xl border border-border bg-bg-card p-5 shadow-xl">
+        <h3 className="mb-2 text-lg font-semibold text-text-primary">{title}</h3>
+        {description && <p id={descriptionId} className="mb-5 text-sm leading-6 text-text-secondary">{description}</p>}
+        <div className="modal-actions mt-4 flex flex-wrap gap-2 sm:justify-end">
+          <button type="button" onClick={onCancel} disabled={loading}
+            className="min-h-[44px] rounded-xl border border-border bg-bg-secondary px-4 py-2.5 text-sm font-medium text-text-secondary disabled:opacity-50">
             {cancelLabel}
           </button>
-          <button
-            onClick={onConfirm}
-            disabled={loading}
-            className={`flex-1 sm:flex-none px-4 py-2.5 sm:py-2 text-sm font-semibold rounded-xl transition-colors disabled:opacity-50 min-h-[44px] sm:min-h-0 ${
-              destructive
-                ? 'bg-status-red text-white hover:bg-status-red/90'
-                : 'bg-accent text-white hover:bg-accent/90'
-            }`}
-          >
-            {loading ? 'Loading...' : confirmLabel}
+          <button type="button" onClick={onConfirm} disabled={loading}
+            aria-describedby={description ? descriptionId : undefined}
+            className={`min-h-[44px] rounded-xl px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-50 ${destructive ? 'bg-status-red' : 'bg-accent'}`}>
+            {loading ? 'Processing…' : confirmLabel}
           </button>
         </div>
       </div>
-    </div>
+    </Modal>
   );
 }

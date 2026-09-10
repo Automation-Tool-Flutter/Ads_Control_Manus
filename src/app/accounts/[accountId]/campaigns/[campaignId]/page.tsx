@@ -1,4 +1,5 @@
 "use client";
+import { usePublishAIView } from '@/hooks/useAIViewContext';
 
 import { useEffect, useState } from "react";
 import { useRouter, useParams, useSearchParams } from "next/navigation";
@@ -9,6 +10,7 @@ import { useAdSets } from "@/hooks/useAdSets";
 import { useAccountCurrency } from "@/hooks/useAccountCurrency";
 import { useCampaignAnalysis } from "@/hooks/useCampaignAnalysis";
 import { useDailyInsights } from "@/hooks/useDailyInsights";
+import { useRootCauseAnalysis } from "@/hooks/useRootCauseAnalysis";
 import { CampaignChart } from "@/components/ui/CampaignChart";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { Breadcrumb } from "@/components/ui/Breadcrumb";
@@ -21,6 +23,8 @@ import { ErrorState } from "@/components/ui/ErrorState";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { ScoreCard } from "@/components/optimize/ScoreCard";
 import { AngleTabs } from "@/components/optimize/AngleTabs";
+import { ObjectiveAssessmentPanel } from "@/components/optimize/ObjectiveAssessmentPanel";
+import { RootCauseTree } from "@/components/optimize/RootCauseTree";
 import {
   formatCurrency,
   formatSpend,
@@ -29,6 +33,7 @@ import {
   getObjectiveLabel,
   getAdSetStatus,
   getOptGoalLabel,
+  dateFilterLabel,
 } from "@/lib/utils";
 import type { DatePreset, DateRange } from "@/lib/types";
 
@@ -57,11 +62,14 @@ export default function CampaignDetailPage() {
     reset: resetAnalysis,
   } = useCampaignAnalysis(accountId);
   const [dateFilter, setDateFilter] = useState<DatePreset | DateRange>("last_30d");
+  usePublishAIView(dateFilter);
   const { state: chartState, aggregateState } = useDailyInsights(campaignId, dateFilter, 'campaign', auth.token);
+  const { state: rootCauseState, analyze: analyzeRootCause, reset: resetRootCause } = useRootCauseAnalysis();
 
   // Reset analysis when date filter changes
   useEffect(() => {
     if (analysisState.step === "done") resetAnalysis();
+    if (rootCauseState.status === 'success') resetRootCause();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dateFilter]);
 
@@ -156,6 +164,7 @@ export default function CampaignDetailPage() {
               dateFilter={dateFilter}
               onDateFilterChange={setDateFilter}
               externalState={aggregateState}
+              objective={state.data.objective}
             />
           </div>
 
@@ -166,6 +175,50 @@ export default function CampaignDetailPage() {
             loading={chartState.status === 'loading' || chartState.status === 'idle'}
             dateFilter={dateFilter}
           />
+
+          {/* Root-cause analysis */}
+          <div className="glass-card gradient-border-card rounded-2xl p-5">
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <h3 className="text-base font-semibold text-text-primary">AI Root-Cause Analysis</h3>
+                <p className="mt-1 text-sm text-text-secondary">Compare the latest 7 days with the preceding period and trace KPI changes to measurable drivers.</p>
+              </div>
+              {rootCauseState.status !== 'analyzing' && (
+                <button
+                  type="button"
+                  disabled={chartState.status !== 'success' || chartState.data.length < 4}
+                  onClick={() => analyzeRootCause({
+                    campaign: state.data,
+                    dailyInsights: chartState.status === 'success' ? chartState.data : [],
+                    adsets: adsetsState.status === 'success'
+                      ? adsetsState.data.map(adset => ({ adset, insight: adsetInsights[adset.id] }))
+                      : [],
+                    currency,
+                    dateFilter: dateFilterLabel(dateFilter),
+                  })}
+                  className="rounded-lg bg-accent px-3 py-2 text-sm font-bold text-white transition-opacity disabled:opacity-40"
+                >
+                  {rootCauseState.status === 'success' ? 'Analyze again' : 'Find root causes'}
+                </button>
+              )}
+            </div>
+
+            {rootCauseState.status === 'idle' && chartState.status === 'success' && chartState.data.length < 4 && (
+              <p className="mt-4 rounded-lg border border-status-yellow/30 bg-status-yellow/10 p-3 text-sm text-status-yellow">At least 4 days of delivery data are needed.</p>
+            )}
+            {rootCauseState.status === 'analyzing' && (
+              <div className="mt-5 flex items-center gap-3 py-5">
+                <svg className="h-5 w-5 animate-spin text-accent" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>
+                <p className="text-sm text-text-secondary">Tracing KPI drivers and verification steps…</p>
+              </div>
+            )}
+            {rootCauseState.status === 'error' && (
+              <p className="mt-4 rounded-lg border border-status-red/30 bg-status-red/10 p-3 text-sm text-status-red">{rootCauseState.error}</p>
+            )}
+            {rootCauseState.status === 'success' && (
+              <div className="mt-5"><RootCauseTree analysis={rootCauseState.analysis} accountId={accountId} campaignId={campaignId} /></div>
+            )}
+          </div>
 
           {/* AI Analysis */}
           <div className="glass-card gradient-border-card rounded-2xl p-5">
@@ -223,6 +276,7 @@ export default function CampaignDetailPage() {
                   score={analysisState.analysis.overallScore}
                   summary={analysisState.analysis.summary}
                 />
+                <ObjectiveAssessmentPanel assessments={analysisState.analysis.objectiveAssessments} />
                 <AngleTabs angles={analysisState.analysis.angles} />
                 <button
                   onClick={() => {

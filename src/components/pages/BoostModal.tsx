@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { Modal } from '@/components/ui/Modal';
+import { useState, useEffect, useMemo, useRef } from "react";
 import type { AdAccount, PagePost } from "@/lib/types";
 import type { BoostConfig } from "@/lib/api/boostPost";
 import { boostPost, WORLDWIDE_COUNTRIES } from "@/lib/api/boostPost";
@@ -252,6 +253,9 @@ export function BoostModal({
     useState<BoostConfig["targeting_type"]>("broad");
   const [selectedCountries, setSelectedCountries] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
+  const submitting = useRef(false);
+  const stepContent = useRef<HTMLFieldSetElement>(null);
+  useEffect(() => { stepContent.current?.scrollTo({ top: 0 }); }, [step]);
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -276,7 +280,8 @@ export function BoostModal({
   const totalBudget = (parseFloat(dailyBudget) * durationDays).toLocaleString();
 
   async function handleBoost() {
-    if (!selectedAccount || selectedCountries.length === 0) return;
+    if (submitting.current || !selectedAccount || selectedCountries.length === 0) return;
+    submitting.current = true;
     setLoading(true);
     setError("");
     try {
@@ -297,20 +302,20 @@ export function BoostModal({
     } catch (err) {
       setError(err instanceof Error ? err.message : "Boost failed");
     } finally {
+      submitting.current = false;
       setLoading(false);
     }
   }
 
   return (
-    <div className="fixed inset-0 z-[80] flex items-end sm:items-center justify-center">
+    <Modal open label="Boost Post" onClose={onClose} busy={loading}>
       <div
         className="absolute inset-0 bg-black/60 backdrop-blur-sm"
         onClick={onClose}
       />
 
       <div
-        className="relative w-full sm:max-w-md bg-bg-card border border-border rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-hidden"
-        style={{ marginBottom: "env(safe-area-inset-bottom, 0px)" }}
+        className="relative w-full sm:max-w-md bg-bg-card border border-border rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-hidden flex flex-col"
       >
         {/* Header */}
         <div className="px-5 py-4 border-b border-border flex items-center justify-between">
@@ -322,6 +327,8 @@ export function BoostModal({
           </div>
           <button
             onClick={onClose}
+            disabled={loading}
+            aria-label="Close Boost Post"
             className="p-1.5 text-text-muted hover:text-text-secondary rounded-lg hover:bg-white/5"
           >
             <svg
@@ -349,7 +356,7 @@ export function BoostModal({
         </div>
 
         {/* Step content */}
-        <div className="p-5 space-y-4 max-h-[70vh] overflow-y-auto">
+        <fieldset ref={stepContent} disabled={loading} className="min-h-0 flex-1 p-5 space-y-4 overflow-y-auto">
           {step === 1 && (
             <>
               <h3 className="text-sm font-semibold text-text-primary">
@@ -539,12 +546,13 @@ export function BoostModal({
               )}
             </>
           )}
-        </div>
+        </fieldset>
 
         {/* Footer */}
-        <div className="px-5 pb-5 pt-3 border-t border-border flex gap-3">
+        <div className="modal-actions px-5 pb-5 pt-3 border-t border-border flex gap-3">
           {step > 1 && (
             <button
+              disabled={loading}
               onClick={() => setStep((s) => s - 1)}
               className="flex-1 py-3 text-sm font-medium text-text-secondary bg-bg-secondary border border-border rounded-xl hover:bg-white/[0.06] transition-colors min-h-[44px]"
             >
@@ -570,6 +578,6 @@ export function BoostModal({
           )}
         </div>
       </div>
-    </div>
+    </Modal>
   );
 }

@@ -5,61 +5,25 @@ export interface BreadcrumbItem {
   label: string;
   href?: string;
 }
-
 interface Props {
   items: BreadcrumbItem[];
+  /** ControlHeader already provides the page title directly below this row. */
+  mobileShowCurrent?: boolean;
 }
 
-function Chevron() {
-  return (
-    <svg className="w-3 h-3 text-text-muted flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-    </svg>
-  );
-}
-
-export function Breadcrumb({ items }: Props) {
-  if (items.length === 0) return null;
-  const last = items.length - 1;
-  const collapse = items.length > 3;
-
-  return (
-    <nav aria-label="Breadcrumb" className="flex items-center gap-1 sm:gap-1.5 text-sm text-text-secondary overflow-hidden">
-      {items.map((item, i) => {
-        // Middle items (not first, not last 2) are hidden on mobile when collapsing
-        const hiddenOnMobile = collapse && i > 0 && i < last - 1;
-        // At index 1 we inject the ellipsis placeholder (mobile only, before hiding item)
-        const showEllipsis = collapse && i === 1;
-        const isLast = i === last;
-
-        return (
-          <Fragment key={i}>
-            {/* Ellipsis shown on mobile in place of hidden middle items */}
-            {showEllipsis && (
-              <span className="sm:hidden flex items-center gap-1 text-text-muted flex-shrink-0">
-                <Chevron />
-                <span className="text-xs tracking-widest">···</span>
-              </span>
-            )}
-
-            <span className={`flex items-center gap-1 sm:gap-1.5 min-w-0 ${hiddenOnMobile ? 'hidden sm:flex' : 'flex'}`}>
-              {i > 0 && <Chevron />}
-              {item.href && !isLast ? (
-                <Link
-                  href={item.href}
-                  className="hover:text-text-primary transition-colors truncate max-w-[100px] sm:max-w-[180px]"
-                >
-                  {item.label}
-                </Link>
-              ) : (
-                <span className={`truncate max-w-[140px] sm:max-w-[220px] ${isLast ? 'text-text-primary font-medium' : ''}`}>
-                  {item.label}
-                </span>
-              )}
-            </span>
-          </Fragment>
-        );
-      })}
+export function Breadcrumb({ items, mobileShowCurrent = true }: Props) {
+  if (!items.length) return null;
+  const current = items[items.length - 1];
+  return <>
+    {mobileShowCurrent && <nav aria-label="Current page" className="mobile-breadcrumb lg:hidden">
+      <span aria-current="page" className="mobile-breadcrumb-current">{current.label}</span>
+    </nav>}
+    <nav aria-label="Breadcrumb" className="desktop-breadcrumb hidden min-w-0 flex-wrap items-center gap-1.5 text-sm text-text-secondary lg:flex">
+      {items.map((item, index) => <Fragment key={index}>
+        {index > 0 && <svg aria-hidden="true" className="h-3 w-3 shrink-0 text-text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="m9 5 7 7-7 7"/></svg>}
+        {item.href && index < items.length - 1 ? <Link href={item.href} title={item.label} className="max-w-[180px] truncate hover:text-text-primary">{item.label}</Link> :
+          <span aria-current={index === items.length - 1 ? 'page' : undefined} title={item.label} className="max-w-[240px] truncate font-medium text-text-primary">{item.label}</span>}
+      </Fragment>)}
     </nav>
-  );
+  </>;
 }

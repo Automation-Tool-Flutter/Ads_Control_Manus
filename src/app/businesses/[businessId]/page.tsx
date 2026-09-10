@@ -104,7 +104,7 @@ function AdAccountsSection({ accounts }: { accounts: BusinessAdAccount[] }) {
   return (
     <>
       {/* Desktop table */}
-      <div className="hidden sm:block overflow-x-auto">
+      <div className="pointer-record-table overflow-x-auto">
         <table className="w-full min-w-[560px]">
           <thead>
             <tr className="border-b border-border/50">
@@ -167,7 +167,7 @@ function AdAccountsSection({ accounts }: { accounts: BusinessAdAccount[] }) {
       </div>
 
       {/* Mobile cards */}
-      <div className="grid gap-3 sm:hidden">
+      <div className="touch-record-list gap-3">
         {accounts.map((a) => {
           const st = getAccountStatus(a.account_status);
           return (

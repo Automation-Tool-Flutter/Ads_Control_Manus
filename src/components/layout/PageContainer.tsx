@@ -5,7 +5,7 @@ interface Props {
 
 export function PageContainer({ children, className = "" }: Props) {
   return (
-    <main className={`w-full px-3 py-3 sm:px-5 sm:py-5 xl:px-7 ${className}`}>
+    <main className={`workspace-page w-full px-3 py-5 sm:px-6 sm:py-7 xl:px-8 ${className}`}>
       {children}
     </main>
   );
