@@ -33,7 +33,7 @@ test('nested overlays keep scrolling locked until the last overlay closes', () =
 });
 
 test('custom dates have explicit labels and reject reversed ranges', () => {
-  const { DateFilter } = load('src/components/ui/DateFilter.tsx');
+  const { DateFilter } = load('src/components/ui/DateFilter.tsx', { './Modal': { Modal: () => null } });
   const html = renderToStaticMarkup(React.createElement(DateFilter, {
     value: { since: '2026-09-10', until: '2026-09-01' }, onChange() {},
   }));
@@ -53,7 +53,7 @@ test('status toggles expose state separately from their larger touch target', ()
 });
 
 test('modal markup uses native dialog isolation with an accessible label', () => {
-  const { Modal } = load('src/components/ui/Modal.tsx', { '@/lib/overlay-scroll': { lockOverlayScroll: () => () => {} } });
+  const { Modal } = load('src/components/ui/Modal.tsx', { './SheetHandle': { SheetHandle: () => null }, '@/lib/overlay-scroll': { lockOverlayScroll: () => () => {} }, '@/hooks/useOverlayPresence': { useOverlayPresence: open => ({ present: open, closing: false }) } });
   const html = renderToStaticMarkup(React.createElement(Modal, { open: true, label: 'Review changes', onClose() {} }, React.createElement('div', null, 'Review first')));
   assert.match(html, /<dialog/);
   assert.match(html, /aria-label="Review changes"/);

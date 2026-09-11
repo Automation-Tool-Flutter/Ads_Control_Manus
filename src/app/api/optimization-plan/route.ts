@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
   const entityMap = new Map(entities.map(entity => [entity.id, entity]));
   try {
     const ai = await callOpenAI<AIPlan>(SYSTEM_PROMPT, `PRIMARY GOAL: ${payload.primaryGoal || 'Improve performance against the current objective'}\nPLAN DURATION: ${payload.durationDays} days\nPREVIOUS LEARNING PROFILE (supporting evidence, not a replacement for current data):\n${JSON.stringify(payload.learningProfile ?? null, null, 2)}\nSNAPSHOT:\n${JSON.stringify(payload.snapshot, null, 2)}\nKeep action days within the cycle. Use changePercent=0 unless adjusting daily budgets. Do not recommend activation without clear evidence.`, {
-      temperature: 0.2, maxOutputTokens: 6000, schema: { name: 'optimization_cycle_plan', value: SCHEMA },
+      maxOutputTokens: 6000, schema: { name: 'optimization_cycle_plan', value: SCHEMA },
     });
     const seen = new Set<string>();
     const items: OptimizationPlan['items'] = ai.items.flatMap((item, index) => {

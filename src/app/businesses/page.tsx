@@ -1,6 +1,8 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useDeferredValue, useMemo } from "react";
+import { BusinessAssetCard } from '@/components/businesses/BusinessAssetCard';
+import { useViewState } from '@/hooks/useViewState';
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/contexts/AuthContext";
@@ -8,6 +10,8 @@ import { useBusinesses } from "@/hooks/useBusinesses";
 import { parseBusinessDetail } from "@/lib/api/businesses";
 import type { BusinessSummary } from "@/hooks/useBusinessSummary";
 import { PageContainer } from "@/components/layout/PageContainer";
+import { LoadingState } from '@/components/ui/LoadingState';
+import { CollectionToolbar } from "@/components/ui/CollectionToolbar";
 import { StatusDot } from "@/components/ui/StatusBadge";
 import { CopyButton } from "@/components/ui/CopyButton";
 import { ErrorState } from "@/components/ui/ErrorState";
@@ -31,26 +35,6 @@ function BusinessesHero({ count }: { count?: number }) {
   return <WorkspaceHero title="Business assets" count={count} countLabel="Businesses" />;
 }
 
-function StatChips({ summary }: { summary: BusinessSummary }) {
-  const items = [
-    { label: 'Ad Accounts', value: summary.adAccounts },
-    { label: 'Pages', value: summary.pages },
-    { label: 'Users', value: summary.users },
-    { label: 'Catalogs', value: summary.catalogs },
-  ];
-
-  return (
-    <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-      {items.map(({ label, value }) => (
-        <div key={label} className="meta-metric">
-          <span className="block text-[10px] font-bold uppercase text-text-muted">{label}</span>
-          <span className="mt-1 block text-lg font-black tabular-nums text-text-primary">{value}</span>
-        </div>
-      ))}
-    </div>
-  );
-}
-
 function TableSummaryCells({ summary }: { summary: BusinessSummary | null }) {
   const skeleton = <div className="h-4 w-6 bg-white/8 rounded animate-pulse" />;
   return (
@@ -68,157 +52,11 @@ function TableSummaryCells({ summary }: { summary: BusinessSummary | null }) {
   );
 }
 
-function SkeletonCard() {
-  return (
-    <div className="meta-item animate-pulse">
-      <div className="absolute left-0 right-0 top-0 h-1.5 bg-bg-tertiary" />
-      <div className="meta-item-header p-4">
-        <div className="flex items-start gap-3">
-          <div className="h-12 w-12 flex-shrink-0 rounded-lg bg-bg-tertiary" />
-          <div className="flex-1 space-y-2 pt-1">
-            <div className="h-4 w-4/5 rounded bg-bg-tertiary" />
-            <div className="h-3 w-1/2 rounded bg-bg-tertiary/70" />
-          </div>
-          <div className="h-7 w-20 rounded bg-bg-tertiary" />
-        </div>
-      </div>
-      <div className="grid grid-cols-2 gap-2 p-4">
-        <div className="h-14 rounded-lg bg-bg-secondary" />
-        <div className="h-14 rounded-lg bg-bg-secondary" />
-      </div>
-      <div className="grid grid-cols-4 gap-2 px-4 pb-4">
-        {Array.from({ length: 4 }).map((_, i) => (
-          <div key={i} className="h-16 rounded-lg bg-bg-secondary" />
-        ))}
-      </div>
-      <div className="grid grid-cols-2 gap-2 border-t border-border p-4">
-        <div className="h-11 rounded-lg bg-bg-tertiary" />
-        <div className="h-11 rounded-lg bg-bg-secondary" />
-      </div>
-    </div>
-  );
-}
 
-function InfoCell({ label, value }: { label: string; value: React.ReactNode }) {
-  return (
-    <div className="meta-metric">
-      <span className="block text-[10px] font-bold uppercase text-text-muted">{label}</span>
-      <span className="mt-1 block text-sm font-semibold text-text-primary">{value}</span>
-    </div>
-  );
-}
-
-function BusinessCard({ business }: { business: Business }) {
-  const initial = business.name.charAt(0).toUpperCase();
-  const detail = parseBusinessDetail(business);
-  const summary: BusinessSummary = {
-    adAccounts: detail.adAccounts.length,
-    pages: detail.pages.length,
-    instagramAccounts: detail.instagramAccounts.length,
-    catalogs: detail.catalogs.length,
-    users: detail.users.length,
-  };
-  const verStatus = getVerificationStatus(business.verification_status);
-  const avatarStyle: Record<StatusInfo['color'], string> = {
-    green:  'bg-emerald-100 text-emerald-700',
-    yellow: 'bg-amber-100 text-amber-700',
-    red:    'bg-rose-100 text-rose-700',
-    gray:   'bg-slate-100 text-slate-600',
-  };
-  const railStyle: Record<StatusInfo['color'], string> = {
-    green:  'bg-status-green',
-    yellow: 'bg-status-yellow',
-    red:    'bg-status-red',
-    gray:   'bg-text-muted/35',
-  };
-
-  const infoItems: { label: string; value: React.ReactNode }[] = [];
-  if (business.created_time) {
-    infoItems.push({ label: 'Created', value: formatDate(business.created_time) });
-  }
-  if (business.timezone_id !== undefined) {
-    infoItems.push({ label: 'Timezone ID', value: String(business.timezone_id) });
-  }
-  if (business.primary_page) {
-    infoItems.push({
-      label: 'Primary Page',
-      value: (
-        <Link
-          href={`/pages/${business.primary_page.id}`}
-          onClick={e => e.stopPropagation()}
-          className="text-accent hover:underline truncate block"
-        >
-          {business.primary_page.name}
-        </Link>
-      ),
-    });
-  }
-
-  return (
-    <article className="meta-item meta-item-compact group">
-      <div className={`absolute left-0 right-0 top-0 h-1.5 ${railStyle[verStatus.color]}`} />
-
-      <div className="meta-item-header p-4">
-        <Link href={`/businesses/${business.id}`} className="flex items-start gap-3 active:opacity-80 transition-opacity">
-          {business.profile_picture_uri ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={business.profile_picture_uri} alt={business.name} className="meta-compact-avatar h-12 w-12 flex-shrink-0 rounded-lg object-cover" />
-          ) : (
-            <div className={`meta-compact-avatar flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-lg text-xl font-black ${avatarStyle[verStatus.color]}`}>
-              {initial}
-            </div>
-          )}
-          <div className="flex-1 min-w-0 pt-0.5">
-            <div className="mb-2 inline-flex items-center gap-1.5 rounded-md border border-border bg-bg-card px-2.5 py-1 text-[11px] font-bold text-text-secondary shadow-sm">
-              <StatusDot color={verStatus.color} />
-              {verStatus.label}
-            </div>
-            <p className="meta-compact-title text-base font-black leading-snug text-text-primary line-clamp-2">{business.name}</p>
-            <div className="mt-1.5 flex items-center gap-1.5">
-              <code className="min-w-0 truncate rounded-md bg-bg-card px-2 py-1 font-mono text-[11px] text-text-muted">{business.id}</code>
-              <CopyButton value={business.id} />
-            </div>
-          </div>
-        </Link>
-      </div>
-
-      {infoItems.length > 0 && (
-        <div className="meta-compact-hide grid grid-cols-1 gap-2 p-4 pb-0 sm:grid-cols-2">
-          {infoItems.map((item, i) => (
-            <InfoCell key={i} label={item.label} value={item.value} />
-          ))}
-        </div>
-      )}
-
-      <div className="meta-compact-pad p-4">
-        <StatChips summary={summary} />
-      </div>
-
-      <div className="meta-compact-pad grid grid-cols-2 gap-2 border-t border-border p-4">
-        <Link
-          href={`/businesses/${business.id}`}
-          className="meta-action meta-action-primary"
-        >
-          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21" />
-          </svg>
-          Open assets
-        </Link>
-        <Link
-          href={`/businesses/${business.id}`}
-          className="meta-action meta-action-secondary"
-        >
-          Full profile
-          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-          </svg>
-        </Link>
-      </div>
-    </article>
-  );
-}
 
 export default function BusinessesPage() {
+  const [search, setSearch] = useViewState('search', '');
+  const filterSearch = useDeferredValue(search);
   const { state: auth } = useAuth();
   const router = useRouter();
   useEffect(() => {
@@ -227,19 +65,20 @@ export default function BusinessesPage() {
 
   const { state, retry } = useBusinesses(auth.token);
 
-  if (auth.isLoading || state.status === "idle") return null;
+  const allBusinesses = useMemo(() => state.status === "success" ? state.data : [], [state]);
+  const businesses = useMemo(() => allBusinesses.filter(b => `${b.name} ${b.id}`.toLowerCase().includes(filterSearch.trim().toLowerCase())), [allBusinesses, filterSearch]);
 
-  const businesses = state.status === "success" ? state.data : [];
+  if (auth.isLoading || state.status === "idle") return <PageContainer ready={false}><LoadingState message="Loading business assets…" /></PageContainer>;
 
   return (
-    <PageContainer>
+    <PageContainer ready={state.status === 'success' && filterSearch === search}>
       <BusinessesHero count={state.status === "success" ? state.data.length : undefined} />
+      {state.status === 'success' && allBusinesses.length > 0 && <CollectionToolbar search={search} onSearch={setSearch} label="Search business assets" placeholder="Search businesses…" count={`${businesses.length} of ${allBusinesses.length} businesses`} onReset={() => setSearch('')} />}
+      {state.status === 'success' && allBusinesses.length > 0 && businesses.length === 0 && <div className="collection-empty"><h2>No matching businesses</h2><p>Try another name or business ID.</p><button type="button" onClick={() => setSearch('')}>Clear search</button></div>}
 
       {/* Loading */}
       {state.status === "loading" && (
-        <div className="space-y-3">
-          {Array.from({ length: 3 }).map((_, i) => <SkeletonCard key={i} />)}
-        </div>
+        <LoadingState />
       )}
 
       {/* Error */}
@@ -253,7 +92,7 @@ export default function BusinessesPage() {
       )}
 
       {/* Empty */}
-      {state.status === "success" && businesses.length === 0 && (
+      {state.status === "success" && allBusinesses.length === 0 && (
         <div className="flex flex-col items-center justify-center py-16 gap-4 text-center">
           <div className="w-16 h-16 rounded-2xl bg-accent/10 flex items-center justify-center">
             <svg className="w-8 h-8 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -270,8 +109,8 @@ export default function BusinessesPage() {
       {state.status === "success" && businesses.length > 0 && (
         <>
           {/* Portfolio board */}
-          <div className="grid gap-4 md:grid-cols-2 2xl:grid-cols-3">
-            {businesses.map(b => <BusinessCard key={b.id} business={b} />)}
+          <div className="business-asset-list grid md:grid-cols-2 2xl:grid-cols-3">
+            {businesses.map(b => <BusinessAssetCard key={b.id} business={b} />)}
           </div>
 
           {/* Desktop table */}

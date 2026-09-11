@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCatalogs } from '@/hooks/useCatalogs';
 import { PageContainer } from '@/components/layout/PageContainer';
+import { LoadingState } from '@/components/ui/LoadingState';
 import { Breadcrumb } from '@/components/ui/Breadcrumb';
 import { ErrorState } from '@/components/ui/ErrorState';
 import type { Catalog } from '@/lib/types';
@@ -87,7 +88,7 @@ export default function CatalogsPage() {
 
   return (
     <PageContainer>
-      <div className="mb-5">
+      <div className="workspace-section-hero mb-5">
         <Breadcrumb
           items={[
             { label: 'Accounts', href: '/accounts' },
@@ -105,21 +106,7 @@ export default function CatalogsPage() {
         </div>
       </div>
 
-      {state.status === 'loading' && (
-        <div className="space-y-3">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className="meta-item p-4 animate-pulse">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-white/8" />
-                <div className="flex-1 space-y-2">
-                  <div className="h-4 bg-white/8 rounded w-3/5" />
-                  <div className="h-3 bg-white/5 rounded w-2/5" />
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
+      {state.status === 'loading' && <LoadingState />}
 
       {state.status === 'error' && <ErrorState message={state.error} onRetry={retry} />}
 

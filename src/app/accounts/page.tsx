@@ -1,13 +1,16 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useDeferredValue, useMemo, memo } from "react";
+import { useViewState } from '@/hooks/useViewState';
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAdAccounts } from "@/hooks/useAdAccounts";
 import { PageContainer } from "@/components/layout/PageContainer";
+import { LoadingState } from '@/components/ui/LoadingState';
 import { StatusDot } from "@/components/ui/StatusBadge";
 import { CopyButton } from "@/components/ui/CopyButton";
+import { CollectionToolbar } from "@/components/ui/CollectionToolbar";
 import { ErrorState } from "@/components/ui/ErrorState";
 import { formatCurrency, getAccountStatus } from "@/lib/utils";
 import type { AdAccount } from "@/lib/types";
@@ -57,41 +60,17 @@ function MetricCell({ label, value }: { label: string; value: string }) {
 }
 
 // ─── Skeleton ─────────────────────────────────────────────────────────────────
-function SkeletonCard() {
-  return (
-    <div className="meta-item animate-pulse">
-      <div className="meta-item-header p-4">
-        <div className="flex items-start gap-3">
-          <div className="h-12 w-12 flex-shrink-0 rounded-lg bg-bg-tertiary" />
-          <div className="flex-1 space-y-2 pt-1">
-            <div className="h-4 w-4/5 rounded bg-bg-tertiary" />
-            <div className="h-3 w-1/2 rounded bg-bg-tertiary/70" />
-            <div className="h-7 w-3/4 rounded bg-bg-card" />
-          </div>
-        </div>
-      </div>
-      <div className="grid grid-cols-3 gap-2 p-4">
-        {[...Array(3)].map((_, i) => (
-          <div key={i} className="h-16 rounded-lg bg-bg-secondary" />
-        ))}
-      </div>
-      <div className="grid grid-cols-2 gap-2 border-t border-border p-4">
-        <div className="h-11 rounded-lg bg-bg-tertiary" />
-        <div className="h-11 rounded-lg bg-bg-secondary" />
-      </div>
-    </div>
-  );
-}
+
 
 // ─── Mobile card ──────────────────────────────────────────────────────────────
-function AccountCard({ account }: { account: AdAccount }) {
+const AccountCard = memo(function AccountCard({ account }: { account: AdAccount }) {
   const status = getAccountStatus(account.account_status);
   const fmt = (v?: string) =>
     v && v !== "0" ? formatCurrency(v, account.currency) : "-";
 
   return (
     <article className="meta-item meta-item-compact group">
-      <div className="meta-item-header p-4">
+      <div className="account-card-header meta-item-header p-4">
       <Link
         href={`/accounts/${account.id}?name=${encodeURIComponent(account.name)}&currency=${account.currency}`}
         className="flex items-start gap-3 active:opacity-80 transition-opacity"
@@ -114,14 +93,9 @@ function AccountCard({ account }: { account: AdAccount }) {
               <span className="truncate">{account.business.name}</span>
             </div>
           )}
-          <div className="mt-1.5 flex items-center gap-1.5">
-            <code className="min-w-0 truncate rounded-md bg-bg-card px-2 py-1 font-mono text-[11px] text-text-muted">
-              {account.id}
-            </code>
-            <CopyButton value={account.id} />
-          </div>
         </div>
       </Link>
+      <div className="account-card-identifier"><span>Account ID</span><code>{account.id}</code><CopyButton value={account.id} /></div>
       </div>
 
       <div className="meta-account-metrics meta-compact-pad grid grid-cols-3 gap-2 p-4">
@@ -203,12 +177,13 @@ function AccountCard({ account }: { account: AdAccount }) {
       </div>
     </article>
   );
-}
+});
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 export default function AccountsPage() {
-  const [search, setSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
+  const [search, setSearch] = useViewState('search', '');
+  const [statusFilter, setStatusFilter] = useViewState('status', 'all');
+  const filterSearch = useDeferredValue(search);
   const { state: auth } = useAuth();
   const router = useRouter();
   useEffect(() => {
@@ -217,37 +192,28 @@ export default function AccountsPage() {
 
   const { state, retry } = useAdAccounts(auth.token);
 
-  if (auth.isLoading || state.status === "idle") return null;
-
-  const allAccounts = state.status === "success" ? sortAccounts(state.data) : [];
-  const accounts = allAccounts.filter(account => {
+  const allAccounts = useMemo(() => state.status === "success" ? sortAccounts(state.data) : [], [state]);
+  const accounts = useMemo(() => allAccounts.filter(account => {
     const text = [account.name,account.id,account.business?.name,account.currency].join(' ').toLowerCase();
-    return text.includes(search.trim().toLowerCase()) && (statusFilter === 'all' || (statusFilter === 'active' ? [1,8].includes(account.account_status) : ![1,8].includes(account.account_status)));
-  });
+    return text.includes(filterSearch.trim().toLowerCase()) && (statusFilter === 'all' || (statusFilter === 'active' ? [1,8].includes(account.account_status) : ![1,8].includes(account.account_status)));
+  }), [allAccounts, filterSearch, statusFilter]);
   const activeCount = allAccounts.filter((a) =>
     [1, 8].includes(a.account_status),
   ).length;
 
+  if (auth.isLoading || state.status === "idle") return <PageContainer ready={false}><LoadingState message="Loading accounts…" /></PageContainer>;
+
   return (
-    <PageContainer>
+    <PageContainer ready={state.status === 'success' && filterSearch === search}>
       <AccountsHero
         count={state.status === "success" ? state.data.length : undefined}
         activeCount={activeCount}
       />
-      {state.status === 'success' && <div className="meta-toolbar mb-5 flex flex-wrap items-center gap-3 p-3">
-        <input aria-label="Search ad accounts" placeholder="Search name, ID, business, or currency…" value={search} onChange={event => setSearch(event.target.value)} className="min-w-[180px] flex-1 rounded-xl border border-border bg-bg-secondary/30 px-3 py-2.5 text-sm text-text-primary" />
-        <select aria-label="Filter accounts by status" value={statusFilter} onChange={event => setStatusFilter(event.target.value)} className="rounded-xl border border-border bg-bg-card px-3 py-2.5 text-sm text-text-primary"><option value="all">All statuses</option><option value="active">Active</option><option value="attention">Needs attention</option></select>
-        <span className="text-xs text-text-muted">{accounts.length} of {allAccounts.length} accounts</span>
-        {(search || statusFilter !== 'all') && <button onClick={() => {setSearch('');setStatusFilter('all');}} className="text-xs font-semibold text-accent">Reset filters</button>}
-      </div>}
+      {state.status === 'success' && <CollectionToolbar search={search} onSearch={setSearch} label="Search ad accounts" placeholder="Search accounts…" count={`${accounts.length} of ${allAccounts.length} accounts`} filterCount={statusFilter === 'all' ? 0 : 1} onReset={() => { setSearch(''); setStatusFilter('all'); }} filters={<label>Account status<select value={statusFilter} onChange={event => setStatusFilter(event.target.value)}><option value="all">All statuses</option><option value="active">Active</option><option value="attention">Needs attention</option></select></label>} />}
 
       {/* Loading */}
       {state.status === "loading" && (
-        <div className="space-y-3">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <SkeletonCard key={i} />
-          ))}
-        </div>
+        <LoadingState />
       )}
 
       {/* Error */}

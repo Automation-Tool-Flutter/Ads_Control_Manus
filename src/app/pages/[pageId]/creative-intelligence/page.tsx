@@ -9,6 +9,7 @@ import { usePagePosts } from '@/hooks/usePagePosts';
 import { useAdAccounts } from '@/hooks/useAdAccounts';
 import { useCreativeIntelligence } from '@/hooks/useCreativeIntelligence';
 import { PageContainer } from '@/components/layout/PageContainer';
+import { LoadingState } from '@/components/ui/LoadingState';
 import { ControlHeader } from '@/components/layout/ControlHeader';
 import { ErrorState } from '@/components/ui/ErrorState';
 import { BoostModal } from '@/components/pages/BoostModal';
@@ -73,9 +74,7 @@ export default function CreativeIntelligencePage() {
         </div>
       </ControlHeader>
 
-      {(pagesState.status === 'loading' || postsState.status === 'loading' || accountsState.status === 'loading' || state.status === 'loading') && (
-        <div className="grid gap-3 md:grid-cols-2">{Array.from({ length: 4 }).map((_, index) => <div key={index} className="h-56 animate-pulse rounded-2xl border border-border bg-bg-card" />)}</div>
-      )}
+      {(pagesState.status === 'loading' || postsState.status === 'loading' || accountsState.status === 'loading' || state.status === 'loading') && <LoadingState />}
       {state.status === 'error' && <ErrorState message={state.error} onRetry={runAnalysis} />}
       {postsState.status === 'error' && <ErrorState message={postsState.error} />}
 

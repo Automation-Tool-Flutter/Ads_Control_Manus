@@ -300,13 +300,7 @@ export default function AdSetDetailPage() {
           <div className="glass-card gradient-border-card rounded-2xl p-5">
             <h2 className="text-base font-semibold text-text-primary mb-4">Ads</h2>
 
-            {(adsState.status === 'idle' || adsState.status === 'loading') && (
-              <div className="space-y-2">
-                {Array.from({ length: 3 }).map((_, i) => (
-                  <div key={i} className="h-14 bg-white/5 rounded-xl animate-pulse" />
-                ))}
-              </div>
-            )}
+            {(adsState.status === 'idle' || adsState.status === 'loading') && <LoadingState />}
 
             {adsState.status === 'error' && (
               <p className="text-status-red text-sm">{adsState.error}</p>

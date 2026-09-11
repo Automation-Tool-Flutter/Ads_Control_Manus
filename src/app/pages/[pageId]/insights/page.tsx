@@ -6,6 +6,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { usePageInsights } from "@/hooks/usePageInsights";
 import { usePageToken } from "@/hooks/usePageToken";
 import { PageContainer } from "@/components/layout/PageContainer";
+import { LoadingState } from '@/components/ui/LoadingState';
 import { ControlHeader } from "@/components/layout/ControlHeader";
 import { ErrorState } from "@/components/ui/ErrorState";
 import { DateFilter } from "@/components/ui/DateFilter";
@@ -116,23 +117,7 @@ export default function PageInsightsPage() {
         </div>
       </ControlHeader>
 
-      {state.status === "loading" && (
-        <>
-          <InsightChart title="" metrics={[]} lines={[]} loading />
-          <InsightChart title="" metrics={[]} lines={[]} loading />
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <div
-                key={i}
-                className="glass-card rounded-2xl p-4 animate-pulse"
-              >
-                <div className="h-3 bg-white/5 rounded w-3/4 mb-3" />
-                <div className="h-7 bg-white/8 rounded w-1/2" />
-              </div>
-            ))}
-          </div>
-        </>
-      )}
+      {state.status === "loading" && <LoadingState />}
 
       {state.status === "error" &&
         // Error code 100 = invalid metric = New Page Experience, insights API not supported

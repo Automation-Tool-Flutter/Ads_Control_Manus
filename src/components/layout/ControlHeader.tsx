@@ -39,7 +39,7 @@ export function ControlHeader({
   compact = false,
 }: ControlHeaderProps) {
   return (
-    <section className="workspace-heading mb-6 overflow-hidden rounded-3xl border border-border bg-bg-card">
+    <section data-has-summary={stats.length > 0 || Boolean(actions)} data-has-tools={Boolean(children)} className="workspace-heading mb-6 overflow-hidden rounded-3xl border border-border bg-bg-card">
       <div className={`control-breadcrumb-row border-b border-border/60 px-4 py-3 sm:px-6 ${breadcrumbs?.length ? '' : 'hidden lg:block'}`}>
         <div className="flex flex-wrap items-center justify-between gap-2">
           {breadcrumbs ? <Breadcrumb items={breadcrumbs} mobileShowCurrent={false} /> : <span />}
@@ -50,16 +50,16 @@ export function ControlHeader({
         </div>
       </div>
 
-      <div className={`grid gap-5 px-4 ${compact ? "py-4" : "py-6"} sm:px-6 2xl:grid-cols-[minmax(0,1fr)_auto] 2xl:items-end`}>
-        <div className="min-w-0">
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-2"><p className="text-[10px] font-bold uppercase tracking-[.18em] text-accent">
+      <div className={`control-header-main grid gap-5 px-4 ${compact ? "py-4" : "py-6"} sm:px-6 2xl:grid-cols-[minmax(0,1fr)_auto] 2xl:items-end`}>
+        <div className="control-header-title-block min-w-0">
+          <div className="control-header-context flex flex-wrap items-center gap-x-3 gap-y-2"><p className="text-[10px] font-bold uppercase tracking-[.18em] text-accent">
             {eyebrow}
           </p><span className="control-mobile-badge lg:hidden">{badge}</span></div>
           <h1 className="mt-2 text-2xl font-bold leading-tight tracking-tight text-text-primary sm:text-3xl">
             {title}
           </h1>
           {description && (
-            <p className="mt-1.5 max-w-4xl text-sm font-medium leading-6 text-text-secondary">
+            <p className="control-header-description mt-1.5 max-w-4xl text-sm font-medium leading-6 text-text-secondary">
               {description}
             </p>
           )}
@@ -84,13 +84,13 @@ export function ControlHeader({
                 ))}
               </div>
             )}
-            {actions && <div className="flex flex-wrap gap-2">{actions}</div>}
+            {actions && <div className="control-header-actions flex flex-wrap gap-2">{actions}</div>}
           </div>
         )}
       </div>
 
       {children && (
-        <div className="border-t border-border/60 bg-bg-secondary/30 px-4 py-4 sm:px-6">
+        <div className="control-header-tools border-t border-border/60 bg-bg-secondary/30 px-4 py-4 sm:px-6">
           {children}
         </div>
       )}

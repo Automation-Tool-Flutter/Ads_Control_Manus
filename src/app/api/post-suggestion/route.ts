@@ -40,7 +40,7 @@ export async function POST(req: NextRequest) {
     const result = await callOpenAI<{ suggestions: string[] }>(
       SYSTEM_PROMPT,
       buildPrompt(payload.topic, payload.tone ?? 'casual', 'en'),
-      { temperature: 0.8, maxOutputTokens: 4096 },
+      { maxOutputTokens: 4096 },
     );
 
     if (!Array.isArray(result.suggestions) || result.suggestions.length === 0) {

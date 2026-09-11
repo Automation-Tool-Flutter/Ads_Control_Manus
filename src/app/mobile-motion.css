@@ -1,0 +1,46 @@
+/* Short, interruptible motion. Never animate layout dimensions or page ancestors. */
+.mobile-sheet-handle { display: none; }
+.navigation-feedback { position: fixed; inset: 0 0 auto; height: 3px; z-index: 55; overflow: hidden; pointer-events: none; background: rgb(var(--c-accent)/.12); }
+.navigation-feedback[hidden] { display: none; }
+.navigation-feedback > span[aria-hidden] { display: block; width: 40%; height: 100%; background: #0866ff; animation: navigation-progress 1.1s ease-in-out infinite; }
+@keyframes navigation-progress { from { transform: translateX(-110%); } to { transform: translateX(360%); } }
+@keyframes mobile-sheet-in { from { opacity: .65; transform: translate3d(0,24px,0); } to { opacity: 1; transform: translate3d(0,0,0); } }
+@keyframes mobile-sheet-out { from { opacity: 1; transform: translate3d(0,0,0); } to { opacity: 0; transform: translate3d(0,16px,0); } }
+@keyframes mobile-overlay-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes mobile-overlay-out { from { opacity: 1; } to { opacity: 0; } }
+@media (max-width: 1023px), (hover: none) and (pointer: coarse) {
+  /* Let Next restore each history entry, without CSS smooth-scrolling it. */
+  html { scroll-behavior: auto; }
+  .app-modal-content { position: relative; }
+  .app-modal-content > div { padding-top: 48px; }
+  .app-modal .mobile-sheet-handle { display: flex; align-items: center; justify-content: center; position: absolute; inset: 0 auto auto 50%; margin-left: -48px; width: 96px; min-height: 44px; z-index: 2; touch-action: none; border: 0; background: transparent; border-radius: 22px; }
+  .mobile-sheet-handle > span { width: 36px; height: 5px; border-radius: 8px; background: rgb(var(--c-text-muted)/.45); }
+  .mobile-sheet-handle:disabled { opacity: .35; }
+  .mobile-sheet-handle:focus-visible { outline: 2px solid rgb(var(--c-accent)); outline-offset: -4px; }
+  .workspace-page :is(.meta-item,.glass-card,.ai-surface,.soft-card),
+  .mobile-tool-tile { transition: background-color 120ms ease, border-color 120ms ease; }
+  .workspace-page :is(.meta-item,.glass-card,.ai-surface,.soft-card):hover { transform: none; }
+  .mobile-tab, .mobile-tools-close, .mobile-header-profile,
+  .workspace-page :is(.meta-action,button), .app-modal button { transition: background-color 120ms ease, color 120ms ease, opacity 120ms ease; -webkit-tap-highlight-color: transparent; }
+  .mobile-tab:active { opacity: .65; }
+  .mobile-tab.is-pending { background: rgb(var(--c-accent)/.12); color: rgb(var(--c-accent)); }
+  .mobile-tab.is-pending > svg { opacity: 1; }
+  .workspace-page button:not(:disabled):active, .app-modal button:not(:disabled):active { filter: none; opacity: .72; }
+  .app-modal[open]:not([data-closing=true]) .app-modal-content,
+  .mobile-tools-dialog[open]:not([data-closing=true]) .mobile-tools-shell,
+  .ai-floating-root[data-open=true]:not([data-closing=true]) .ai-floating-panel { animation: mobile-sheet-in 200ms cubic-bezier(.2,.8,.2,1) backwards; }
+  .app-modal[data-closing=true] .app-modal-content,
+  .mobile-tools-dialog[data-closing=true] .mobile-tools-shell,
+  .ai-floating-root[data-closing=true] .ai-floating-panel { animation: mobile-sheet-out 140ms ease-in both; pointer-events: none; }
+  .app-modal[open]::backdrop, .mobile-tools-dialog[open]::backdrop { animation: mobile-overlay-in 180ms ease-out both; }
+  .app-modal[data-closing=true]::backdrop, .mobile-tools-dialog[data-closing=true]::backdrop { animation: mobile-overlay-out 140ms ease-in both; }
+  .mobile-tools-scroll, .ai-floating-panel [role=log], .app-modal-content > div { overscroll-behavior-y: contain; }
+  .mobile-tools-filters { scroll-behavior: smooth; }
+  .mobile-app-content { overflow-anchor: auto; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .navigation-feedback > span[aria-hidden] { animation: none; width: 100%; }
+  .app-modal .app-modal-content, .mobile-tools-dialog .mobile-tools-shell,
+  .ai-floating-root .ai-floating-panel, .app-modal::backdrop, .mobile-tools-dialog::backdrop { animation: none !important; }
+  .mobile-tools-filters { scroll-behavior: auto; }
+}

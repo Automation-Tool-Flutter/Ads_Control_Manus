@@ -7,6 +7,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useCampaignBuilder } from '@/hooks/useCampaignBuilder';
 import { useCatalogs } from '@/hooks/useCatalogs';
 import { PageContainer } from '@/components/layout/PageContainer';
+import { LoadingState } from '@/components/ui/LoadingState';
 import { ControlHeader } from '@/components/layout/ControlHeader';
 import { formatCurrency } from '@/lib/utils';
 import type { CampaignBuilderInput, CampaignBusinessGoal } from '@/lib/types/campaign-builder';
@@ -82,7 +83,7 @@ export default function CampaignBuilderPage() {
 
         <main className="min-w-0 space-y-5">
           {builder.state.status === 'idle' && <div className="rounded-xl border border-dashed border-border bg-bg-card p-10 text-center"><p className="font-bold text-text-primary">Start with a clear brief</p><p className="mx-auto mt-2 max-w-xl text-sm text-text-secondary">AI recommends the structure. The application recalculates budgets and validates the objective and optimization goal against your chosen business outcome.</p></div>}
-          {builder.state.status === 'generating' && <div className="grid gap-3 md:grid-cols-2">{Array.from({ length: 6 }).map((_, index) => <div key={index} className="h-44 animate-pulse rounded-xl border border-border bg-bg-card" />)}</div>}
+          {builder.state.status === 'generating' && <LoadingState message="Building your campaign…" />}
           {builder.state.status === 'success' && (() => { const draft = builder.state.draft; return <>
             <section className="rounded-xl border border-accent/30 bg-accent/5 p-5"><div className="flex flex-wrap items-start justify-between gap-3"><div><p className="text-[10px] font-black uppercase text-accent">2. AI strategy draft</p><h2 className="mt-1 text-xl font-black text-text-primary">{draft.campaign.name}</h2></div><span className="rounded-lg bg-accent px-2.5 py-1 text-xs font-bold text-white">{draft.campaign.objective}</span></div><p className="mt-3 text-sm text-text-secondary">{draft.summary}</p><p className="mt-2 text-xs text-text-muted">{draft.campaign.rationale}</p><div className="mt-4 grid grid-cols-3 gap-2"><div className="meta-metric"><p className="text-[10px] uppercase text-text-muted">Total budget</p><p className="font-bold text-text-primary">{formatCurrency(draft.campaign.totalBudgetRaw, currency)}</p></div><div className="meta-metric"><p className="text-[10px] uppercase text-text-muted">Duration</p><p className="font-bold text-text-primary">{draft.campaign.durationDays} days</p></div><div className="meta-metric"><p className="text-[10px] uppercase text-text-muted">Confidence</p><p className="font-bold text-accent">{draft.confidence}%</p></div></div></section>
 

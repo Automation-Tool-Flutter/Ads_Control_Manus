@@ -6,6 +6,7 @@ import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAlertCenter } from '@/hooks/useAlertCenter';
 import { PageContainer } from '@/components/layout/PageContainer';
+import { LoadingState } from '@/components/ui/LoadingState';
 import { ControlHeader } from '@/components/layout/ControlHeader';
 import { ErrorState } from '@/components/ui/ErrorState';
 import type { AIAlert, AlertSeverity } from '@/lib/types/alerts';
@@ -113,7 +114,7 @@ export default function AlertCenterPage() {
       </ControlHeader>
       {state.status === 'idle' && <section className="ai-surface p-8"><h2 className="text-lg font-bold text-text-primary">Run an account health check</h2><p className="mt-3 max-w-2xl text-sm leading-6 text-text-secondary">Analyze recent delivery, cost, tracking, and fatigue signals. This is an on-demand review, not background monitoring. A Meta Ads AI request is sent only when you start the analysis.</p><button onClick={refresh} className="ai-primary-button mt-5">Run analysis</button></section>}
 
-      {state.status === 'loading' && <div className="grid gap-3 md:grid-cols-2">{Array.from({ length: 6 }).map((_, index) => <div key={index} className="h-64 animate-pulse rounded-2xl border border-border bg-bg-card" />)}</div>}
+      {state.status === 'loading' && <LoadingState message="Loading diagnostics…" />}
       {state.status === 'error' && <ErrorState message={state.error} onRetry={refresh} />}
       {state.status === 'success' && (
         <>

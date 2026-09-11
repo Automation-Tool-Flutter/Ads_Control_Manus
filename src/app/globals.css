@@ -1,12 +1,10 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=JetBrains+Mono:wght@400;500&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --font-dm-sans: 'DM Sans', sans-serif;
-  --font-jetbrains-mono: 'JetBrains Mono', monospace;
+  --font-dm-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-jetbrains-mono: ui-monospace, SFMono-Regular, Consolas, monospace;
 }
 
 :root,
@@ -410,35 +408,6 @@ input[type='date'] {
 
   .dark body {
     background: rgb(var(--c-bg-primary));
-  }
-
-  .meta-item-compact .meta-item-header {
-    padding: 0.625rem 0.75rem !important;
-  }
-
-  .meta-item-compact .meta-compact-pad {
-    padding: 0.625rem 0.75rem !important;
-  }
-
-  .meta-item-compact .meta-metric {
-    padding: 0.45rem 0.55rem;
-  }
-
-  .meta-item-compact .meta-action {
-    min-height: 2.125rem;
-    padding: 0.35rem 0.5rem;
-    font-size: 0.75rem;
-  }
-
-  .meta-item-compact .meta-compact-avatar {
-    width: 2.25rem !important;
-    height: 2.25rem !important;
-    font-size: 0.875rem !important;
-  }
-
-  .meta-item-compact .meta-compact-title {
-    font-size: 0.875rem;
-    line-height: 1.2;
   }
 
   .meta-item-compact .meta-compact-hide {

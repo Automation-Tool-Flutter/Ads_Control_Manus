@@ -15,10 +15,10 @@ function load(file, dependencies) {
   }});
   return exports;
 }
-function render({search='',filter='Quick access',base='/accounts/act_1',pathname='/accounts/act_1/optimize'}={}) {
+function render({search='',editing=false,base='/accounts/act_1',pathname='/accounts/act_1/optimize'}={}) {
   let stateIndex=0;
   const dependencies = {
-    'react': {...React,useState:initial=>{const index=stateIndex++; return [index === 0 ? search : index === 1 ? filter : initial,()=>{}];}},
+    'react': {...React,useState:initial=>{const index=stateIndex++; return [index === 0 ? search : index === 2 ? editing : initial,()=>{}];}},
     'next/link':{default:({children,...props})=>React.createElement('a',props,children)},
     './AdsIcon':{AdsIcon:()=>null},
     '@/components/ui/BrandLogo':{BrandLogo:()=>React.createElement('img',{src:'/meta-ads-ai.png',alt:''})},
@@ -30,32 +30,47 @@ function render({search='',filter='Quick access',base='/accounts/act_1',pathname
   const {MobileToolMenu}=load('src/components/layout/MobileToolMenu.tsx',dependencies);
   return renderToStaticMarkup(React.createElement(MobileToolMenu,{accountBase:base,query:'?accountName=Demo&currency=VND',accountName:'Demo account',pathname,name:'Demo User',userId:'demo',onClose(){},onLogout(){}}));
 }
-test('quick access shows six compact task tiles instead of the full sidebar',()=>{
+test('menu has four compact shortcuts and three visible tool groups',()=>{
   const html=render();
-  assert.equal((html.match(/class="mobile-tool-tile"/g)||[]).length,6);
-  assert.match(html,/Budgets/); assert.match(html,/Create campaign/);
-  assert.doesNotMatch(html,/<details/);
+  assert.equal((html.match(/class="mobile-menu-shortcut"/g)||[]).length,4);
+  assert.equal((html.match(/class="mobile-menu-group"/g)||[]).length,3);
+  assert.match(html,/Analyze &amp; optimize/); assert.match(html,/Create &amp; manage/);
+  assert.doesNotMatch(html,/mobile-tools-filters|mobile-menu-ai/);
   assert.match(html,/Menu primary navigation/);
   assert.match(html,/Close all tools/);
-  assert.match(html,/Customize/);
 });
-test('all tools preserves twelve account tools and four workspace tools',()=>{
-  const html=render({filter:'All tools'});
-  assert.equal((html.match(/class="mobile-tool-tile"/g)||[]).length,16);
-  assert.equal((html.match(/aria-current="page"/g)||[]).length,1);
+
+test('grouped menu preserves all sixteen tools and the current account query',()=>{
+  const html=render();
+  assert.equal((html.match(/class="mobile-menu-row"/g)||[]).length,16);
+  assert.match(html,/aria-current="page"/);
   assert.match(html,/currency=VND/);
 });
-test('search finds tools outside the selected category using full names',()=>{
-  const html=render({filter:'Workspace',search:'performance intelligence'});
-  assert.equal((html.match(/class="mobile-tool-tile"/g)||[]).length,1);
+
+test('search finds full tool names without a category filter',()=>{
+  const html=render({search:'performance intelligence'});
+  assert.equal((html.match(/class="mobile-menu-row"/g)||[]).length,1);
   assert.match(html,/Performance/);
+  assert.doesNotMatch(html,/class="mobile-menu-shortcut"/);
 });
+
 test('unmatched search has a clear recovery action',()=>{
   const html=render({search:'zzzzmissing'});
-  assert.match(html,/No matching tools/); assert.match(html,/Show all tools/);
+  assert.match(html,/No matching tools/); assert.match(html,/Clear search/);
 });
-test('account tools without an account lead to selection with an explicit label',()=>{
-  const html=render({base:'',filter:'Build',pathname:'/pages'});
-  assert.equal((html.match(/Select account/g)||[]).length,4);
-  assert.doesNotMatch(html,/\/accounts\/undefined/);
+
+test('workspace menu explains account selection without showing unusable shortcuts',()=>{
+  const html=render({base:'',pathname:'/pages'});
+  assert.equal((html.match(/Select account first/g)||[]).length,12);
+  assert.doesNotMatch(html,/class="mobile-menu-shortcut"/);
+  assert.equal(html.includes('/accounts/undefined'), false);
+});
+
+test('shortcut editing has explicit cancel and save instead of navigation controls',()=>{
+  const html=render({editing:true});
+  assert.equal((html.match(/class="mobile-menu-row mobile-menu-pin"/g)||[]).length,16);
+  assert.match(html,/Cancel shortcut changes/);
+  assert.match(html,/>Cancel<\/button>/);
+  assert.match(html,/Save shortcuts \(4\)/);
+  assert.doesNotMatch(html,/Menu primary navigation/);
 });

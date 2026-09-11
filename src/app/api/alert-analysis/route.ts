@@ -42,7 +42,6 @@ export async function POST(request: NextRequest) {
 
   try {
     const ai = await callOpenAI<AIResult>(SYSTEM_PROMPT, `Triage every candidate and return one evaluation per alertId.\n\nCANDIDATES:\n${JSON.stringify(candidates, null, 2)}`, {
-      temperature: 0.2,
       maxOutputTokens: 6000,
       schema: { name: 'meta_ads_alert_triage', value: ALERT_SCHEMA },
     });

@@ -9,6 +9,8 @@ import { useRouter } from 'next/navigation';
 import { useDailyInsights } from '@/hooks/useDailyInsights';
 import { useCampaigns } from '@/hooks/useCampaigns';
 import { CampaignChart } from '@/components/ui/CampaignChart';
+import { DateFilter } from '@/components/ui/DateFilter';
+import { useViewState } from '@/hooks/useViewState';
 import { getLearningRecords } from '@/lib/learning-store';
 import { deriveCampaignKpis, formatKpi } from '@/lib/campaign-kpis';
 import { formatSpend } from '@/lib/utils';
@@ -24,9 +26,9 @@ const FEATURES = [
 ] as const;
 
 export function AccountAIDashboard(props: { accountId: string; name: string; currency: string; token: string }) {
-  const [period, setPeriod] = useState<DatePreset>('last_30d');
+  const [period, setPeriod] = useViewState<DatePreset>('period', 'last_30d');
   usePublishAIView(period);
-  return <div className="ai-dashboard space-y-6"><header className="flex flex-wrap items-center justify-between gap-4"><div><Link href="/accounts" className="text-xs text-text-muted">Workspace / {props.name}</Link><h1 className="mt-2 text-3xl font-bold tracking-tight text-text-primary">Performance overview<span className="text-accent">.</span></h1><p className="mt-2 text-sm text-text-secondary">Understand performance. Prioritize action. Measure outcomes.</p></div><select aria-label="Dashboard date range" value={period} onChange={e => setPeriod(e.target.value as DatePreset)} className="rounded-xl border border-border bg-bg-card px-4 py-3 text-sm text-text-primary"><option value="last_7d">Last 7 days</option><option value="last_14d">Last 14 days</option><option value="last_30d">Last 30 days</option></select></header><DashboardPeriod key={`${props.accountId}:${period}`} {...props} period={period} /></div>;
+  return <div className="ai-dashboard space-y-6"><header className="mobile-dashboard-header flex flex-wrap items-center justify-between gap-4"><div className="min-w-0"><p className="text-sm text-text-secondary">{props.name}</p><h1 className="mt-1 text-3xl font-bold tracking-tight text-text-primary">Performance overview</h1></div><DateFilter value={period} onChange={value => { if (typeof value === 'string') setPeriod(value); }} allowCustom={false} presets={[{ value: 'last_7d', label: 'Last 7 days' }, { value: 'last_14d', label: 'Last 14 days' }, { value: 'last_30d', label: 'Last 30 days' }]} /></header><DashboardPeriod key={`${props.accountId}:${period}`} {...props} period={period} /></div>;
 }
 
 function DashboardPeriod({ accountId, name, currency, token, period }: { accountId: string; name: string; currency: string; token: string; period: DatePreset }) {

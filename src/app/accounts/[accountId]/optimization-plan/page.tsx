@@ -6,6 +6,7 @@ import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { useOptimizationPlan } from '@/hooks/useOptimizationPlan';
 import { PageContainer } from '@/components/layout/PageContainer';
+import { LoadingState } from '@/components/ui/LoadingState';
 import { ControlHeader } from '@/components/layout/ControlHeader';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { formatCurrency } from '@/lib/utils';
@@ -79,7 +80,7 @@ export default function OptimizationPlanPage() {
       </section>
 
       {!planner.plan && !planner.isGenerating && <div className="rounded-xl border border-dashed border-border bg-bg-card p-10 text-center"><div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-accent/10 text-xl text-accent">↗</div><h2 className="mt-3 text-lg font-bold text-text-primary">No optimization cycle yet</h2><p className="mx-auto mt-2 max-w-2xl text-sm text-text-secondary">AI schedules actions using current and previous performance. Every change to Meta requires your separate approval.</p></div>}
-      {planner.isGenerating && <div className="space-y-3">{Array.from({ length: 5 }).map((_, index) => <div key={index} className="h-36 animate-pulse rounded-xl border border-border bg-bg-card" />)}</div>}
+      {planner.isGenerating && <LoadingState message="Preparing your optimization plan…" />}
 
       {planner.plan && !planner.isGenerating && <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_19rem]">
         <main className="min-w-0 space-y-4">

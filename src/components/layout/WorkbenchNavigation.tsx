@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { AdsIcon } from './AdsIcon';
 export const WORKBENCH_SECTIONS = [
-  { title: 'Command center', items: [['', 'Overview', 'grid'], ['/ask-ads', 'AI Analyst', 'ai'], ['/actions', 'Action inbox', 'plan']] },
+  { title: 'Command center', items: [['', 'Overview', 'grid'], ['/ask-ads', 'Meta AI', 'ai'], ['/actions', 'Action inbox', 'plan']] },
   { title: 'Analyze & optimize', items: [['/optimize', 'Performance intelligence', 'chart'], ['/audiences', 'Audience insights', 'audience'], ['/budget-optimizer', 'Budget studio', 'budget'], ['/alerts', 'Diagnostics', 'alert']] },
   { title: 'Build & manage', items: [['/campaigns', 'Campaign manager', 'campaign'], ['/campaign-builder', 'AI Campaign Builder', 'ai'], ['/optimization-plan', 'Growth plans', 'plan']] },
   { title: 'Measure & learn', items: [['/ai-learning', 'Learning hub', 'learning'], ['/catalogs', 'Product catalogs', 'content']] },

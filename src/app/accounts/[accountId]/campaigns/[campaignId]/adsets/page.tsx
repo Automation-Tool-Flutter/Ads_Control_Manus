@@ -10,6 +10,7 @@ import { useAdSets } from '@/hooks/useAdSets';
 import { useAccountCurrency } from '@/hooks/useAccountCurrency';
 import { useAdSetAnalysis } from '@/hooks/useAdSetAnalysis';
 import { PageContainer } from '@/components/layout/PageContainer';
+import { LoadingState } from '@/components/ui/LoadingState';
 import { ControlHeader } from '@/components/layout/ControlHeader';
 import { StatusDot } from '@/components/ui/StatusBadge';
 import { CopyButton } from '@/components/ui/CopyButton';
@@ -60,34 +61,7 @@ function MetricCell({ label, value, loading }: { label: string; value: string; l
 }
 
 // ─── Skeleton ─────────────────────────────────────────────────────────────────
-function SkeletonCard() {
-  return (
-    <div className="glass-card rounded-2xl overflow-hidden animate-pulse">
-      <div className="flex items-start gap-3 p-4 pb-3">
-        <div className="flex-1 space-y-2">
-          <div className="h-4 bg-white/8 rounded w-3/4" />
-          <div className="h-3 bg-white/5 rounded w-1/3" />
-        </div>
-        <div className="h-5 w-16 bg-white/8 rounded-full" />
-      </div>
-      <div className="mx-4 border-t border-border/40" />
-      <div className="grid grid-cols-4 gap-3 px-4 py-3">
-        {[...Array(4)].map((_, i) => (
-          <div key={i} className="space-y-1.5">
-            <div className="h-2.5 bg-white/5 rounded w-8" />
-            <div className="h-4 bg-white/8 rounded w-12" />
-          </div>
-        ))}
-      </div>
-      <div className="mx-4 border-t border-border/40" />
-      <div className="flex">
-        <div className="flex-1 h-10 bg-white/5" />
-        <div className="w-px bg-border/40" />
-        <div className="flex-1 h-10 bg-white/5" />
-      </div>
-    </div>
-  );
-}
+
 
 // ─── Mobile card ──────────────────────────────────────────────────────────────
 function AdSetCard({
@@ -312,11 +286,7 @@ export default function AdSetsPage() {
       )}
 
       {/* Loading */}
-      {state.status === 'loading' && (
-        <div className="space-y-3">
-          {Array.from({ length: 3 }).map((_, i) => <SkeletonCard key={i} />)}
-        </div>
-      )}
+      {state.status === 'loading' && <LoadingState />}
 
       {/* Error */}
       {state.status === 'error' && (

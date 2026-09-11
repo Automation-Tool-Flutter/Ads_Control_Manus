@@ -4,6 +4,14 @@ import "./ai-ads.css";
 import "./mobile.css";
 import "./meta-cards.css";
 import "./mobile-interactions.css";
+import "./mobile-product.css";
+import "./ai-chat.css";
+import "./mobile-motion.css";
+import "./chat-refinement.css";
+import "./mobile-menu.css";
+import "./business-assets.css";
+import { NavigationFeedback } from "@/components/layout/NavigationFeedback";
+import { MobileScrollMemory } from "@/components/layout/MobileScrollMemory";
 import { MobileExperience } from "@/components/layout/MobileExperience";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
@@ -35,7 +43,7 @@ export const viewport: Viewport = {
 
 // Runs before React hydration to prevent flash of wrong theme.
 // Also sets theme-color meta so the iOS safe area matches immediately.
-const themeScript = `(function(){try{var c={dark:'#102334',light:'#ffffff'};var t=localStorage.getItem('theme')||'system';var s=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches;var r=t==='system'?(s?'dark':'light'):t;document.documentElement.classList.remove('dark','light');document.documentElement.classList.add(r);var m=document.querySelector('meta[name="theme-color"]');if(m)m.setAttribute('content',c[r]);}catch(e){document.documentElement.classList.remove('dark','light');document.documentElement.classList.add('light');}})();`;
+const themeScript = `(function(){try{var c={dark:'#242526',light:'#ffffff'};var t=localStorage.getItem('theme')||'system';var s=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches;var r=t==='system'?(s?'dark':'light'):t;document.documentElement.classList.remove('dark','light');document.documentElement.classList.add(r);var m=document.querySelector('meta[name="theme-color"]');if(m)m.setAttribute('content',c[r]);}catch(e){document.documentElement.classList.remove('dark','light');document.documentElement.classList.add('light');}})();`;
 
 export default function RootLayout({
   children,
@@ -51,9 +59,11 @@ export default function RootLayout({
       </head>
       <body className="app-shell flex flex-col min-h-screen">
         <MobileExperience />
+        <NavigationFeedback />
         <ThemeProvider>
           <ToastProvider>
             <AuthProvider>
+              <MobileScrollMemory />
               <AuthNotifier />
               <Header />
               <NavSpacer><WorkspaceBar />{children}</NavSpacer>

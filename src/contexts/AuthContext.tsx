@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useReducer, useEffect, useCallback } from 'react';
 import type { AuthState, FBUser } from '@/lib/types';
+import { clearViewMemory } from '@/lib/view-memory';
 import {
   STORAGE_KEYS,
   FB_AUTH_ERROR_EVENT,
@@ -68,6 +69,7 @@ function isLocalOAuthCallback() {
 }
 
 function clearStoredSession() {
+  clearViewMemory();
   localStorage.removeItem(STORAGE_KEYS.TOKEN);
   localStorage.removeItem(STORAGE_KEYS.TOKEN_EXPIRY);
   localStorage.removeItem(STORAGE_KEYS.USER);

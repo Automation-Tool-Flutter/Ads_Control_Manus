@@ -201,7 +201,6 @@ export async function POST(request: NextRequest) {
 
   try {
     const analysis = await callOpenAI<RootCauseAnalysis>(SYSTEM_PROMPT, buildPrompt(payload), {
-      temperature: 0.2,
       maxOutputTokens: 5000,
       schema: { name: 'campaign_root_cause_analysis', value: ROOT_CAUSE_SCHEMA },
     });

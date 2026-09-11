@@ -97,7 +97,7 @@ export async function POST(request: NextRequest) {
   if (!body.data?.adsets?.length) return NextResponse.json({ error: 'No ad sets are available for audience analysis.' }, { status: 422 });
   try {
     const analysis = await callOpenAI<AudienceIntelligence>(SYSTEM_PROMPT, buildPrompt(body.data, body.currency ?? 'USD'), {
-      temperature: 0.2, maxOutputTokens: 8000, schema: { name: 'audience_intelligence', value: SCHEMA },
+      maxOutputTokens: 8000, schema: { name: 'audience_intelligence', value: SCHEMA },
     });
     return NextResponse.json(sanitize(analysis, body.data));
   } catch (error) {

@@ -5,6 +5,7 @@ import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePageToken } from '@/hooks/usePageToken';
 import { PageContainer } from '@/components/layout/PageContainer';
+import { LoadingState } from '@/components/ui/LoadingState';
 import { Breadcrumb } from '@/components/ui/Breadcrumb';
 import { ErrorState } from '@/components/ui/ErrorState';
 import { CommentItem } from '@/components/pages/CommentItem';
@@ -230,19 +231,7 @@ export default function CommentsPage() {
         </div>
       )}
 
-      {commentsState.status === 'loading' && (
-        <div className="space-y-4">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="flex gap-3 animate-pulse">
-              <div className="w-8 h-8 rounded-full bg-white/8 flex-shrink-0" />
-              <div className="flex-1 space-y-2 pt-1">
-                <div className="h-3 bg-white/8 rounded w-2/5" />
-                <div className="h-3 bg-white/5 rounded w-4/5" />
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
+      {commentsState.status === 'loading' && <LoadingState />}
 
       {commentsState.status === 'error' && (
         <ErrorState message={commentsState.error} onRetry={loadComments} />

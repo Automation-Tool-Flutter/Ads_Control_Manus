@@ -105,7 +105,6 @@ export async function POST(request: NextRequest) {
       SYSTEM_PROMPT,
       buildPrompt(payload),
       {
-        temperature: 0.2,
         maxOutputTokens: 4096,
         schema: { name: 'budget_campaign_evaluations', value: EVALUATION_SCHEMA },
       },

@@ -5,6 +5,7 @@ import { useRouter, useParams } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCatalogProducts } from '@/hooks/useCatalogProducts';
 import { PageContainer } from '@/components/layout/PageContainer';
+import { LoadingState } from '@/components/ui/LoadingState';
 import { Breadcrumb } from '@/components/ui/Breadcrumb';
 import { ErrorState } from '@/components/ui/ErrorState';
 import { updateProduct } from '@/lib/api/catalogs';
@@ -185,19 +186,7 @@ export default function CatalogDetailPage() {
         </div>
       )}
 
-      {state.status === 'loading' && (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
-          {Array.from({ length: 8 }).map((_, i) => (
-            <div key={i} className="bg-bg-card border border-border rounded-xl animate-pulse">
-              <div className="aspect-square bg-white/8" />
-              <div className="p-3 space-y-2">
-                <div className="h-3 bg-white/8 rounded w-4/5" />
-                <div className="h-3 bg-white/5 rounded w-2/5" />
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
+      {state.status === 'loading' && <LoadingState />}
 
       {state.status === 'error' && <ErrorState message={state.error} onRetry={retry} />}
 

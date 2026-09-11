@@ -6,6 +6,7 @@ import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAudienceIntelligence } from '@/hooks/useAudienceIntelligence';
 import { PageContainer } from '@/components/layout/PageContainer';
+import { LoadingState } from '@/components/ui/LoadingState';
 import { ControlHeader } from '@/components/layout/ControlHeader';
 import { ErrorState } from '@/components/ui/ErrorState';
 
@@ -46,7 +47,7 @@ export default function AudienceIntelligencePage() {
       </ControlHeader>
 
       {state.status === 'idle' && <div className="rounded-2xl border border-border bg-bg-card p-8 text-center"><p className="font-bold text-text-primary">Ready to inspect audience performance</p><p className="mt-2 text-sm text-text-secondary">The analysis uses age, gender, region, placement, targeting configuration and objective-aware conversion metrics.</p></div>}
-      {state.status === 'loading' && <div className="grid gap-3 md:grid-cols-2">{Array.from({ length: 6 }).map((_, index) => <div key={index} className="h-52 animate-pulse rounded-2xl border border-border bg-bg-card" />)}</div>}
+      {state.status === 'loading' && <LoadingState message="Analyzing audiences…" />}
       {state.status === 'error' && <ErrorState message={state.error} onRetry={analyze} />}
 
       {state.status === 'success' && (

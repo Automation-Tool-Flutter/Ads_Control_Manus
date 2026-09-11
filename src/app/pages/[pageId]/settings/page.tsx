@@ -5,6 +5,7 @@ import { useRouter, useParams } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePageToken } from '@/hooks/usePageToken';
 import { PageContainer } from '@/components/layout/PageContainer';
+import { LoadingState } from '@/components/ui/LoadingState';
 import { Breadcrumb } from '@/components/ui/Breadcrumb';
 import { ErrorState } from '@/components/ui/ErrorState';
 import { getPageInfo, updatePageInfo, updatePagePicture } from '@/lib/api/pageSettings';
@@ -168,28 +169,7 @@ export default function PageSettingsPage() {
         )}
       </div>
 
-      {infoState.status === 'loading' && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 animate-pulse">
-          <div className="space-y-4">
-            <div className="glass-card gradient-border-card rounded-2xl p-4 flex items-center gap-4">
-              <div className="w-20 h-20 rounded-2xl bg-white/8 flex-shrink-0" />
-              <div className="flex-1 space-y-2">
-                <div className="h-4 bg-white/8 rounded w-1/3" />
-                <div className="h-3 bg-white/5 rounded w-1/4" />
-              </div>
-            </div>
-            <div className="glass-card gradient-border-card rounded-2xl aspect-[2.7/1] bg-white/5" />
-          </div>
-          <div className="space-y-4">
-            {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="glass-card gradient-border-card rounded-2xl p-4">
-                <div className="h-3 bg-white/5 rounded w-1/4 mb-3" />
-                <div className="h-9 bg-white/8 rounded" />
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+      {infoState.status === 'loading' && <LoadingState />}
 
       {infoState.status === 'error' && (
         <ErrorState message={infoState.error} onRetry={loadInfo} />

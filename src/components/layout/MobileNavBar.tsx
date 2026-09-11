@@ -20,14 +20,14 @@ export function MobileNavBar({ base, query, pathname, inMenu = false, onNavigate
   ];
   const item = (link: typeof links[number]) => {
     const active = !inMenu && (pathname === link.path || (!link.exact && pathname.startsWith(link.path + '/')));
-    return <Link key={link.label} href={link.href} onClick={event => {
+    return <Link key={link.label} data-mobile-tab href={link.href} onPointerDown={() => { if (pathname !== link.path) router.prefetch(link.href); }} onFocus={() => { if (pathname !== link.path) router.prefetch(link.href); }} onClick={event => {
       if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return;
       event.preventDefault();
       onNavigate?.();
       if (pathname === link.path) return;
       setDestination(link.href);
       startTransition(() => router.push(link.href));
-    }} aria-busy={pending && destination === link.href || undefined} aria-current={active ? 'page' : undefined} className={'mobile-tab ' + (active ? 'is-active' : '')}><AdsIcon name={link.icon}/><span>{link.label}</span></Link>;
+    }} aria-busy={pending && destination === link.href || undefined} aria-current={active ? 'page' : undefined} className={'mobile-tab ' + (active ? 'is-active ' : '') + (pending && destination === link.href ? 'is-pending' : '')}><AdsIcon name={link.icon}/><span>{link.label}</span></Link>;
   };
   return <nav aria-label={inMenu ? 'Menu primary navigation' : 'Mobile primary navigation'} className={inMenu ? 'mobile-tools-tabbar' : 'ads-bottom-nav lg:hidden'}>
     <span className="sr-only" role="status">{pending ? "Opening page…" : ""}</span>{item(links[0])}{item(links[1])}

@@ -10,7 +10,7 @@ export function WorkspaceHero({
   countLabel = "items",
 }: WorkspaceHeroProps) {
   return (
-    <header className="mb-4 flex flex-wrap items-center gap-x-3 gap-y-2 sm:mb-5">
+    <header className="workspace-section-hero mb-4 flex flex-wrap items-center gap-x-3 gap-y-2 sm:mb-5">
       <h1 className="min-w-0 text-xl font-semibold leading-tight tracking-tight text-text-primary sm:text-2xl">
         {title}
       </h1>

@@ -1,0 +1,24 @@
+/* Compact Business Suite-style portfolio cards, isolated from account-card rules. */
+.business-asset-card { min-width: 0; overflow: hidden; border: 1px solid rgb(var(--c-border)); border-radius: 14px; background: rgb(var(--c-bg-card)); color: rgb(var(--c-text-primary)); }
+.business-asset-heading { display: grid; grid-template-columns: minmax(0,1fr) 44px; align-items: center; gap: 4px; padding: 8px 8px 0 12px; }
+.business-asset-open { display: flex; align-items: center; min-width: 0; min-height: 48px; gap: 10px; border-radius: 8px; }
+.business-asset-avatar { display: grid; place-items: center; flex: 0 0 36px; width: 36px; height: 36px; overflow: hidden; border-radius: 10px; background: rgb(var(--c-accent)/.08); color: rgb(var(--c-accent)); font-size: 16px; font-weight: 600; }
+.business-asset-avatar img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.business-asset-name { flex: 1; min-width: 0; }
+.business-asset-name h2 { margin: 0; font-size: 14px; line-height: 1.4; font-weight: 600; overflow-wrap: anywhere; }
+.business-asset-status { display: flex; align-items: center; gap: 5px; margin-top: 3px; font-size: 11px; line-height: 1.5; color: rgb(var(--c-text-secondary)); }
+.business-asset-chevron { flex-shrink: 0; font-size: 22px; color: rgb(var(--c-text-muted)); }
+.business-asset-heading .copy-button { display: grid; place-items: center; width: 44px; height: 44px; padding: 0; border-radius: 10px; }
+.business-asset-heading .copy-button:hover { background: rgb(var(--c-bg-secondary)); }
+.business-asset-id { display: flex; gap: 5px; margin: 4px 12px 8px; font-size: 11px; line-height: 16px; color: rgb(var(--c-text-secondary)); }
+.business-asset-id code { min-width: 0; overflow-wrap: anywhere; font-family: inherit; font-variant-numeric: tabular-nums; user-select: text; }
+.business-asset-stats { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 0; margin: 0; padding: 8px 4px; border-top: 1px solid rgb(var(--c-border)); }
+.business-asset-stats > div { display: flex; flex-direction: column; min-width: 0; padding: 0 8px; }
+.business-asset-stats > div + div { border-left: 1px solid rgb(var(--c-border)/.6); }
+.business-asset-stats dt { font-size: 11px; line-height: 1.4; color: rgb(var(--c-text-secondary)); }
+.business-asset-stats dd { order: -1; margin: 0 0 3px; font-size: 14px; line-height: 1.3; font-weight: 600; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.business-asset-card :is(a,button) { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+.business-asset-card :is(a,button):focus-visible { outline: 2px solid rgb(var(--c-accent)); outline-offset: -2px; }
+.business-asset-open:active { opacity: .7; }
+.business-asset-list { align-items: start; gap: 10px; }
+@media (max-width: 359px) { .business-asset-stats > div { padding-inline: 6px; } }

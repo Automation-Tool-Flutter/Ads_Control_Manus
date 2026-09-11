@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
     }
   }
   try {
-    const ai = await callOpenAI<Omit<AccountLearningProfile, 'accountId' | 'generatedAt' | 'sampleSize' | 'acceptanceRate' | 'safeBudgetChangePercent'>>(SYSTEM_PROMPT, `RECORDS:\n${JSON.stringify(records, null, 2)}\nOnly checkpoints with verdict=improved count as positive evidence. Reduce confidence when the sample is small.`, { temperature: 0.15, maxOutputTokens: 4500, schema: { name: 'account_learning_profile', value: SCHEMA } });
+    const ai = await callOpenAI<Omit<AccountLearningProfile, 'accountId' | 'generatedAt' | 'sampleSize' | 'acceptanceRate' | 'safeBudgetChangePercent'>>(SYSTEM_PROMPT, `RECORDS:\n${JSON.stringify(records, null, 2)}\nOnly checkpoints with verdict=improved count as positive evidence. Reduce confidence when the sample is small.`, { maxOutputTokens: 4500, schema: { name: 'account_learning_profile', value: SCHEMA } });
     const successfulActionTypes = Array.from(actionStats.entries()).map(([actionType, stat]) => ({
       actionType, successRate: stat.total ? stat.improved / stat.total * 100 : 0, sampleSize: stat.total,
       learning: ai.successfulActionTypes.find(item => item.actionType === actionType)?.learning ?? `${stat.improved}/${stat.total} evaluations with improved outcomes.`,

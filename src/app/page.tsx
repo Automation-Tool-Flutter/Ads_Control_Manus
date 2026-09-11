@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
+import { LoadingState } from '@/components/ui/LoadingState';
 
 export default function Home() {
   const { state } = useAuth();
@@ -16,9 +17,7 @@ export default function Home() {
 
   if (state.isLoading) {
     return (
-      <div className="flex min-h-[60dvh] items-center justify-center">
-        <div className="h-12 w-12 rounded-2xl border-2 border-accent/20 border-t-accent animate-spin" />
-      </div>
+      <LoadingState message="Opening your workspace…" />
     );
   }
 

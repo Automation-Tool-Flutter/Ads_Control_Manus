@@ -338,7 +338,7 @@ export async function POST(req: NextRequest) {
     const analysis = await callOpenAI<GeminiAnalysis>(
       SYSTEM_PROMPT,
       buildPrompt(stats, kpis, body.dateRange),
-      { temperature: 0.25, maxOutputTokens: 4096 },
+      { maxOutputTokens: 4096 },
     );
     return NextResponse.json(analysis);
   } catch (err) {

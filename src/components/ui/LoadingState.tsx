@@ -1,15 +1,15 @@
 interface Props {
   message?: string;
+  placement?: 'screen' | 'panel';
 }
 
-export function LoadingState({ message = 'Loading...' }: Props) {
+export function LoadingState({ message = 'Loading…', placement = 'screen' }: Props) {
   return (
-    <div role="status" aria-live="polite" className="flex flex-col items-center justify-center py-12 sm:py-20 gap-4">
-      <div className="relative w-12 h-12">
-        <div className="absolute inset-0 rounded-2xl bg-accent/10" />
-        <div className="absolute inset-2 border-2 border-accent/25 border-t-accent rounded-xl animate-spin" />
+    <div role="status" aria-live="polite" className={`loading-state loading-state-${placement}`}>
+      <div className="loading-state-center">
+        <span className="loading-state-spinner" aria-hidden="true" />
+        <p>{message}</p>
       </div>
-      <p className="text-text-secondary text-sm font-medium">{message}</p>
     </div>
   );
 }

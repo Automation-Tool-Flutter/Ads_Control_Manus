@@ -9,6 +9,7 @@ import { usePagePosts } from '@/hooks/usePagePosts';
 import { useAdAccounts } from '@/hooks/useAdAccounts';
 import type { AdAccount } from '@/lib/types';
 import { PageContainer } from '@/components/layout/PageContainer';
+import { LoadingState } from '@/components/ui/LoadingState';
 import { ControlHeader } from '@/components/layout/ControlHeader';
 import { ReauthError } from '@/components/ui/ReauthError';
 import { PostCard } from '@/components/pages/PostCard';
@@ -259,16 +260,7 @@ export default function PageDetailPage() {
       {/* Scheduled posts tab */}
       {activeTab === 'scheduled' && (
         <>
-          {scheduledState.status === 'loading' && (
-            <div className="space-y-3">
-              {Array.from({ length: 2 }).map((_, i) => (
-                <div key={i} className="glass-card rounded-2xl p-4 animate-pulse space-y-3">
-                  <div className="h-4 bg-white/8 rounded w-4/5" />
-                  <div className="h-3 bg-white/5 rounded w-2/5" />
-                </div>
-              ))}
-            </div>
-          )}
+          {scheduledState.status === 'loading' && <LoadingState />}
           {scheduledState.status === 'error' && (
             <ReauthError
               message={scheduledState.error}
@@ -303,17 +295,7 @@ export default function PageDetailPage() {
       )}
 
       {/* Published posts tab */}
-      {activeTab === 'published' && postsState.status === 'loading' && (
-        <div className="space-y-3">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className="glass-card rounded-2xl p-4 animate-pulse space-y-3">
-              <div className="h-4 bg-white/8 rounded w-4/5" />
-              <div className="h-4 bg-white/5 rounded w-3/5" />
-              <div className="h-3 bg-white/5 rounded w-1/4" />
-            </div>
-          ))}
-        </div>
-      )}
+      {activeTab === 'published' && postsState.status === 'loading' && <LoadingState />}
 
       {activeTab === 'published' && postsState.status === 'error' && (
         <ReauthError

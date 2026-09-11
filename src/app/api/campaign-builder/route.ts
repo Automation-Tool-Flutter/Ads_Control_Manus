@@ -86,7 +86,7 @@ export async function POST(request: NextRequest) {
 
   try {
     const ai = await callOpenAI<AIResult>(SYSTEM_PROMPT, `Build a campaign plan using the following data:\n${JSON.stringify({ ...input, accountId: undefined, pageId: input.pageId ? 'available' : 'missing', postId: input.postId ? 'available' : 'missing', pixelId: input.pixelId ? 'available' : 'missing', requiredAdSets: input.numberOfAdSets, fixedObjective: goal.objective, fixedOptimizationGoal: goal.optimizationGoal }, null, 2)}\nEvery ad set needs at least one ad concept. Use the exact draftId values to link ads to ad sets.`, {
-      temperature: 0.35, maxOutputTokens: 6000, schema: { name: 'campaign_builder_draft', value: SCHEMA },
+      maxOutputTokens: 6000, schema: { name: 'campaign_builder_draft', value: SCHEMA },
     });
     const selected = ai.adSets.slice(0, Math.max(1, Math.min(5, input.numberOfAdSets)));
     if (!selected.length) throw new Error('AI did not generate a valid ad set.');

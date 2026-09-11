@@ -78,13 +78,14 @@ export async function POST(request: NextRequest) {
   if (!payload.posts.length && !payload.ads.length) return NextResponse.json({ error: 'No posts or ads are available to analyze.' }, { status: 422 });
 
   const input = buildInput(payload);
-  const config = { temperature: 0.35, maxOutputTokens: 7000, schema: { name: 'creative_intelligence', value: SCHEMA }, imageUrls: input.imageUrls };
+  const config = { maxOutputTokens: 7000, schema: { name: 'creative_intelligence', value: SCHEMA }, imageUrls: input.imageUrls };
   try {
     let analysis: CreativeAnalysis;
     try {
       analysis = await callOpenAI<CreativeAnalysis>(SYSTEM_PROMPT, input.prompt, config);
     } catch (error) {
-      if (!(error instanceof OpenAIError) || error.status !== 400 || !input.imageUrls.length) throw error;
+      const imageErrorCodes = ['invalid_image', 'invalid_image_url', 'image_parse_error', 'image_too_large'];
+      if (!(error instanceof OpenAIError) || error.status !== 400 || !imageErrorCodes.includes(error.details?.code ?? '') || !input.imageUrls.length) throw error;
       analysis = await callOpenAI<CreativeAnalysis>(SYSTEM_PROMPT, `${input.prompt}\n\nImage URLs could not be loaded; assess text and metrics only and lower confidence for visual conclusions.`, { ...config, imageUrls: [] });
     }
     return NextResponse.json(sanitize(analysis, input.postIds, input.adIds));

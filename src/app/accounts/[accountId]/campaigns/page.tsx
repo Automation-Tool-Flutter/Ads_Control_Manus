@@ -2,7 +2,8 @@
 import { Modal } from '@/components/ui/Modal';
 import { usePublishAIView } from '@/hooks/useAIViewContext';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useDeferredValue, useMemo } from 'react';
+import { useViewState } from '@/hooks/useViewState';
 import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
@@ -10,6 +11,7 @@ import { useCampaigns } from '@/hooks/useCampaigns';
 import { useAccountCurrency } from '@/hooks/useAccountCurrency';
 import { useCampaignAnalysis } from '@/hooks/useCampaignAnalysis';
 import { PageContainer } from '@/components/layout/PageContainer';
+import { LoadingState } from '@/components/ui/LoadingState';
 import { ControlHeader } from '@/components/layout/ControlHeader';
 import { StatusDot } from '@/components/ui/StatusBadge';
 import { CopyButton } from '@/components/ui/CopyButton';
@@ -18,6 +20,7 @@ import { ReauthError, isPermissionError } from '@/components/ui/ReauthError';
 import { StatusToggle } from '@/components/ui/StatusToggle';
 import { BudgetEditor } from '@/components/ui/BudgetEditor';
 import { DateFilter } from '@/components/ui/DateFilter';
+import { CollectionToolbar } from '@/components/ui/CollectionToolbar';
 import { ScoreCard } from '@/components/optimize/ScoreCard';
 import { AngleTabs } from '@/components/optimize/AngleTabs';
 import { CampaignActionPreview } from '@/components/optimize/CampaignActionPreview';
@@ -67,34 +70,7 @@ function MetricCell({ label, value, loading }: { label: string; value: string; l
 }
 
 // ─── Skeleton ─────────────────────────────────────────────────────────────────
-function SkeletonCard() {
-  return (
-    <div className="glass-card rounded-2xl overflow-hidden animate-pulse">
-      <div className="flex items-start gap-3 p-4 pb-3">
-        <div className="flex-1 space-y-2">
-          <div className="h-4 bg-white/8 rounded w-3/4" />
-          <div className="h-3 bg-white/5 rounded w-1/3" />
-        </div>
-        <div className="h-5 w-16 bg-white/8 rounded-full" />
-      </div>
-      <div className="mx-4 border-t border-border/40" />
-      <div className="grid grid-cols-4 gap-3 px-4 py-3">
-        {[...Array(4)].map((_, i) => (
-          <div key={i} className="space-y-1.5">
-            <div className="h-2.5 bg-white/5 rounded w-8" />
-            <div className="h-4 bg-white/8 rounded w-12" />
-          </div>
-        ))}
-      </div>
-      <div className="mx-4 border-t border-border/40" />
-      <div className="flex">
-        <div className="flex-1 h-10 bg-white/5" />
-        <div className="w-px bg-border/40" />
-        <div className="flex-1 h-10 bg-white/5" />
-      </div>
-    </div>
-  );
-}
+
 
 // ─── Mobile card ──────────────────────────────────────────────────────────────
 function CampaignCard({
@@ -122,7 +98,7 @@ function CampaignCard({
   return (
     <div className={`meta-item meta-item-compact ${selected ? 'meta-item-selected' : ''}`}>
       {/* Header: name + controls */}
-      <div className="meta-item-header flex items-start justify-between gap-3 px-4 py-3">
+      <div className="campaign-card-heading meta-item-header flex items-start justify-between gap-3 px-4 py-3">
         <Link href={`/accounts/${accountId}/campaigns/${campaign.id}?accountName=${encodeURIComponent(accountName)}&campaignName=${encodeURIComponent(campaign.name)}`} className="flex-1 min-w-0 active:opacity-70">
           <div className="flex items-center gap-1.5">
             <StatusDot color={status.color} />
@@ -130,9 +106,11 @@ function CampaignCard({
           </div>
           <p className="meta-card-status">{status.label}<span aria-hidden="true">·</span>{getObjectiveLabel(campaign.objective)}</p>
         </Link>
-        <div className="flex items-center gap-2 flex-shrink-0 pt-0.5">
+        <div className="campaign-card-controls flex items-center gap-2 flex-shrink-0 pt-0.5">
+          <span className="campaign-delivery-label">Delivery</span>
           <StatusToggle status={campaign.status} onToggle={async () => onToggleStatus()} />
           <label className="meta-card-select">
+          <span className="campaign-select-label">Select</span>
           <input
             type="checkbox"
             aria-label={`Select ${campaign.name}`}
@@ -167,13 +145,13 @@ function CampaignCard({
       <div className="meta-card-actions flex gap-2">
         <Link
           href={`/accounts/${accountId}/campaigns/${campaign.id}?accountName=${encodeURIComponent(accountName)}&campaignName=${encodeURIComponent(campaign.name)}`}
-          className="meta-action flex-1 rounded-none text-text-secondary hover:bg-bg-secondary active:bg-bg-secondary"
+          className="meta-action meta-action-secondary flex-1"
         >
           Details
         </Link>
         <Link
           href={`/accounts/${accountId}/campaigns/${campaign.id}/adsets?accountName=${encodeURIComponent(accountName)}&currency=${encodeURIComponent(currency)}&campaignName=${encodeURIComponent(campaign.name)}`}
-          className="meta-action flex-1 rounded-none text-accent hover:bg-accent/5 active:bg-accent/10"
+          className="meta-action meta-action-primary flex-1"
         >
           Ad Sets
           <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -194,7 +172,10 @@ export default function CampaignsPage() {
   const searchParams = useSearchParams();
   const accountName = searchParams.get('accountName') ?? accountId;
   const { toast } = useToast();
-  const [dateFilter, setDateFilter] = useState<DatePreset | DateRange>('last_30d');
+  const [dateFilter, setDateFilter] = useViewState<DatePreset | DateRange>('period', 'last_30d');
+  const [search, setSearch] = useViewState('search', '');
+  const [statusFilter, setStatusFilter] = useViewState('status', 'all');
+  const filterSearch = useDeferredValue(search);
 
   useEffect(() => {
     if (!auth.isLoading && !auth.token) router.replace('/login');
@@ -378,14 +359,15 @@ export default function CampaignsPage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dateFilter]);
 
-  if (auth.isLoading || state.status === 'idle') return null;
-
-  const rawCampaigns = state.status === 'success' ? state.data : [];
-  const campaigns = sortCampaigns(rawCampaigns.map(c => ({ ...c, ...overrides[c.id] })));
+  const rawCampaigns = useMemo(() => state.status === 'success' ? state.data : [], [state]);
+  const campaigns = useMemo(() => sortCampaigns(rawCampaigns.map(c => ({ ...c, ...overrides[c.id] }))), [rawCampaigns, overrides]);
   const activeCount = campaigns.filter(c => c.status === 'ACTIVE').length;
+  const visibleCampaigns = useMemo(() => campaigns.filter(c => `${c.name} ${c.id}`.toLowerCase().includes(filterSearch.trim().toLowerCase()) && (statusFilter === 'all' || c.status === statusFilter)), [campaigns, filterSearch, statusFilter]);
 
-  const allSelected = campaigns.length > 0 && campaigns.every(c => selectedIds.has(c.id));
-  const someSelected = campaigns.some(c => selectedIds.has(c.id)) && !allSelected;
+  if (auth.isLoading || state.status === 'idle') return <PageContainer ready={false}><LoadingState message="Loading campaigns…" /></PageContainer>;
+
+  const allSelected = visibleCampaigns.length > 0 && visibleCampaigns.every(c => selectedIds.has(c.id));
+  const someSelected = visibleCampaigns.some(c => selectedIds.has(c.id)) && !allSelected;
   const selectedCampaigns = campaigns.filter(c => selectedIds.has(c.id));
 
   // Update indeterminate state
@@ -394,15 +376,15 @@ export default function CampaignsPage() {
   }
 
   function handleCheckAll() {
-    if (allSelected) {
-      setSelectedIds(new Set());
-    } else {
-      setSelectedIds(new Set(campaigns.map(c => c.id)));
-    }
+    setSelectedIds(previous => {
+      const next = new Set(previous);
+      visibleCampaigns.forEach(c => { if (allSelected) next.delete(c.id); else next.add(c.id); });
+      return next;
+    });
   }
 
   return (
-    <PageContainer>
+    <PageContainer ready={state.status === 'success' && filterSearch === search}>
       <ControlHeader
         breadcrumbs={[
           { label: 'Accounts', href: '/accounts' },
@@ -410,9 +392,9 @@ export default function CampaignsPage() {
           { label: 'Campaigns' },
         ]}
         eyebrow="Campaign operations"
-        title="Delivery board"
-        description="Monitor status, budget movement, delivery metrics, and GPT review signals for this ad account."
-        badge="Meta Ads + GPT"
+        title="Campaigns"
+        description="Monitor delivery, review budgets and analyze performance with Meta AI."
+        badge="Meta Ads AI"
         stats={state.status === 'success' ? [
           { label: 'total', value: campaigns.length, tone: 'neutral' },
           { label: 'active', value: activeCount, tone: 'green' },
@@ -433,6 +415,8 @@ export default function CampaignsPage() {
           </div>
         )}
       </ControlHeader>
+      {state.status === 'success' && campaigns.length > 0 && <CollectionToolbar search={search} onSearch={setSearch} label="Search campaigns" placeholder="Search campaigns…" count={`${visibleCampaigns.length} of ${campaigns.length} campaigns · ${selectedIds.size} selected`} filterCount={statusFilter === 'all' ? 0 : 1} onReset={() => { setSearch(''); setStatusFilter('all'); }} filters={<label>Delivery status<select value={statusFilter} onChange={event => setStatusFilter(event.target.value)}><option value="all">All campaigns</option><option value="ACTIVE">Active</option><option value="PAUSED">Paused</option><option value="ARCHIVED">Archived</option><option value="DELETED">Deleted</option></select></label>} />}
+      {state.status === 'success' && campaigns.length > 0 && visibleCampaigns.length === 0 && <div className="collection-empty"><h2>No matching campaigns</h2><p>Try another name, ID or delivery status.</p><button type="button" onClick={() => { setSearch(''); setStatusFilter('all'); }}>Clear filters</button></div>}
 
       {/* Mutation error */}
       {mutationError && (
@@ -443,9 +427,7 @@ export default function CampaignsPage() {
 
       {/* Loading */}
       {state.status === 'loading' && (
-        <div className="space-y-3">
-          {Array.from({ length: 4 }).map((_, i) => <SkeletonCard key={i} />)}
-        </div>
+        <LoadingState />
       )}
 
       {/* Error */}
@@ -482,9 +464,10 @@ export default function CampaignsPage() {
               {someSelected && (
                 <span className="text-xs text-text-muted">{selectedIds.size} selected</span>
               )}
-              {allSelected ? 'Deselect all' : 'Select all'}
+              {allSelected ? 'Deselect visible' : 'Select visible'}
               <input
                 type="checkbox"
+                disabled={visibleCampaigns.length === 0}
                 checked={allSelected}
                 ref={el => { if (el) el.indeterminate = someSelected; }}
                 onChange={handleCheckAll}
@@ -495,7 +478,7 @@ export default function CampaignsPage() {
 
           {/* Mobile cards */}
           <div className="touch-record-list space-y-3">
-            {campaigns.map(campaign => (
+            {visibleCampaigns.map(campaign => (
               <CampaignCard
                 key={campaign.id}
                 campaign={campaign}
@@ -522,6 +505,8 @@ export default function CampaignsPage() {
                       <input
                         ref={checkAllRef}
                         type="checkbox"
+                        aria-label="Select visible campaigns"
+                        disabled={visibleCampaigns.length === 0}
                         checked={allSelected}
                         onChange={handleCheckAll}
                         className="w-4 h-4 rounded accent-accent cursor-pointer"
@@ -547,7 +532,7 @@ export default function CampaignsPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border/50">
-                  {campaigns.map(campaign => {
+                  {visibleCampaigns.map(campaign => {
                     const status = getCampaignStatus(campaign.status);
                     const insight = insights[campaign.id];
                     const budget = campaign.daily_budget
@@ -704,7 +689,7 @@ export default function CampaignsPage() {
             <div className="flex items-center justify-between px-5 py-4 border-b border-border flex-shrink-0">
               <div className="flex items-center gap-2">
                 <span className="text-accent text-lg leading-none">✦</span>
-                <h2 className="text-base font-semibold text-text-primary">GPT Analysis</h2>
+                <h2 className="text-base font-semibold text-text-primary">Meta AI analysis</h2>
               </div>
               {analysisState.step !== 'analyzing' && (
                 <button
@@ -733,7 +718,7 @@ export default function CampaignsPage() {
                   </div>
                   <div className="text-center">
                     <p className="text-text-primary font-semibold mb-1">Analyzing campaigns...</p>
-                    <p className="text-text-muted text-sm">GPT is processing your campaign data</p>
+                    <p className="text-text-muted text-sm">Meta AI is analyzing your campaign data</p>
                   </div>
                 </div>
               )}
@@ -811,7 +796,7 @@ export default function CampaignsPage() {
               title={!insightsLoaded ? 'Load metrics first' : undefined}
               className="selection-analyze flex items-center gap-1.5 px-3 py-2 bg-text-primary text-white text-sm font-medium rounded-lg disabled:opacity-50 transition-opacity"
             >
-              Analyze with GPT ({selectedIds.size})
+              Analyze with Meta AI ({selectedIds.size})
             </button>
           </div>
         </div>

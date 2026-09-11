@@ -1,39 +1,24 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useDeferredValue, useMemo, memo } from 'react';
+import { useViewState } from '@/hooks/useViewState';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePages } from '@/hooks/usePages';
 import { PageContainer } from '@/components/layout/PageContainer';
+import { LoadingState } from '@/components/ui/LoadingState';
 import { ReauthError } from '@/components/ui/ReauthError';
+import { CollectionToolbar } from '@/components/ui/CollectionToolbar';
 import type { Page } from '@/lib/types';
 
 function PagesHero({ count }: { count?: number }) {
   return <WorkspaceHero title="Page" count={count} countLabel="Connected Pages" />;
 }
 
-function SkeletonCard() {
-  return (
-    <div className="meta-item animate-pulse">
-      <div className="meta-item-header p-4">
-        <div className="flex gap-3">
-          <div className="h-14 w-14 rounded-lg bg-bg-tertiary" />
-          <div className="min-w-0 flex-1 py-1">
-            <div className="h-4 w-3/4 rounded bg-bg-tertiary" />
-            <div className="mt-2 h-3 w-1/2 rounded bg-bg-secondary" />
-          </div>
-        </div>
-      </div>
-      <div className="grid grid-cols-2 gap-2 p-4">
-        <div className="h-14 rounded-lg bg-bg-secondary" />
-        <div className="h-14 rounded-lg bg-bg-secondary" />
-      </div>
-    </div>
-  );
-}
 
-function PageCard({ page }: { page: Page }) {
+
+const PageCard = memo(function PageCard({ page }: { page: Page }) {
   const isVerified = page.verification_status === 'blue_verified' || page.verification_status === 'gray_verified';
 
   return (
@@ -41,7 +26,6 @@ function PageCard({ page }: { page: Page }) {
       href={`/pages/${page.id}?name=${encodeURIComponent(page.name)}`}
       className="meta-item meta-item-compact group block"
     >
-      <div className="absolute left-0 right-0 top-0 h-1.5 bg-accent/60" />
       <div className="meta-item-header flex gap-3 p-4">
         {page.picture?.data.url ? (
           // eslint-disable-next-line @next/next/no-img-element
@@ -101,9 +85,11 @@ function PageCard({ page }: { page: Page }) {
       </div>
     </Link>
   );
-}
+});
 
 export default function PagesPage() {
+  const [search, setSearch] = useViewState('search', '');
+  const filterSearch = useDeferredValue(search);
   const { state: auth } = useAuth();
   const router = useRouter();
 
@@ -113,16 +99,16 @@ export default function PagesPage() {
 
   const { state, retry, loadMore, hasMore, loadingMore } = usePages(auth.token);
 
-  if (auth.isLoading || state.status === 'idle') return null;
+  const pages = useMemo(() => state.status === 'success' ? state.data.filter(page => [page.name, page.id, page.category, page.business?.name].join(' ').toLowerCase().includes(filterSearch.trim().toLowerCase())) : [], [state, filterSearch]);
+  if (auth.isLoading || state.status === 'idle') return <PageContainer ready={false}><LoadingState message="Loading Pages…" /></PageContainer>;
 
   return (
-    <PageContainer>
+    <PageContainer ready={state.status === 'success' && filterSearch === search}>
       <PagesHero count={state.status === 'success' ? state.data.length : undefined} />
+      {state.status === 'success' && state.data.length > 0 && <CollectionToolbar search={search} onSearch={setSearch} label="Search Pages" placeholder="Search Pages…" count={`${pages.length} of ${state.data.length} loaded Pages`} onReset={() => setSearch('')} />}
 
       {state.status === 'loading' && (
-        <div className="space-y-3">
-          {Array.from({ length: 4 }).map((_, i) => <SkeletonCard key={i} />)}
-        </div>
+        <LoadingState />
       )}
 
       {state.status === 'error' && (
@@ -157,10 +143,11 @@ export default function PagesPage() {
         <>
           {/* Mobile + Desktop: card list (same layout, table not needed for pages) */}
           <div className="grid gap-4 md:grid-cols-2 2xl:grid-cols-3">
-            {state.data.map(page => (
+            {pages.map(page => (
               <PageCard key={page.id} page={page} />
             ))}
           </div>
+          {pages.length === 0 && <div className="collection-empty"><h2>No matching Pages</h2><p>Try another name, ID or business. Load more Pages to search further.</p><button type="button" onClick={() => setSearch('')}>Clear search</button></div>}
           {hasMore && (
             <button
               onClick={loadMore}

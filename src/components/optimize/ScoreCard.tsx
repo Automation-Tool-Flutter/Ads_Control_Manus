@@ -32,7 +32,7 @@ export function ScoreCard({ score, summary }: Props) {
     <div className="meta-item">
       <div className="meta-item-header flex items-center justify-between px-4 py-3">
         <div>
-          <p className="text-[10px] font-black uppercase text-accent">GPT decision layer</p>
+          <p className="text-xs font-semibold text-accent">Meta AI analysis</p>
           <h2 className="mt-0.5 text-base font-bold text-text-primary">Overall Score</h2>
         </div>
         <span className={`rounded-md border px-2.5 py-1 text-xs font-black ${ring} ${text}`}>

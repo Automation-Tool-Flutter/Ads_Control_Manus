@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, type ReactNode } from 'react';
 import { lockOverlayScroll } from '@/lib/overlay-scroll';
+import { useOverlayPresence } from '@/hooks/useOverlayPresence';
+import { SheetHandle } from './SheetHandle';
 
 /** Native focus isolation, nested dialogs, keyboard-aware sizing and focus return. */
 export function Modal({ open, label, onClose, busy = false, children }: {
@@ -12,10 +14,12 @@ export function Modal({ open, label, onClose, busy = false, children }: {
   children: ReactNode;
 }) {
   const dialog = useRef<HTMLDialogElement>(null);
+  const content = useRef<HTMLDivElement>(null);
+  const { present, closing } = useOverlayPresence(open);
   const backdropStart = useRef(false);
   useEffect(() => {
     const node = dialog.current;
-    if (!open || !node) return;
+    if (!present || !node) return;
     const opener = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     const release = lockOverlayScroll();
     if (!node.open) node.showModal();
@@ -26,10 +30,10 @@ export function Modal({ open, label, onClose, busy = false, children }: {
       release();
       if (opener?.isConnected) opener.focus({ preventScroll: true });
     };
-  }, [open]);
+  }, [present]);
 
   return (
-    <dialog ref={dialog} className="app-modal" aria-label={label} aria-busy={busy || undefined}
+    <dialog ref={dialog} className="app-modal" data-closing={closing} aria-label={label} aria-busy={busy || undefined}
       onKeyDown={event => { if (event.key === 'Escape' || event.key === 'Tab') event.stopPropagation(); }}
       onCancel={event => { event.preventDefault(); if (!busy) onClose(); }}
       onPointerDown={event => { backdropStart.current = event.target === event.currentTarget; }}
@@ -37,8 +41,9 @@ export function Modal({ open, label, onClose, busy = false, children }: {
         if (event.target === event.currentTarget && backdropStart.current && !busy) onClose();
         backdropStart.current = false;
       }}>
-      <div className="app-modal-content" data-modal-content tabIndex={-1} autoFocus>
-        {open && children}
+      <div ref={content} className="app-modal-content" data-modal-content tabIndex={-1} autoFocus>
+        {present && <SheetHandle panel={content} onClose={onClose} disabled={busy} open={open} />}
+        {present && children}
       </div>
     </dialog>
   );

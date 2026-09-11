@@ -1,0 +1,12 @@
+# API credentials remain in the Firebase backend's Environment / Secret Manager.
+# Console environment variables take precedence over these defaults.
+env:
+  - variable: OPENAI_MODEL
+    value: gpt-5.6-luna
+    availability:
+      - BUILD
+      - RUNTIME
+  - variable: OPENAI_REASONING_EFFORT
+    value: none
+    availability:
+      - RUNTIME
