@@ -1,6 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useReducer, useEffect, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import type { AuthState, FBUser } from '@/lib/types';
 import { clearViewMemory } from '@/lib/view-memory';
 import {
@@ -145,6 +146,7 @@ async function finishOAuthLogin(callback: FacebookOAuthCallback) {
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [state, dispatch] = useReducer(reducer, initialState);
+  const router = useRouter();
 
   // Restore session or complete the OAuth redirect after Facebook returns.
   useEffect(() => {
@@ -181,10 +183,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         clearOAuthState();
 
         if (!cancelled) {
+          // Navigate only after a completed Facebook sign-in, never when merely
+          // restoring a saved session on the Login page.
+          const returnTo = localStorage.getItem(STORAGE_KEYS.OAUTH_RETURN_TO) ??
+            getCookieValue(STORAGE_KEYS.OAUTH_RETURN_TO);
+          localStorage.removeItem(STORAGE_KEYS.OAUTH_RETURN_TO);
+          clearCookieValue(STORAGE_KEYS.OAUTH_RETURN_TO);
+          let destination = '/accounts';
+          if (returnTo?.startsWith('/')) {
+            const target = new URL(returnTo, window.location.origin);
+            if (target.origin === window.location.origin && target.pathname !== '/login' && target.pathname !== '/') {
+              destination = `${target.pathname}${target.search}${target.hash}`;
+            }
+          }
           dispatch({
             type: 'SET_AUTH',
             payload: { token: oauthCallback.accessToken, user },
           });
+          router.replace(destination);
         }
       } catch (error) {
         clearStoredSession();
@@ -201,7 +217,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [router]);
 
   // Auto-logout when any API call detects an expired/invalid token
   useEffect(() => {

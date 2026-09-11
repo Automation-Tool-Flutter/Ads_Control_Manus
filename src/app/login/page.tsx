@@ -1,27 +1,12 @@
 "use client";
 
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useAuth } from "@/contexts/AuthContext";
 import { BrandLogo } from "@/components/ui/BrandLogo";
 import { FacebookLoginButton } from "@/components/facebook/FacebookLoginButton";
-import { STORAGE_KEYS } from "@/lib/constants";
-import { clearCookieValue, getCookieValue } from "@/lib/facebook-oauth";
 
 export default function LoginPage() {
   const { state } = useAuth();
-  const router = useRouter();
-
-  useEffect(() => {
-    if (!state.isLoading && state.token) {
-      const returnTo =
-        localStorage.getItem(STORAGE_KEYS.OAUTH_RETURN_TO) ??
-        getCookieValue(STORAGE_KEYS.OAUTH_RETURN_TO);
-      localStorage.removeItem(STORAGE_KEYS.OAUTH_RETURN_TO);
-      clearCookieValue(STORAGE_KEYS.OAUTH_RETURN_TO);
-      router.replace(returnTo?.startsWith("/") && returnTo !== "/login" ? returnTo : "/accounts");
-    }
-  }, [state.isLoading, state.token, router]);
 
   return (
     <main className="login-workspace flex-1 grid items-center gap-8 p-5 sm:p-10 lg:grid-cols-[1.1fr_0.9fr]">
@@ -50,6 +35,19 @@ export default function LoginPage() {
           </p>
 
           <div className="mt-6">
+            {!state.isLoading && state.token && (
+              <div className="mb-4 rounded-2xl border border-border bg-bg-secondary p-4">
+                <p className="text-sm text-text-secondary">
+                  Signed in as {state.user?.name || "your Facebook account"}.
+                </p>
+                <Link
+                  href="/accounts"
+                  className="mobile-action mt-2 flex w-full items-center justify-center rounded-full border border-border px-4 text-sm font-semibold text-accent"
+                >
+                  Continue to workspace
+                </Link>
+              </div>
+            )}
             <FacebookLoginButton />
           </div>
 
