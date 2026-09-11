@@ -100,4 +100,54 @@ Menu tests updated in `tests/mobile-tools.test.cjs`; not executed at the user's 
 
 Static review only. Added `tests/business-asset-card.test.cjs`; not executed.
 
+## Single mobile Back control
+
+Inline return links, including the Business Portfolio row and shared BackLink,
+are hidden with their own spacing when a mobile app-bar Back button is present.
+The four public Back to home links follow the same rule. Desktop and pages
+without an app-bar Back retain these links. Breadcrumb titles, tabs, cross-tool
+links and the header's existing history behavior are unchanged. Verify a direct
+business-detail entry, normal Back history, desktop navigation and public pages
+without authentication. Static checks only; updated tests were not run.
+
+## Menu account selection and navigation repair
+
+Without an account context, account tools now open an in-menu account picker
+instead of navigating to the same Accounts page. Choosing an account opens the
+originally requested tool with the account ID, name and currency. Choose/Switch
+account opens the same picker for Account overview. The picker supports search,
+loading, retry, no results and Cancel. Test selecting Budgets, cancelling,
+selecting again, and opening a specific account; verify Page, Business assets,
+Settings and bottom tabs release the native dialog before changing routes.
+Desktop modified-click behavior on normal links remains intact.
+
+An interaction regression test was added for tool → picker → destination and
+Cancel. No runtime tests, app or build were executed at the user's request.
+
+## Scroll-only tool menu (latest layout)
+
+The duplicate Workspace group is removed, including its search/pin entries.
+Analyze & optimize and Create & manage now show all twelve account tools in
+ordinary sections, without disclosure arrows or tap-to-expand behavior. Scroll
+the menu body to reach them; search and bottom navigation remain in place.
+Account selection remains at the top, Page/Assets in the bottom navigation,
+and Settings on the profile row. Valid saved account shortcuts are preserved.
+Updated menu assertions cover the two sections, absence of disclosures and
+duplicate Workspace entries. Static review only; tests were not run.
+
+## Menu transition cover
+
+Menu navigation now activates an opaque, centered loading cover before closing
+the native menu. The old screen is not visible or interactive while Next changes
+routes. The cover clears only after a different pathname commits; the destination
+page's own data loader then takes over. Same-page clicks do not block the screen.
+After 15 seconds the cover stays up and offers Reload destination / Cancel
+navigation (normal document navigation, so a pending client transition cannot
+arrive later after cancelling). Reduced motion does not disable this protection.
+
+Manually check a slow route, a cached route, choosing an account for a tool,
+bottom tabs inside Menu, redirects, and an unreachable destination. Added
+`tests/menu-navigation.test.cjs` and an ordering assertion in menu interaction
+tests. Static review only; no app/build/test execution.
+
 Suggested tests to run locally: `node --test tests/mobile-interactions.test.cjs tests/mobile-product.test.cjs tests/meta-chat.test.cjs tests/overlay-presence.test.cjs tests/mobile-continuity.test.cjs`.

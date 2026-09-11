@@ -32,6 +32,20 @@ test('nested overlays keep scrolling locked until the last overlay closes', () =
   assert.equal(document.documentElement.style.overflow, '');
 });
 
+test('inline back links are marked independently of the app-bar back button', () => {
+  const { BackLink } = load('src/components/ui/BackLink.tsx', {
+    'next/link': { default: props => React.createElement('a', props) },
+  });
+  const html = renderToStaticMarkup(React.createElement(BackLink, { href: '/businesses', label: 'businesses' }));
+  assert.match(html, /data-inline-back="true"/);
+  assert.match(html, /href="\/businesses"/);
+  assert.match(html, /aria-label="Back to businesses"/);
+  const css = fs.readFileSync('src/app/mobile-interactions.css', 'utf8');
+  assert.ok(css.includes('body:has(.ads-mobile-header .mobile-back) .workspace-shell [data-inline-back] { display: none; }'));
+  const detail = fs.readFileSync('src/app/businesses/[businessId]/page.tsx', 'utf8');
+  assert.match(detail, /<div data-inline-back className="mb-4">/);
+});
+
 test('custom dates have explicit labels and reject reversed ranges', () => {
   const { DateFilter } = load('src/components/ui/DateFilter.tsx', { './Modal': { Modal: () => null } });
   const html = renderToStaticMarkup(React.createElement(DateFilter, {

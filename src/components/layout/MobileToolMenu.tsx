@@ -1,11 +1,13 @@
 'use client';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type MouseEvent } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { AdsIcon } from './AdsIcon';
 import { UserAvatar } from '@/components/ui/UserAvatar';
 import { WORKBENCH_SECTIONS } from './WorkbenchNavigation';
 import { MobileNavBar } from './MobileNavBar';
+import { MenuAccountPicker } from './MenuAccountPicker';
+import { beginMenuNavigation } from '@/lib/menu-navigation';
 
 const SHORT_NAMES: Record<string, string> = {
   '/optimize': 'Performance', '/audiences': 'Audiences', '/budget-optimizer': 'Budgets',
@@ -21,16 +23,12 @@ export function mobileTools(base: string, query: string) {
       icon, href: base ? base + path + query : '/accounts', accountRequired: !base,
       category: BUILD.has(path) ? 'Build' : 'Analyze', quick: QUICK.has(path),
     }))),
-    ...[['/accounts', 'Switch account', 'grid'], ['/pages', 'Page', 'page'], ['/businesses', 'Business assets', 'audience'], ['/settings', 'Settings', 'settings']].map(([href,label,icon]) => ({
-      id: href, href, label, icon, keywords: label, category: 'Workspace', quick: false, accountRequired: false,
-    })),
   ];
 }
 
 const GROUPS = [
   { id: 'Analyze', label: 'Analyze & optimize', icon: 'chart' },
   { id: 'Build', label: 'Create & manage', icon: 'campaign' },
-  { id: 'Workspace', label: 'Workspace', icon: 'grid' },
 ];
 
 export function MobileToolMenu({ accountBase, query, accountName, pathname, name, picture, userId, focusSearch = false, onClose, onLogout }: {
@@ -43,6 +41,8 @@ export function MobileToolMenu({ accountBase, query, accountName, pathname, name
   const [pins, setPins] = useState<string[]>(Array.from(QUICK));
   const [editing, setEditing] = useState(false);
   const [message, setMessage] = useState('');
+  const [picking, setPicking] = useState<{ path: string; label: string } | null>(null);
+  const menuRoot = useRef<HTMLDivElement>(null);
   const savedPins = useRef<string[]>(Array.from(QUICK));
   const searchInput = useRef<HTMLInputElement>(null);
   const scrollArea = useRef<HTMLDivElement>(null);
@@ -50,6 +50,21 @@ export function MobileToolMenu({ accountBase, query, accountName, pathname, name
   const term = search.trim().toLowerCase();
   const visible = tools.filter(tool => (tool.label + ' ' + tool.keywords).toLowerCase().includes(term));
   const shortcuts = pins.map(id => tools.find(tool => tool.id === id)).filter((tool): tool is typeof tools[number] => Boolean(tool));
+  const navigate = (href: string) => {
+    beginMenuNavigation(href);
+    // Release native dialog hit-testing before navigating, including same-route clicks.
+    menuRoot.current?.closest('dialog')?.close();
+    onClose();
+    router.push(href);
+  };
+  const visitLink = (event: MouseEvent<HTMLAnchorElement>, href: string) => {
+    if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    event.preventDefault(); navigate(href);
+  };
+  const chooseTool = (tool: typeof tools[number]) => {
+    if (tool.accountRequired) setPicking({ path: tool.id === 'overview' ? '' : tool.id, label: tool.label });
+    else navigate(tool.href);
+  };
 
   const openAI = () => {
     const dialog = scrollArea.current?.closest('dialog');
@@ -88,19 +103,25 @@ export function MobileToolMenu({ accountBase, query, accountName, pathname, name
   const renderTool = (tool: typeof tools[number], shortcut = false) => editing ?
     <button type="button" key={tool.id} onClick={() => togglePin(tool.id)} aria-pressed={pins.includes(tool.id)} aria-label={(pins.includes(tool.id) ? 'Unpin ' : 'Pin ') + tool.label} className="mobile-menu-row mobile-menu-pin">
       <span className="mobile-tool-icon"><AdsIcon name={tool.icon} /></span><strong>{tool.label}</strong><span className="mobile-menu-check" aria-hidden="true">{pins.includes(tool.id) ? '✓' : '+'}</span>
-    </button> :
-    <Link key={tool.id} href={tool.href} onClick={onClose} aria-current={active(tool) ? 'page' : undefined} className={shortcut ? 'mobile-menu-shortcut' : 'mobile-menu-row'}>
+    </button> : tool.accountRequired ?
+    <button type="button" key={tool.id} className={shortcut ? 'mobile-menu-shortcut' : 'mobile-menu-row'} onClick={() => chooseTool(tool)}><span className="mobile-tool-icon"><AdsIcon name={tool.icon} /></span><span className="mobile-menu-label"><strong>{tool.label}</strong>{tool.accountRequired && <small>Select account first</small>}</span><span aria-hidden="true">›</span></button> :
+    <Link key={tool.id} href={tool.href} onClick={event => visitLink(event, tool.href)} aria-current={active(tool) ? 'page' : undefined} className={shortcut ? 'mobile-menu-shortcut' : 'mobile-menu-row'}>
       <span className="mobile-tool-icon"><AdsIcon name={tool.icon} /></span><span className="mobile-menu-label"><strong>{tool.label}</strong>{tool.accountRequired && <small>Select account first</small>}</span>
       {!shortcut && <span className="mobile-menu-chevron" aria-hidden="true">›</span>}
     </Link>;
 
-  return <div className="mobile-tools-shell mobile-menu-organized" data-editing={editing}>
+  if (picking) return <div ref={menuRoot} className="mobile-tools-shell mobile-menu-organized"><MenuAccountPicker label={picking.label} onCancel={() => setPicking(null)} onSelect={account => {
+    const params = new URLSearchParams({ accountName: account.name, name: account.name, currency: account.currency });
+    navigate(`/accounts/${encodeURIComponent(account.id)}${picking.path}?${params}`);
+  }} /></div>;
+
+  return <div ref={menuRoot} className="mobile-tools-shell mobile-menu-organized" data-editing={editing}>
     <div className="mobile-tools-heading"><h2 id="mobile-tools-title">{editing ? 'Edit shortcuts' : 'Menu'}</h2><button type="button" autoFocus={!focusSearch} onClick={editing ? cancelEditing : onClose} aria-label={editing ? 'Cancel shortcut changes' : 'Close tools'} className="mobile-tools-close"><AdsIcon name="close" /></button></div>
     <div className="mobile-menu-search-area">
       <form role="search" className="mobile-tools-search" onSubmit={event => {
         event.preventDefault();
         // Never guess which tool the user meant when several results match.
-        if (!editing && term && visible.length === 1) { onClose(); router.push(visible[0].href); }
+        if (!editing && term && visible.length === 1) chooseTool(visible[0]);
         else searchInput.current?.blur();
       }}>
         <AdsIcon name="search" /><input ref={searchInput} autoFocus={focusSearch} type="search" enterKeyHint="search" autoComplete="off" spellCheck={false} aria-label="Search all tools" placeholder="Search tools…" value={search} onChange={event => setSearch(event.target.value)} onKeyDown={event => { if (event.key === 'Escape' && search) { event.preventDefault(); event.stopPropagation(); setSearch(''); } }} />
@@ -109,7 +130,7 @@ export function MobileToolMenu({ accountBase, query, accountName, pathname, name
     </div>
     <div className="mobile-tools-scroll" ref={scrollArea}>
       {!editing && !term && <>
-        <Link href="/accounts" onClick={onClose} className="mobile-tools-account"><span><AdsIcon name="campaign" /></span><div><small>{accountBase ? 'Ad account' : 'Account tools'}</small><strong>{accountName || (accountBase ? 'Account workspace' : 'Choose an ad account')}</strong></div><b>{accountBase ? 'Switch' : 'Choose'} <span aria-hidden="true">›</span></b></Link>
+        <button type="button" onClick={() => setPicking({ path: '', label: 'Account overview' })} className="mobile-tools-account"><span><AdsIcon name="campaign" /></span><div><small>{accountBase ? 'Ad account' : 'Account tools'}</small><strong>{accountName || (accountBase ? 'Account workspace' : 'Choose an ad account')}</strong></div><b>{accountBase ? 'Switch' : 'Choose'} <span aria-hidden="true">›</span></b></button>
         {accountBase && <section aria-labelledby="menu-shortcuts-title">
           <div className="mobile-tools-section-title"><h3 id="menu-shortcuts-title">Shortcuts</h3><button type="button" onClick={customize}>Edit</button></div>
           <nav aria-label="Your shortcuts" className="mobile-menu-shortcuts">{shortcuts.map(tool => renderTool(tool, true))}</nav>
@@ -126,16 +147,15 @@ export function MobileToolMenu({ accountBase, query, accountName, pathname, name
       </> : <nav aria-label="All tools" className="mobile-menu-groups">
         {GROUPS.map(group => {
           const items = tools.filter(tool => tool.category === group.id);
-          const current = items.some(active);
-          return <details key={group.id} className="mobile-menu-group" open={current || (!accountBase && group.id === 'Workspace')}>
-            <summary><span className="mobile-tool-icon"><AdsIcon name={group.icon} /></span><strong>{group.label}</strong><span className="mobile-menu-count">{items.length}</span><span className="mobile-menu-expand" aria-hidden="true">⌄</span></summary>
+          return <section key={group.id} className="mobile-menu-group" aria-labelledby={`menu-group-${group.id}`}>
+            <div className="mobile-menu-group-heading"><span className="mobile-tool-icon"><AdsIcon name={group.icon} /></span><h3 id={`menu-group-${group.id}`}>{group.label}</h3><span className="mobile-menu-count">{items.length}</span></div>
             <div className="mobile-menu-list">{items.map(tool => renderTool(tool))}</div>
-          </details>;
+          </section>;
         })}
       </nav>}
-      {!editing && !term && <div className="mobile-tools-profile"><Link href="/settings" onClick={onClose}><UserAvatar name={name} src={picture} /><span>{name}<small>Profile & preferences</small></span></Link><button type="button" onClick={onLogout}>Sign out</button></div>}
+      {!editing && !term && <div className="mobile-tools-profile"><Link href="/settings" onClick={event => visitLink(event, '/settings')}><UserAvatar name={name} src={picture} /><span>{name}<small>Profile & preferences</small></span></Link><button type="button" onClick={onLogout}>Sign out</button></div>}
     </div>
     {editing ? <div className="mobile-menu-edit-actions"><button type="button" onClick={cancelEditing}>Cancel</button><button type="button" onClick={savePins}>Save shortcuts ({pins.length})</button></div> :
-      <MobileNavBar base={accountBase} query={query} pathname={pathname} inMenu onNavigate={onClose} onMenu={onClose} onAI={openAI} />}
+      <MobileNavBar base={accountBase} query={query} pathname={pathname} inMenu navigate={navigate} onMenu={onClose} onAI={openAI} />}
   </div>;
 }

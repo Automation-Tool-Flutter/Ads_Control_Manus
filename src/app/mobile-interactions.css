@@ -20,6 +20,12 @@
 .context-back-link span { min-width: 0; overflow-wrap: anywhere; }
 .context-back-link:focus-visible { outline: 2px solid rgb(var(--c-accent)); outline-offset: 3px; }
 .context-back-link:active { background: rgb(var(--c-accent)/.1); }
+/* Keep one Back control on touch layouts. Hide the whole inline row (and its
+   spacing) only when the app bar actually provides a replacement. Desktop and
+   public pages without an app-bar Back retain their navigation fallback. */
+@media (max-width: 1023px), (hover: none) and (pointer: coarse) {
+  body:has(.ads-mobile-header .mobile-back) .workspace-shell [data-inline-back] { display: none; }
+}
 .touch-record-list, .touch-record-select { display: none; }
 .full-chat-log { max-height: 65dvh; overscroll-behavior-y: contain; }
 .ai-chat-new { align-self: center; margin: 4px 12px; padding: 8px 16px; border: 1px solid rgb(var(--c-border)); border-radius: 24px; color: rgb(var(--c-accent)); font-size: 13px; background: rgb(var(--c-bg-card)); }

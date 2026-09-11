@@ -45,6 +45,18 @@
 .meta-chat-loading .loading-state-panel { min-height: 0; }
 .meta-chat-loading .loading-state-center { border-radius: 20px; background: rgb(var(--c-bg-card)); }
 .navigation-loading { position: fixed; inset: 0; z-index: 36; pointer-events: none; }
+/* Menu navigation must not reveal the source screen between closing and commit. */
+.menu-navigation-cover { display: none; position: fixed; inset: var(--app-viewport-top,0px) 0 auto; height: var(--app-viewport-height,100dvh); z-index: 1000; background: rgb(var(--c-bg-primary)); color: rgb(var(--c-text-primary)); overflow-y: auto; overscroll-behavior: contain; outline: none; }
+html[data-menu-navigation=true] .menu-navigation-cover { display: grid; place-items: center; }
+.menu-navigation-status { max-width: 360px; padding: 24px; text-align: center; }
+.menu-navigation-cover .loading-state-panel { min-height: 0; }
+.menu-navigation-cover .loading-state-center p { background: transparent; }
+.menu-navigation-recovery { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; font-size: 14px; }
+.menu-navigation-recovery p { flex-basis: 100%; line-height: 1.6; color: rgb(var(--c-text-secondary)); }
+.menu-navigation-recovery :is(a,button) { display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: 10px 16px; border: 1px solid rgb(var(--c-border)); border-radius: 12px; background: rgb(var(--c-bg-card)); }
+.menu-navigation-recovery a { background: #0866ff; border-color: #0866ff; color: white; }
+.menu-navigation-recovery .menu-navigation-cancel { background: rgb(var(--c-bg-card)); border-color: rgb(var(--c-border)); color: rgb(var(--c-text-primary)); }
+.menu-navigation-recovery :is(a,button):focus-visible { outline: 2px solid rgb(var(--c-accent)); outline-offset: 3px; }
 /* Once a route fallback exists it owns the loading announcement and visual. */
 body:has(.workspace-shell .loading-state-screen) .navigation-loading { display: none; }
 @media (min-width: 1024px) and (hover: hover) and (pointer: fine) {

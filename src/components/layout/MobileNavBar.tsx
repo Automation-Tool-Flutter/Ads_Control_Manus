@@ -6,9 +6,10 @@ import { BrandLogo } from '@/components/ui/BrandLogo';
 import { AdsIcon } from './AdsIcon';
 
 /** Shared by the page and the modal menu so primary actions never disappear. */
-export function MobileNavBar({ base, query, pathname, inMenu = false, onNavigate, onMenu, onAI }: {
+export function MobileNavBar({ base, query, pathname, inMenu = false, onNavigate, navigate, onMenu, onAI }: {
   base: string; query: string; pathname: string; inMenu?: boolean;
   onNavigate?: () => void; onMenu: () => void; onAI: () => void;
+  navigate?: (href: string) => void;
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -23,6 +24,7 @@ export function MobileNavBar({ base, query, pathname, inMenu = false, onNavigate
     return <Link key={link.label} data-mobile-tab href={link.href} onPointerDown={() => { if (pathname !== link.path) router.prefetch(link.href); }} onFocus={() => { if (pathname !== link.path) router.prefetch(link.href); }} onClick={event => {
       if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return;
       event.preventDefault();
+      if (navigate) { navigate(link.href); return; }
       onNavigate?.();
       if (pathname === link.path) return;
       setDestination(link.href);

@@ -609,7 +609,7 @@ export default function BusinessDetailPage() {
 
   return (
     <PageContainer>
-      <div className="mb-4">
+      <div data-inline-back className="mb-4">
         <Link
           href="/businesses"
           className="meta-action meta-action-secondary text-xs"
