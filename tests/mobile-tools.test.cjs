@@ -42,7 +42,13 @@ test('menu has four compact shortcuts and two permanently visible tool groups',(
   assert.doesNotMatch(html,/menu-group-Workspace|Switch account/);
   assert.match(html,/href="\/settings"/); // Profile still opens settings.
   assert.match(html,/Menu primary navigation/);
-  assert.match(html,/Close all tools/);
+  assert.doesNotMatch(html,/Close tools|Close all tools|class="mobile-tools-close"/);
+  const tabbar = html.match(/<nav aria-label="Menu primary navigation"[\s\S]*?<\/nav>/)?.[0] ?? '';
+  assert.equal((tabbar.match(/<a\b/g)||[]).length,3);
+  assert.equal((tabbar.match(/<button\b/g)||[]).length,2); // Meta AI and the persistent Menu tab.
+  assert.match(tabbar,/>Menu<\/span>/);
+  assert.match(tabbar,/aria-label="Close menu" aria-expanded="true"/);
+  assert.doesNotMatch(tabbar,/>Close</);
 });
 
 test('grouped menu preserves twelve account tools and the current account query',()=>{
@@ -74,10 +80,30 @@ test('workspace menu explains account selection without showing unusable shortcu
 test('shortcut editing has explicit cancel and save instead of navigation controls',()=>{
   const html=render({editing:true});
   assert.equal((html.match(/class="mobile-menu-row mobile-menu-pin"/g)||[]).length,12);
-  assert.match(html,/Cancel shortcut changes/);
+  assert.doesNotMatch(html,/class="mobile-tools-close"/);
   assert.match(html,/>Cancel<\/button>/);
   assert.match(html,/Save shortcuts \(4\)/);
   assert.doesNotMatch(html,/Menu primary navigation/);
+});
+
+test('menu lifecycle preserves content and initializes viewport before presenting', () => {
+  const header = fs.readFileSync('src/components/layout/Header.tsx', 'utf8');
+  assert.ok(header.includes("key={state.user.id + ':' + pathname}"));
+  assert.doesNotMatch(header, /key=\{[^}]*menuPresent/);
+  assert.ok(header.includes('const menuVisible = menuPresent && menuPath === pathname'));
+  assert.ok(header.indexOf("observeMobileViewport(element, '--tools-height'") < header.indexOf('element.showModal()'));
+  assert.ok(header.includes('element.focus({ preventScroll: true })'));
+  assert.ok(header.includes('if (!event.currentTarget.open) close()'));
+});
+
+test('menu keeps bottom tabs still and permits reversing a close', () => {
+  const motion = fs.readFileSync('src/app/mobile-motion.css', 'utf8');
+  assert.ok(motion.includes('.mobile-tools-dialog .mobile-tools-shell, .mobile-tools-dialog .mobile-tools-tabbar { animation: none; transform: none; }'));
+  assert.doesNotMatch(motion, /\.mobile-tools-dialog\[data-closing=true\] \.mobile-tools-shell/);
+  const navbar = fs.readFileSync('src/components/layout/MobileNavBar.tsx', 'utf8');
+  assert.doesNotMatch(navbar, /autoFocus=/);
+  const menu = fs.readFileSync('src/components/layout/MobileToolMenu.tsx', 'utf8');
+  assert.ok(menu.includes('onMenu={onToggleMenu ?? onClose}'));
 });
 
 test('an account tool opens the picker then navigates to that tool after selection', () => {

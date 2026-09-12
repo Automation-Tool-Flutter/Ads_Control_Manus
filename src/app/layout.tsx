@@ -10,6 +10,7 @@ import "./mobile-motion.css";
 import "./chat-refinement.css";
 import "./mobile-menu.css";
 import "./business-assets.css";
+import "./meta-ai-experience.css";
 import { NavigationFeedback } from "@/components/layout/NavigationFeedback";
 import { MobileScrollMemory } from "@/components/layout/MobileScrollMemory";
 import { MobileExperience } from "@/components/layout/MobileExperience";

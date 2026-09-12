@@ -10,6 +10,6 @@ export function BottomNav() {
   const base = pathname.startsWith('/accounts/') ? '/accounts/' + pathname.split('/')[2] : '';
   const { state: account } = useAccountDetail(base ? pathname.split('/')[2] : '', state.token);
   const query = account.status === 'success' && base === '/accounts/' + account.data.id ? '?accountName=' + encodeURIComponent(account.data.name) + '&currency=' + encodeURIComponent(account.data.currency) : '';
-  if (!state.user) return null;
+  if (!state.user || pathname === '/login') return null;
   return <MobileNavBar base={base} query={query} pathname={pathname} onMenu={() => window.dispatchEvent(new Event('open-workspace-menu'))} onAI={() => window.dispatchEvent(new Event('open-ai-assistant'))} />;
 }

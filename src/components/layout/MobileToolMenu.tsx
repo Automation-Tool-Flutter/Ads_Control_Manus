@@ -31,9 +31,10 @@ const GROUPS = [
   { id: 'Build', label: 'Create & manage', icon: 'campaign' },
 ];
 
-export function MobileToolMenu({ accountBase, query, accountName, pathname, name, picture, userId, focusSearch = false, onClose, onLogout }: {
+export function MobileToolMenu({ accountBase, query, accountName, pathname, name, picture, userId, focusSearch = false, onClose, onToggleMenu, onLogout }: {
   accountBase: string; query: string; accountName?: string; pathname: string;
   name: string; picture?: string; onClose: () => void; onLogout: () => void;
+  onToggleMenu?: () => void;
   userId: string; focusSearch?: boolean;
 }) {
   const router = useRouter();
@@ -116,7 +117,7 @@ export function MobileToolMenu({ accountBase, query, accountName, pathname, name
   }} /></div>;
 
   return <div ref={menuRoot} className="mobile-tools-shell mobile-menu-organized" data-editing={editing}>
-    <div className="mobile-tools-heading"><h2 id="mobile-tools-title">{editing ? 'Edit shortcuts' : 'Menu'}</h2><button type="button" autoFocus={!focusSearch} onClick={editing ? cancelEditing : onClose} aria-label={editing ? 'Cancel shortcut changes' : 'Close tools'} className="mobile-tools-close"><AdsIcon name="close" /></button></div>
+    <div className="mobile-tools-heading"><h2 id="mobile-tools-title">{editing ? 'Edit shortcuts' : 'Menu'}</h2></div>
     <div className="mobile-menu-search-area">
       <form role="search" className="mobile-tools-search" onSubmit={event => {
         event.preventDefault();
@@ -156,6 +157,6 @@ export function MobileToolMenu({ accountBase, query, accountName, pathname, name
       {!editing && !term && <div className="mobile-tools-profile"><Link href="/settings" onClick={event => visitLink(event, '/settings')}><UserAvatar name={name} src={picture} /><span>{name}<small>Profile & preferences</small></span></Link><button type="button" onClick={onLogout}>Sign out</button></div>}
     </div>
     {editing ? <div className="mobile-menu-edit-actions"><button type="button" onClick={cancelEditing}>Cancel</button><button type="button" onClick={savePins}>Save shortcuts ({pins.length})</button></div> :
-      <MobileNavBar base={accountBase} query={query} pathname={pathname} inMenu navigate={navigate} onMenu={onClose} onAI={openAI} />}
+      <MobileNavBar base={accountBase} query={query} pathname={pathname} inMenu navigate={navigate} onMenu={onToggleMenu ?? onClose} onAI={openAI} />}
   </div>;
 }

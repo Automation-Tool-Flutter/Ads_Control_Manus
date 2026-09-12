@@ -3,76 +3,45 @@
 import Link from "next/link";
 import { useAuth } from "@/contexts/AuthContext";
 import { BrandLogo } from "@/components/ui/BrandLogo";
+import { UserAvatar } from "@/components/ui/UserAvatar";
 import { FacebookLoginButton } from "@/components/facebook/FacebookLoginButton";
 
 export default function LoginPage() {
   const { state } = useAuth();
+  const signedIn = !state.isLoading && Boolean(state.token);
 
   return (
-    <main className="login-workspace flex-1 grid items-center gap-8 p-5 sm:p-10 lg:grid-cols-[1.1fr_0.9fr]">
-      <section className="ai-command rounded-[32px] p-7 text-white sm:p-12">
-        <p className="text-xs font-semibold tracking-[.2em] text-sky-100/70">Meta Ads AI / INTELLIGENCE WORKSPACE</p>
-        <h2 className="mt-8 max-w-xl text-4xl font-semibold leading-tight tracking-tight sm:text-5xl">Smarter advertising.<br />Starts with intelligence.</h2>
-        <p className="mt-6 max-w-lg text-sm leading-7 text-sky-100">One workspace for analysis, campaigns, and creative strategy. Work with AI throughout your workflow to turn questions into informed actions.</p>
-        <div className="mt-10 space-y-3">{[['01', 'Ask AI in context', 'Explore advertising data using natural language.'], ['02', 'Evidence-led optimization', 'Compare KPIs, budgets, and performance against the right objective.'], ['03', 'Learn from outcomes', 'Track recommendations and improve the next optimization cycle.']].map(([number, title, detail]) => <div key={number} className="flex gap-4 rounded-2xl border border-white/15 p-4"><span className="font-mono text-xs text-sky-100/70">{number}</span><div><h3 className="text-sm font-semibold">{title}</h3><p className="mt-1 text-xs leading-5 text-sky-100/70">{detail}</p></div></div>)}</div>
-      </section>
-      <div className="mx-auto w-full max-w-[460px]">
-        <div className="meta-panel p-5 sm:p-8">
-          <div className="flex items-center gap-3">
-            <BrandLogo size={56} decorative />
-            <div className="min-w-0">
-              <p className="text-xs font-bold uppercase tracking-[0.18em] text-accent">
-                CONNECT YOUR WORKSPACE
-              </p>
-              <h1 className="text-2xl font-bold text-text-primary leading-tight">
-                Meta Ads AI
-              </h1>
-            </div>
-          </div>
-
-          <p className="mt-5 text-sm leading-6 text-text-secondary">
-            Connect Facebook to bring ad accounts, campaigns, content, and AI analysis into one workspace.
+    <main className="login-workspace login-simple">
+      <div className="login-card-wrap">
+        <section className="meta-panel login-card" aria-labelledby="login-title" data-signed-in={signedIn}>
+          <header className="login-brand">
+            <div className="login-brand-mark"><BrandLogo size={48} decorative /></div>
+            <p className="login-greeting">{signedIn ? 'Welcome back' : 'Your advertising workspace'}</p>
+            <h1 id="login-title">Meta Ads AI</h1>
+          </header>
+          <p className="login-description">
+            Your ads. Clearer insights.<br />Smarter decisions with AI.
           </p>
-
-          <div className="mt-6">
-            {!state.isLoading && state.token && (
-              <div className="mb-4 rounded-2xl border border-border bg-bg-secondary p-4">
-                <p className="text-sm text-text-secondary">
-                  Signed in as {state.user?.name || "your Facebook account"}.
-                </p>
-                <Link
-                  href="/accounts"
-                  className="mobile-action mt-2 flex w-full items-center justify-center rounded-full border border-border px-4 text-sm font-semibold text-accent"
-                >
-                  Continue to workspace
-                </Link>
+          <div className="login-actions">
+            {signedIn && <>
+              <div className="login-session">
+                <UserAvatar name={state.user?.name || 'Facebook user'} src={state.user?.picture?.data?.url} className="login-session-avatar" />
+                <div className="login-session-copy">
+                  <span>Signed in with Facebook</span>
+                  <strong>{state.user?.name || 'Your Facebook account'}</strong>
+                </div>
+                <span className="login-session-check" aria-label="Signed in">
+                  <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m5 12 4 4L19 6" /></svg>
+                </span>
               </div>
-            )}
-            <FacebookLoginButton />
+              <Link href="/accounts" className="mobile-action login-continue">
+                Continue to workspace
+                <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14m-5-5 5 5-5 5" /></svg>
+              </Link>
+            </>}
+            <FacebookLoginButton className="login-facebook" />
           </div>
-
-          <div className="mt-5 rounded-lg border border-border bg-bg-secondary/60 p-4 text-left">
-            <p className="text-xs font-bold text-text-muted uppercase tracking-wide mb-3">
-              Access requested
-            </p>
-            <ul className="space-y-2.5">
-              {[
-                "Read ad accounts, campaigns, and ad sets",
-                "Update campaign status and budgets",
-                "View and publish Page posts",
-                "Read Page insights and performance signals",
-                "Access Business portfolio assets",
-              ].map((item) => (
-                <li key={item} className="flex items-start gap-2.5">
-                  <span className="mt-1 h-2 w-2 rounded-full bg-accent shrink-0" />
-                  <span className="text-xs leading-5 text-text-secondary">
-                    {item}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
+        </section>
       </div>
     </main>
   );

@@ -49,3 +49,23 @@ test('global navigation does not duplicate the Home destination',()=>{
   assert.match(html,/>Assets<\/span>/);
   assert.equal((html.match(/href="\/accounts"/g)||[]).length,1);
 });
+
+test('back is hidden on primary roots regardless of saved browser history', () => {
+  const exports = {};
+  const source = ts.transpileModule(fs.readFileSync('src/hooks/useAppBack.ts', 'utf8'), {
+    compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020 },
+  }).outputText;
+  vm.runInNewContext(source, { exports, require: name => name === 'react' ? React : {} });
+  const { shouldShowAppBack } = exports;
+  for (const path of ['/', '/accounts', '/accounts/', '/businesses', '/pages', '/login']) {
+    assert.equal(shouldShowAppBack(path, true, '/accounts'), false, path);
+    assert.equal(shouldShowAppBack(path, false, null), false, path);
+  }
+  assert.equal(shouldShowAppBack('/accounts/act_1', true, '/accounts'), true);
+  assert.equal(shouldShowAppBack('/accounts/act_1/campaigns/10', false, '/accounts/act_1/campaigns'), true);
+  assert.equal(shouldShowAppBack('/pages/42', true, '/pages'), true);
+  assert.equal(shouldShowAppBack('/contact', false, null), false);
+  const header = fs.readFileSync('src/components/layout/Header.tsx', 'utf8');
+  assert.ok(header.includes('d="m15 5-7 7 7 7"'));
+  assert.ok(header.includes("goBack(backHref || '/accounts')"));
+});

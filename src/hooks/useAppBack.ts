@@ -5,6 +5,14 @@ import { useRouter } from 'next/navigation';
 
 const DEPTH_KEY = '__metaAdsNavigationDepth';
 
+const ROOT_PAGES = new Set(['/', '/accounts', '/businesses', '/pages', '/login']);
+
+/** Primary tab roots never expose a back action, even with older history entries. */
+export function shouldShowAppBack(pathname: string, canGoBack: boolean, fallback?: string | null) {
+  const path = pathname.replace(/\/+$/, '') || '/';
+  return !ROOT_PAGES.has(path) && Boolean(canGoBack || fallback);
+}
+
 function depth() {
   const value: unknown = window.history.state?.[DEPTH_KEY];
   return typeof value === 'number' && Number.isInteger(value) && value >= 0 ? value : 0;

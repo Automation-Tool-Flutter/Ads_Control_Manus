@@ -35,6 +35,6 @@ export function MobileNavBar({ base, query, pathname, inMenu = false, onNavigate
     <span className="sr-only" role="status">{pending ? "Opening page…" : ""}</span>{item(links[0])}{item(links[1])}
     <button type="button" className="mobile-tab mobile-tab-ai" onClick={onAI} aria-label="Open Meta AI"><span className="mobile-ai-icon"><BrandLogo size={32} decorative /></span><span>Meta AI</span></button>
     {item(links[2])}
-    <button type="button" className={'mobile-tab ' + (inMenu ? 'is-active' : '')} onClick={onMenu} aria-label={inMenu ? 'Close all tools' : 'Open all tools'} aria-expanded={inMenu} aria-controls="workspace-menu"><AdsIcon name={inMenu ? 'close' : 'menu'}/><span>{inMenu ? 'Close' : 'Menu'}</span></button>
+    <button type="button" className={'mobile-tab' + (inMenu ? ' is-active' : '')} onClick={onMenu} aria-label={inMenu ? 'Close menu' : 'Open all tools'} aria-expanded={inMenu} aria-controls="workspace-menu"><AdsIcon name="menu"/><span>Menu</span></button>
   </nav>;
 }

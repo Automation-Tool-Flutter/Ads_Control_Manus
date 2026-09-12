@@ -21,6 +21,8 @@ export function useMobileDialog(open: boolean, panel: RefObject<HTMLElement>) {
       const stopViewport = observeMobileViewport(element, '--mobile-chat-height', '--mobile-chat-top');
       const trap = (event: KeyboardEvent) => {
         if (event.key !== 'Tab') return;
+        // A nested native sheet owns its focus loop while it is in the top layer.
+        if (event.target instanceof Element && event.target.closest('dialog[open]')) return;
         const items = Array.from(element.querySelectorAll<HTMLElement>('button:not([disabled]), a[href], input, select, textarea, [tabindex="0"]')).filter(node => node.getClientRects().length);
         const first = items[0]; const last = items[items.length - 1];
         if (!first) { event.preventDefault(); element.focus(); return; }

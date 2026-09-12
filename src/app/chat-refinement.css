@@ -28,9 +28,8 @@
 .meta-chat-composer { padding: 10px 12px max(10px,env(safe-area-inset-bottom)); }
 .meta-chat-input-wrap { background: rgb(var(--c-bg-secondary)); border-color: transparent; }
 .meta-chat-composer-note { font-size: 11px; }
-.meta-chat-loading { position: absolute; inset: 0; z-index: 2; display: grid; place-items: center; pointer-events: none; padding: 16px; }
-.meta-chat-loading > .meta-chat-thinking { display: flex; flex-direction: column; flex-wrap: nowrap; justify-content: center; gap: 12px; padding: 20px 24px; border: 1px solid rgb(var(--c-border)); border-radius: 20px; background: rgb(var(--c-bg-card)); box-shadow: 0 4px 24px rgb(0 0 0/.06); }
-.meta-chat-thinking .meta-chat-identity { flex-basis: auto; }
+.meta-chat-loading { position: absolute; inset: 0; z-index: 2; display: grid; place-items: center; pointer-events: none; padding: 16px; background: rgb(var(--c-bg-card)/.92); }
+.meta-chat-loading > .meta-chat-thinking { border: 0; border-radius: 0; background: transparent; box-shadow: none; }
 .meta-chat-body:has(.full-chat-log) { flex: none; height: min(60dvh,650px); min-height: 240px; }
 .meta-chat-body .full-chat-log { max-height: none; }
 .meta-chat-scope-picker > summary:focus-visible, .meta-chat-options > summary:focus-visible { outline: 2px solid rgb(var(--c-accent)); outline-offset: -3px; }

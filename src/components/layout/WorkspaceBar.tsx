@@ -14,7 +14,7 @@ export function WorkspaceBar() {
   const { resolvedTheme, setTheme } = useTheme();
   const accountBase = pathname.startsWith('/accounts/') ? '/accounts/' + pathname.split('/')[2] : '';
   const activeTool = accountBase ? WORKBENCH_SECTIONS.flatMap(group => group.items).filter(([path]) => path && (pathname === accountBase + path || pathname.startsWith(accountBase + path + '/'))).sort((a,b) => b[0].length-a[0].length)[0]?.[1] ?? 'Performance overview' : null;
-  if (!state.token) return null;
+  if (!state.token || pathname === '/login' || pathname.endsWith('/ask-ads')) return null;
   const section = pathname.startsWith('/pages') ? 'Page' : pathname.startsWith('/businesses') ? 'Business assets' : pathname.startsWith('/settings') ? 'Workspace settings' : 'Advertising intelligence';
   return <div className="workspace-bar">
     <div className="min-w-0"><p className="text-[10px] font-medium uppercase tracking-[.15em] text-text-muted">Workspace <span className="mx-1 text-border">/</span> {accountBase ? 'Ad intelligence' : section}</p><p className="mt-1 truncate text-sm font-semibold text-text-primary">{activeTool ?? (pathname === '/accounts' ? 'Portfolio overview' : section)}</p></div>
