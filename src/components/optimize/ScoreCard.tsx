@@ -1,59 +1,22 @@
-interface Props {
-  score: number;
-  summary: string;
-}
+import { BrandLogo } from '@/components/ui/BrandLogo';
 
-function getScoreStyle(score: number): { ring: string; text: string; label: string } {
-  if (score >= 70) {
-    return {
-      ring: 'border-status-green',
-      text: 'text-status-green',
-      label: 'Excellent',
-    };
-  }
-  if (score >= 40) {
-    return {
-      ring: 'border-status-yellow',
-      text: 'text-status-yellow',
-      label: 'Needs Improvement',
-    };
-  }
-  return {
-    ring: 'border-status-red',
-    text: 'text-status-red',
-    label: 'Critical',
-  };
-}
+interface Props { score: number; summary: string; }
 
 export function ScoreCard({ score, summary }: Props) {
-  const { ring, text, label } = getScoreStyle(score);
-
-  return (
-    <div className="meta-item">
-      <div className="meta-item-header flex items-center justify-between px-4 py-3">
-        <div>
-          <p className="text-xs font-semibold text-accent">Meta AI analysis</p>
-          <h2 className="mt-0.5 text-base font-bold text-text-primary">Overall Score</h2>
-        </div>
-        <span className={`rounded-md border px-2.5 py-1 text-xs font-black ${ring} ${text}`}>
-          {label}
-        </span>
+  const valid = Number.isFinite(score);
+  const value = valid ? Math.max(0, Math.min(100, Math.round(score))) : 0;
+  const tone = !valid ? 'neutral' : value >= 70 ? 'positive' : value >= 40 ? 'warning' : 'critical';
+  const label = !valid ? 'Not available' : value >= 70 ? 'Strong performance' : value >= 40 ? 'Room to improve' : 'Needs review';
+  return <section className="ai-result-summary" data-tone={tone} aria-label="AI analysis summary">
+    <div className="ai-result-brand"><BrandLogo size={28} decorative /><span>MetaAI analysis</span><span className="ai-result-status">{label}</span></div>
+    <div className="ai-result-score-row">
+      <div className="ai-result-gauge" role="img" aria-label={valid ? `AI score: ${value} out of 100` : 'Score unavailable'}>
+        <svg viewBox="0 0 100 100" aria-hidden="true"><circle className="ai-result-track" cx="50" cy="50" r="43" /><circle className="ai-result-progress" cx="50" cy="50" r="43" pathLength="100" strokeDasharray={`${value} 100`} /></svg>
+        <div><strong>{valid ? value : '—'}</strong><span>/ 100</span></div>
       </div>
-      <div className="flex flex-col gap-4 p-4 sm:flex-row sm:items-center">
-        {/* Score ring */}
-        <div
-          className={`flex h-24 w-24 flex-shrink-0 flex-col items-center justify-center rounded-lg border-4 ${ring} bg-bg-secondary/60`}
-        >
-          <span className={`text-2xl font-bold tabular-nums leading-none ${text}`}>{score}</span>
-          <span className="mt-0.5 text-xs text-text-muted">/100</span>
-        </div>
-
-        {/* Summary */}
-        <div className="flex-1 min-w-0">
-          <p className={`mb-1 text-sm font-semibold ${text}`}>Recommended readout</p>
-          <p className="text-sm leading-relaxed text-text-secondary">{summary}</p>
-        </div>
-      </div>
+      <div><p className="ai-result-eyebrow">Performance assessment</p><h2>Performance at a glance</h2><p className="ai-result-score-note">AI estimate based on available data</p></div>
     </div>
-  );
+    <div className="ai-result-readout"><h3>Key takeaway</h3><p>{summary}</p></div>
+    <details className="ai-result-context"><summary>How to read this score</summary><p>This is an AI assessment, not a verified performance rating. Missing insights can limit the assessment. Review the findings and source data before changing ads.</p></details>
+  </section>;
 }

@@ -70,20 +70,23 @@
 /* Phone navigation uses focused sections and flat, edge-aligned rows. */
 @media (max-width: 1023px), (hover: none) and (pointer: coarse) {
   .account-overview .dashboard-content { gap: 16px; }
-  .account-overview .dashboard-segments { display: flex; gap: 4px; padding: 4px; border-radius: 12px; background: rgb(var(--c-bg-secondary)); }
-  .dashboard-segments button { flex: 1; min-width: 0; min-height: 44px; padding: 8px; border-radius: 9px; font-size: 14px; font-weight: 600; color: rgb(var(--c-text-secondary)); touch-action: manipulation; }
-  .dashboard-segments button[aria-pressed=true] { background: rgb(var(--c-bg-card)); color: rgb(var(--c-text-primary)); box-shadow: 0 1px 4px #0002; }
+  .account-overview .dashboard-segments { position: fixed; inset: auto 0 0; z-index: 40; display: flex; gap: 8px; padding: 6px max(16px,env(safe-area-inset-right)) calc(6px + env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left)); border-top: 1px solid rgb(var(--c-border)); background: rgb(var(--c-bg-card)); }
+  .dashboard-segments button { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; min-width: 0; min-height: 56px; padding: 6px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; color: rgb(var(--c-text-secondary)); touch-action: manipulation; }
+  .dashboard-segments button .app-icon { width: 24px; height: 24px; }
+  .dashboard-segments button[aria-pressed=true] { background: rgb(var(--c-accent)/.08); color: rgb(var(--c-accent)); }
+  .account-overview { padding-bottom: calc(76px + env(safe-area-inset-bottom)); }
+  html[data-mobile-keyboard=true] .account-overview .dashboard-segments { display: none; }
   .dashboard-content[data-view=overview] [data-dashboard-view]:not([data-dashboard-view=overview]),
   .dashboard-content[data-view=activity] [data-dashboard-view]:not([data-dashboard-view=activity]),
   .dashboard-content[data-view=tools] [data-dashboard-view]:not([data-dashboard-view=tools]) { display: none; }
   .account-overview .dashboard-trends-layout { display: contents; }
   .account-overview .dashboard-content > .dashboard-ai-entry { order: 10; }
-  .account-overview .dashboard-metrics { gap: 0; padding: 4px 0 12px; border-bottom: 1px solid rgb(var(--c-border)); }
+  .account-overview .dashboard-metrics { gap: 0; padding: 4px 16px; border: 1px solid rgb(var(--c-accent)/.14); border-radius: 16px; background: linear-gradient(135deg,rgb(var(--c-accent)/.06),transparent 70%),rgb(var(--c-bg-card)); }
   .workspace-page .account-overview .dashboard-metrics .ads-metric-card { background: transparent; border: 0; border-radius: 0; box-shadow: none; padding: 12px 8px 12px 0; }
   .account-overview .dashboard-metrics .ads-metric-card:nth-child(even) { padding-left: 16px; border-left: 1px solid rgb(var(--c-border)); }
   .account-overview .dashboard-metrics .ads-metric-card > p:last-child { display: none; }
   .account-overview .dashboard-metrics .ads-metric-card > p:first-child { font-size: 13px; }
-  .workspace-page .account-overview :is(.dashboard-trends,.dashboard-campaigns,.dashboard-priorities,.dashboard-learning) { padding: 0; background: transparent; border: 0; border-radius: 0; box-shadow: none; }
+  .workspace-page .account-overview :is(.dashboard-trends,.dashboard-campaigns,.dashboard-priorities,.dashboard-learning) { padding: 16px; background: rgb(var(--c-bg-card)); border: 1px solid rgb(var(--c-border)/.6); border-radius: 16px; box-shadow: none; }
   .account-overview :is(.dashboard-trends,.dashboard-campaigns,.dashboard-priorities,.dashboard-learning) h2 { font-size: 17px; letter-spacing: -.25px; }
   .account-overview .dashboard-trends > p { margin-bottom: 8px; font-size: 13px; }
   .account-overview .dashboard-trends .dashboard-chart-empty { padding: 16px; margin: 12px 0 0; border-radius: 12px; background: rgb(var(--c-bg-secondary)); text-align: left; font-size: 14px; }
@@ -99,11 +102,14 @@
   .account-overview .dashboard-priority-empty { padding: 12px 0; }
   .account-overview .dashboard-priority-empty p { font-size: 14px; }
   .account-overview .dashboard-priority-note { border-bottom: 1px solid rgb(var(--c-border)); }
-  .account-overview .mobile-dashboard-ai { padding: 14px 0 0; border: 0; border-top: 1px solid rgb(var(--c-border)); border-radius: 0; background: transparent; }
+  .account-overview .mobile-dashboard-ai { padding: 14px 16px 6px; border: 1px solid rgb(var(--c-accent)/.16); border-radius: 16px; background: linear-gradient(120deg,rgb(var(--c-accent)/.07),transparent 80%),rgb(var(--c-bg-card)); }
   .account-overview .mobile-dashboard-ai-heading h2 { font-size: 16px; }
   .account-overview .mobile-dashboard-ai-open { background: transparent; font-size: 14px; padding-right: 0; }
-  .account-overview .dashboard-toolkit > div { display: flex; flex-direction: column; gap: 0; }
-  .workspace-page .account-overview .dashboard-toolkit .ads-capability { min-height: 76px; padding: 14px 0; border: 0; border-bottom: 1px solid rgb(var(--c-border)); border-radius: 0; background: transparent; box-shadow: none; }
+  .account-overview .dashboard-toolkit > div { display: flex; flex-direction: column; gap: 0; overflow: hidden; padding-inline: 14px; border: 1px solid rgb(var(--c-border)/.6); border-radius: 16px; background: rgb(var(--c-bg-card)); }
+  .workspace-page .account-overview .dashboard-toolkit .ads-capability { min-height: 76px; padding: 14px 0; border: 0; border-bottom: 1px solid rgb(var(--c-border)/.65); border-radius: 0; background: transparent; box-shadow: none; }
+  .workspace-page .account-overview .dashboard-toolkit .ads-capability:last-child { border-bottom: 0; }
+  .account-overview .dashboard-toolkit .ads-capability > span:first-child { background: rgb(var(--c-accent)/.09); color: rgb(var(--c-accent)); border: 1px solid rgb(var(--c-accent)/.12); }
+  .workspace-page .account-overview .dashboard-toolkit .ads-capability:active { background: rgb(var(--c-accent)/.06); }
   .account-overview .dashboard-toolkit .ads-capability h3 { font-size: 15px; font-weight: 600; }
   .account-overview .dashboard-toolkit .ads-capability p { margin-top: 4px; font-size: 13px; }
 }

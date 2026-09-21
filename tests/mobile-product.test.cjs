@@ -24,6 +24,37 @@ function load(file, dependencies = {}) {
 const modalMock = { Modal: () => null };
 const iconMock = { AdsIcon: () => React.createElement('svg', { 'aria-hidden': true }) };
 
+test('AI result summary keeps the readout and handles unavailable scores', () => {
+  const { ScoreCard } = load('src/components/optimize/ScoreCard.tsx', {
+    '@/components/ui/BrandLogo': { BrandLogo: () => null },
+  });
+  const html = renderToStaticMarkup(React.createElement(ScoreCard, { score: 10, summary: 'No performance insights were available.' }));
+  assert.match(html, /AI score: 10 out of 100/);
+  assert.match(html, /No performance insights were available/);
+  assert.match(html, /AI estimate based on available data/);
+  assert.doesNotMatch(html, /Critical|Recommended readout/);
+  const missing = renderToStaticMarkup(React.createElement(ScoreCard, { score: NaN, summary: 'Unavailable' }));
+  assert.match(missing, /Score unavailable/);
+  assert.doesNotMatch(missing, /NaN/);
+});
+
+test('AI findings preserve evidence and action previews in the new layout', () => {
+  const recommendation = { title: 'Review delivery', description: 'Check account access.', priority: 'high' };
+  const onPreviewAction = () => {};
+  let received;
+  const { AngleSection } = load('src/components/optimize/AngleSection.tsx', {
+    './RecommendationCard': { RecommendationCard: props => { received = props; return React.createElement('p', null, props.recommendation.title); } },
+  });
+  const html = renderToStaticMarkup(React.createElement(AngleSection, {
+    angle: { name: 'Account', level: 'account', score: 10, issues: ['No insights returned'], strengths: ['Account is active'], recommendations: [recommendation] }, onPreviewAction,
+  }));
+  assert.match(html, /No insights returned/);
+  assert.match(html, /Account is active/);
+  assert.match(html, /<details class="ai-findings ai-strengths">/);
+  assert.equal(received.recommendation, recommendation);
+  assert.equal(received.onPreviewAction, onPreviewAction);
+});
+
 test('dashboard priorities keep the empty state short and link to analysis', () => {
   const { ActionCenter } = load('src/components/dashboard/ActionCenter.tsx', {
     'next/link': { default: ({ children, ...props }) => React.createElement('a', props, children) },

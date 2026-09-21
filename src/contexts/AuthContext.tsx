@@ -158,6 +158,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Restore session or complete the OAuth redirect after Facebook returns.
   useEffect(() => {
     let cancelled = false;
+    let loginDelay: ReturnType<typeof setTimeout> | undefined;
 
     async function bootstrap() {
       const oauthCallback = parseFacebookOAuthCallback(window.location);
@@ -204,11 +205,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             }
           }
           setIsRedirecting(true);
-          dispatch({
-            type: 'SET_AUTH',
-            payload: { token: oauthCallback.accessToken, user },
-          });
-          router.replace(destination);
+          router.prefetch(destination);
+          // Keep the login loader visible for three seconds after authentication.
+          // Publish the session only then, so the home redirect cannot skip the delay.
+          loginDelay = setTimeout(() => {
+            if (cancelled || localStorage.getItem(STORAGE_KEYS.TOKEN) !== oauthCallback.accessToken) return;
+            dispatch({
+              type: 'SET_AUTH',
+              payload: { token: oauthCallback.accessToken, user },
+            });
+            router.replace(destination);
+          }, 3000);
         }
       } catch (error) {
         clearStoredSession();
@@ -225,6 +232,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     bootstrap();
     return () => {
       cancelled = true;
+      clearTimeout(loginDelay);
     };
   }, [router]);
 

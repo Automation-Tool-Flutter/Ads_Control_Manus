@@ -14,6 +14,7 @@ import "./meta-ai-experience.css";
 import "./account-overview.css";
 import "./app-icons.css";
 import "./collection-filters.css";
+import "./ai-results.css";
 import { NavigationFeedback } from "@/components/layout/NavigationFeedback";
 import { MobileScrollMemory } from "@/components/layout/MobileScrollMemory";
 import { MobileExperience } from "@/components/layout/MobileExperience";

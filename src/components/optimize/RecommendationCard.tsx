@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import type { Recommendation } from '@/lib/types/optimize';
 import { PriorityBadge } from './PriorityBadge';
+import { AdsIcon } from '@/components/layout/AdsIcon';
 
 interface Props {
   recommendation: Recommendation;
@@ -29,12 +30,12 @@ export function RecommendationCard({ recommendation, onPreviewAction }: Props) {
 
   return (
     <div
-      className="meta-item"
+      className="meta-item ai-recommendation"
     >
       <div className="meta-item-header meta-recommendation-header flex items-start justify-between gap-3 px-4 py-3">
         <div className="flex min-w-0 flex-1 items-start gap-2">
           <span className="mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-md bg-accent/10 text-[10px] font-black text-accent">
-            Meta AI
+            <AdsIcon name="ai" className="h-4 w-4" />
           </span>
           <p className="min-w-0 flex-1 text-sm font-bold leading-snug text-text-primary">{title}</p>
         </div>

@@ -1,96 +1,15 @@
-import type { AngleResult, Recommendation } from "@/lib/types/optimize";
-import { RecommendationCard } from "./RecommendationCard";
+import type { AngleResult, Recommendation } from '@/lib/types/optimize';
+import { RecommendationCard } from './RecommendationCard';
+import { AdsIcon } from '@/components/layout/AdsIcon';
 
-interface Props {
-  angle: AngleResult;
-  onPreviewAction?: (recommendation: Recommendation) => void;
-}
-
-function ScoreRing({ score }: { score: number }) {
-  const color =
-    score >= 70
-      ? "text-status-green"
-      : score >= 40
-        ? "text-status-yellow"
-        : "text-status-red";
-  return (
-    <span className={`text-2xl font-bold tabular-nums ${color}`}>{score}</span>
-  );
-}
+interface Props { angle: AngleResult; onPreviewAction?: (recommendation: Recommendation) => void; }
 
 export function AngleSection({ angle, onPreviewAction }: Props) {
-  return (
-    <div className="space-y-4">
-      {/* Header */}
-      <div className="flex items-center gap-3 rounded-lg border border-border bg-bg-secondary/45 px-3 py-2.5">
-        <div>
-          <h3 className="text-base font-bold text-text-primary">
-            {angle.name}
-          </h3>
-        </div>
-        <div className="ml-auto flex items-center gap-1">
-          <ScoreRing score={angle.score} />
-          <span className="text-text-muted text-sm">/100</span>
-        </div>
-      </div>
-
-      {/* Strengths */}
-      {angle.strengths.length > 0 && (
-        <div className="rounded-lg border border-status-green/20 bg-status-green/5 p-3">
-          <p className="mb-2 text-xs font-bold uppercase text-status-green">
-            Strengths
-          </p>
-          <ul className="space-y-1.5">
-            {angle.strengths.map((s, i) => (
-              <li
-                key={i}
-                className="flex items-start gap-2 text-sm text-text-secondary"
-              >
-                <span className="mt-0.5 flex-shrink-0 text-[10px] font-black text-status-green">
-                  OK
-                </span>
-                {s}
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-
-      {/* Issues */}
-      {angle.issues.length > 0 && (
-        <div className="rounded-lg border border-status-yellow/25 bg-status-yellow/5 p-3">
-          <p className="mb-2 text-xs font-bold uppercase text-status-yellow">
-            Areas for improvement
-          </p>
-          <ul className="space-y-1.5">
-            {angle.issues.map((issue, i) => (
-              <li
-                key={i}
-                className="flex items-start gap-2 text-sm text-text-secondary"
-              >
-                <span className="mt-0.5 flex-shrink-0 font-black text-status-yellow">
-                  !
-                </span>
-                {issue}
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-
-      {/* Recommendations */}
-      {angle.recommendations.length > 0 && (
-        <div>
-          <p className="mb-2 text-xs font-bold uppercase text-text-muted">
-            Recommended
-          </p>
-          <div className="space-y-3">
-            {angle.recommendations.map((rec, i) => (
-              <RecommendationCard key={i} recommendation={rec} onPreviewAction={onPreviewAction} />
-            ))}
-          </div>
-        </div>
-      )}
-    </div>
-  );
+  return <div className="ai-angle-section">
+    <div className="ai-angle-heading"><h3>{angle.name}</h3><span className="ai-angle-score">{Number.isFinite(angle.score) ? Math.max(0, Math.min(100, Math.round(angle.score))) : '—'}<small>/100</small></span></div>
+    {angle.issues.length > 0 && <section className="ai-findings" data-kind="issues"><h4><span className="ai-finding-icon"><AdsIcon name="alert" /></span>Needs attention<span className="ai-finding-count">{angle.issues.length}</span></h4><ul>{angle.issues.map((issue, i) => <li key={i}>{issue}</li>)}</ul></section>}
+    {angle.recommendations.length > 0 && <section className="ai-recommendations"><h4>Recommended next steps<span className="ai-finding-count">{angle.recommendations.length}</span></h4><div>{angle.recommendations.map((rec, i) => <RecommendationCard key={i} recommendation={rec} onPreviewAction={onPreviewAction} />)}</div></section>}
+    {angle.strengths.length > 0 && <details className="ai-findings ai-strengths"><summary><span className="ai-finding-icon"><AdsIcon name="check" /></span>What’s working<span className="ai-finding-count">{angle.strengths.length}</span><AdsIcon name="chevron-down" /></summary><ul>{angle.strengths.map((strength, i) => <li key={i}>{strength}</li>)}</ul></details>}
+    {!angle.issues.length && !angle.strengths.length && !angle.recommendations.length && <p className="ai-result-score-note">No findings returned for this section.</p>}
+  </div>;
 }

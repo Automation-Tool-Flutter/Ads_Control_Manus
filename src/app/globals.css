@@ -113,6 +113,15 @@ body::before {
   outline-offset: 3px;
 }
 
+/* Route and dialog focus targets are containers, not interactive controls.
+   Their outline can span the viewport or flash across a short loading page. */
+.workspace-page[tabindex='-1']:focus,
+.workspace-page[tabindex='-1']:focus-visible,
+[data-modal-content][tabindex='-1']:focus,
+[data-modal-content][tabindex='-1']:focus-visible {
+  outline: none;
+}
+
 .table-container {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
