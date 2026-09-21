@@ -1,5 +1,6 @@
 'use client';
 
+import { AdsIcon } from '@/components/layout/AdsIcon';
 import { createContext, useContext, useCallback, useState, useEffect } from 'react';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -65,7 +66,7 @@ function ToastEl({ item, onRemove }: { item: ToastItem; onRemove: (id: number) =
       onFocusCapture={() => setPaused(true)} onBlurCapture={() => setPaused(false)}>
       {ICONS[item.type]}
       <span role={item.type === 'error' ? 'alert' : 'status'} className="min-w-0 flex-1 break-words text-text-primary">{item.message}</span>
-      <button type="button" onClick={() => onRemove(item.id)} aria-label="Dismiss notification" className="rounded-lg text-lg text-text-secondary">×</button>
+      <button type="button" onClick={() => onRemove(item.id)} aria-label="Dismiss notification" className="rounded-lg text-lg text-text-secondary"><AdsIcon name="close" /></button>
     </div>
   );
 }

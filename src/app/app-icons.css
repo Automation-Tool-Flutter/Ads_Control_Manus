@@ -1,0 +1,22 @@
+/* Shared control icons: consistent strokes, dimensions and disclosure states. */
+:root {
+  --icon-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m5 9 7 7 7-7'/%3E%3C/svg%3E");
+  --select-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23656b73' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m5 9 7 7 7-7'/%3E%3C/svg%3E");
+}
+.dark { --select-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23b0b3b8' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m5 9 7 7 7-7'/%3E%3C/svg%3E"); }
+.app-icon { display: inline-block; flex-shrink: 0; vertical-align: middle; pointer-events: none; }
+.app-icon[data-icon^=chevron], .app-icon[data-icon=close], .app-icon[data-icon=arrow-down] { width: 20px; height: 20px; }
+.mobile-date-trigger > span:last-child, .business-asset-chevron, .mobile-menu-chevron, .meta-ai-starter-arrow { display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; line-height: 1; }
+button[aria-expanded=true] [data-icon=chevron-down], details[open] > summary [data-icon=chevron-down] { transform: rotate(180deg); }
+summary { list-style: none; }
+summary::-webkit-details-marker { display: none; }
+summary::marker { content: ''; }
+summary:not(:has(svg))::after { content: ''; display: inline-block; vertical-align: middle; width: 20px; height: 20px; flex: 0 0 20px; margin-left: 8px; background: currentColor; mask: var(--icon-chevron) center / contain no-repeat; -webkit-mask: var(--icon-chevron) center / contain no-repeat; }
+details[open] > summary:not(:has(svg))::after { transform: rotate(180deg); }
+.dashboard-priority-note > summary::after { content: ''; margin-left: auto; }
+select:not([multiple]):not([size]), select[size='1'] { appearance: none; background-image: var(--select-chevron); background-position: right 12px center; background-repeat: no-repeat; background-size: 20px 20px; padding-right: 40px; }
+@media (max-width: 1023px), (hover: none) and (pointer: coarse) {
+  .mobile-date-trigger { min-height: 44px; gap: 12px; }
+  .mobile-tools-grid[data-layout=list] a::after { content: ''; width: 20px; height: 20px; flex: 0 0 20px; background: currentColor; mask: var(--icon-chevron) center / contain no-repeat; -webkit-mask: var(--icon-chevron) center / contain no-repeat; transform: rotate(-90deg); }
+  button:has(> .app-icon:only-child), a:has(> .app-icon:only-child) { min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; }
+}

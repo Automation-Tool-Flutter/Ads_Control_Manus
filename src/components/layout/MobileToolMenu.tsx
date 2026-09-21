@@ -7,7 +7,6 @@ import { UserAvatar } from '@/components/ui/UserAvatar';
 import { WORKBENCH_SECTIONS } from './WorkbenchNavigation';
 import { MobileNavBar } from './MobileNavBar';
 import { MenuAccountPicker } from './MenuAccountPicker';
-import { beginMenuNavigation } from '@/lib/menu-navigation';
 
 const SHORT_NAMES: Record<string, string> = {
   '/optimize': 'Performance', '/audiences': 'Audiences', '/budget-optimizer': 'Budgets',
@@ -52,7 +51,6 @@ export function MobileToolMenu({ accountBase, query, accountName, pathname, name
   const visible = tools.filter(tool => (tool.label + ' ' + tool.keywords).toLowerCase().includes(term));
   const shortcuts = pins.map(id => tools.find(tool => tool.id === id)).filter((tool): tool is typeof tools[number] => Boolean(tool));
   const navigate = (href: string) => {
-    beginMenuNavigation(href);
     // Release native dialog hit-testing before navigating, including same-route clicks.
     menuRoot.current?.closest('dialog')?.close();
     onClose();
@@ -105,10 +103,10 @@ export function MobileToolMenu({ accountBase, query, accountName, pathname, name
     <button type="button" key={tool.id} onClick={() => togglePin(tool.id)} aria-pressed={pins.includes(tool.id)} aria-label={(pins.includes(tool.id) ? 'Unpin ' : 'Pin ') + tool.label} className="mobile-menu-row mobile-menu-pin">
       <span className="mobile-tool-icon"><AdsIcon name={tool.icon} /></span><strong>{tool.label}</strong><span className="mobile-menu-check" aria-hidden="true">{pins.includes(tool.id) ? '✓' : '+'}</span>
     </button> : tool.accountRequired ?
-    <button type="button" key={tool.id} className={shortcut ? 'mobile-menu-shortcut' : 'mobile-menu-row'} onClick={() => chooseTool(tool)}><span className="mobile-tool-icon"><AdsIcon name={tool.icon} /></span><span className="mobile-menu-label"><strong>{tool.label}</strong>{tool.accountRequired && <small>Select account first</small>}</span><span aria-hidden="true">›</span></button> :
+    <button type="button" key={tool.id} className={shortcut ? 'mobile-menu-shortcut' : 'mobile-menu-row'} onClick={() => chooseTool(tool)}><span className="mobile-tool-icon"><AdsIcon name={tool.icon} /></span><span className="mobile-menu-label"><strong>{tool.label}</strong>{tool.accountRequired && <small>Select account first</small>}</span><span aria-hidden="true"><AdsIcon name="chevron-right" /></span></button> :
     <Link key={tool.id} href={tool.href} onClick={event => visitLink(event, tool.href)} aria-current={active(tool) ? 'page' : undefined} className={shortcut ? 'mobile-menu-shortcut' : 'mobile-menu-row'}>
       <span className="mobile-tool-icon"><AdsIcon name={tool.icon} /></span><span className="mobile-menu-label"><strong>{tool.label}</strong>{tool.accountRequired && <small>Select account first</small>}</span>
-      {!shortcut && <span className="mobile-menu-chevron" aria-hidden="true">›</span>}
+      {!shortcut && <span className="mobile-menu-chevron" aria-hidden="true"><AdsIcon name="chevron-right" /></span>}
     </Link>;
 
   if (picking) return <div ref={menuRoot} className="mobile-tools-shell mobile-menu-organized"><MenuAccountPicker label={picking.label} onCancel={() => setPicking(null)} onSelect={account => {
@@ -131,7 +129,7 @@ export function MobileToolMenu({ accountBase, query, accountName, pathname, name
     </div>
     <div className="mobile-tools-scroll" ref={scrollArea}>
       {!editing && !term && <>
-        <button type="button" onClick={() => setPicking({ path: '', label: 'Account overview' })} className="mobile-tools-account"><span><AdsIcon name="campaign" /></span><div><small>{accountBase ? 'Ad account' : 'Account tools'}</small><strong>{accountName || (accountBase ? 'Account workspace' : 'Choose an ad account')}</strong></div><b>{accountBase ? 'Switch' : 'Choose'} <span aria-hidden="true">›</span></b></button>
+        <button type="button" onClick={() => setPicking({ path: '', label: 'Account overview' })} className="mobile-tools-account"><span><AdsIcon name="campaign" /></span><div><small>{accountBase ? 'Ad account' : 'Account tools'}</small><strong>{accountName || (accountBase ? 'Account workspace' : 'Choose an ad account')}</strong></div><b>{accountBase ? 'Switch' : 'Choose'} <span aria-hidden="true"><AdsIcon name="chevron-right" /></span></b></button>
         {accountBase && <section aria-labelledby="menu-shortcuts-title">
           <div className="mobile-tools-section-title"><h3 id="menu-shortcuts-title">Shortcuts</h3><button type="button" onClick={customize}>Edit</button></div>
           <nav aria-label="Your shortcuts" className="mobile-menu-shortcuts">{shortcuts.map(tool => renderTool(tool, true))}</nav>

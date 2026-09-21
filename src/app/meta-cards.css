@@ -6,7 +6,7 @@
   --c-text-secondary: 75 79 86;
   --c-text-muted: 101 107 115;
   --c-border: 218 221 225;
-  --c-accent: 8 102 255;
+  --c-accent: 7 89 222;
   background: rgb(var(--c-bg-card));
   border: 1px solid rgb(var(--c-border));
   border-radius: 20px;

@@ -16,6 +16,8 @@ function load(file, mocks = {}) {
     require(name) {
       if (name in mocks) return mocks[name];
       if (name === 'react/jsx-runtime') return require(name);
+      if (name === '@/components/layout/AdsIcon') return load('src/components/layout/AdsIcon.tsx');
+      if (name === '@/components/ui/LoadingState') return load('src/components/ui/LoadingState.tsx');
       if (name === '@/components/ui/BrandLogo') return { BrandLogo: () => React.createElement('img', { alt: '', src: '/meta-ads-ai.png' }) };
       throw new Error(`Unexpected dependency: ${name}`);
     },
@@ -40,6 +42,24 @@ for (const signedIn of [false, true]) {
     assert.match(html, /login-brand/);
     assert.doesNotMatch(html, /CONNECT YOUR WORKSPACE/);
     assert.doesNotMatch(html, /Access requested|Smarter advertising|INTELLIGENCE WORKSPACE/);
+  });
+}
+
+for (const phase of ['authenticating', 'redirecting', 'failed']) {
+  test(`login renders the appropriate screen while ${phase}`, () => {
+    const { default: Login } = load('src/app/login/page.tsx', {
+      'next/link': { __esModule: true, default: 'a' },
+      '@/contexts/AuthContext': { useAuth: () => ({
+        state: { isLoading: phase === 'authenticating', token: phase === 'redirecting' ? 'test-session' : null },
+        isRedirecting: phase === 'redirecting',
+      }) },
+      '@/components/facebook/FacebookLoginButton': { FacebookLoginButton: () => React.createElement('button', null, 'Continue with Facebook') },
+      '@/components/ui/UserAvatar': { UserAvatar: () => null },
+    });
+    const html = renderToStaticMarkup(React.createElement(Login));
+    assert.equal(html.includes('role="status"'), phase !== 'failed');
+    assert.equal(html.includes('Continue with Facebook'), phase === 'failed');
+    assert.equal(html.includes('login-card-wrap'), phase === 'failed');
   });
 }
 

@@ -1,5 +1,6 @@
 "use client";
 
+import { AdsIcon } from '@/components/layout/AdsIcon';
 import { useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
@@ -34,12 +35,12 @@ export default function OptimizePage() {
         breadcrumbs={[
             { label: "Accounts", href: "/accounts" },
             { label: accountId, href: `/accounts/${accountId}` },
-            { label: "GPT Optimize" },
+            { label: "Meta AI Optimize" },
         ]}
         eyebrow="Account optimization"
-        title="GPT Analysis & Optimization"
+        title="Meta AI Analysis & Optimization"
         description="Collect Meta Ads performance signals and turn them into prioritized optimization recommendations."
-        badge="Meta Ads + GPT"
+        badge="Meta Ads + Meta AI"
       />
 
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_340px]">
@@ -74,8 +75,8 @@ export default function OptimizePage() {
 
         <aside className="space-y-3 xl:sticky xl:top-5 xl:self-start">
           <div className="meta-panel overflow-hidden">
-            <div className="border-b border-border bg-text-primary px-4 py-3 text-white">
-              <p className="text-[10px] font-black uppercase text-white/70">GPT operator</p>
+            <div className="border-b border-border bg-bg-secondary px-4 py-3 text-text-primary">
+              <p className="text-[10px] font-black uppercase text-accent">Meta AI assistant</p>
               <h2 className="mt-1 text-base font-black">Optimization copilot</h2>
             </div>
             <div className="space-y-3 p-4">
@@ -109,7 +110,7 @@ export default function OptimizePage() {
             className="meta-item block border-status-green/30 bg-status-green/5 p-4 transition-colors hover:bg-status-green/10"
           >
             <p className="text-[10px] font-black uppercase text-status-green">Next tool</p>
-            <p className="mt-1 font-bold text-text-primary">Open Budget Optimizer →</p>
+            <p className="mt-1 font-bold text-text-primary">Open Budget Optimizer <AdsIcon name="chevron-right" /></p>
             <p className="mt-1 text-xs leading-relaxed text-text-muted">
               Build Conservative, Balanced, or Aggressive campaign allocation plans.
             </p>

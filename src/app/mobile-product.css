@@ -144,7 +144,7 @@ body::before, .dark body::before { background: none; }
   .workspace-page .touch-record-list { gap: 10px; }
   .workspace-page .touch-record-list > * { margin-block: 0; }
   .workspace-page .touch-record-select { min-height: 48px; padding: 4px 12px; border-radius: 14px; background: rgb(var(--c-bg-card)); }
-  .ads-mobile-header.mobile-header-clean { min-height: 64px; padding-block: calc(8px + env(safe-area-inset-top)) 8px; }
+  .ads-mobile-header.mobile-header-clean { min-height: calc(64px + env(safe-area-inset-top,0px)); padding-block: calc(8px + env(safe-area-inset-top)) 8px; }
   .ads-mobile-header.mobile-header-clean .mobile-header-title-text { font-size: 18px; font-weight: 700; }
   .ads-bottom-nav, .mobile-tools-tabbar { gap: 4px; padding-top: 6px; padding-bottom: calc(6px + env(safe-area-inset-bottom)); box-shadow: 0 -2px 10px rgb(0 0 0 / .035); }
   .mobile-tab { min-height: 56px; border-radius: 14px; gap: 4px; font-size: 11px; font-weight: 600; color: rgb(var(--c-text-secondary)); }
@@ -174,13 +174,15 @@ body::before, .dark body::before { background: none; }
   .mobile-tool-tile strong { font-size: 14px; }
   .mobile-tools-grid[data-layout=list] { grid-template-columns: minmax(0,1fr); }
   .mobile-tools-grid[data-layout=list] .mobile-tool-tile { min-height: 68px; flex-direction: row; align-items: center; gap: 12px; }
-  .mobile-tools-grid[data-layout=list] a::after { content: '›'; margin-left: auto; color: rgb(var(--c-text-muted)); font-size: 22px; }
+  .mobile-tools-grid[data-layout=list] a::after { margin-left: auto; color: rgb(var(--c-text-muted)); }
   .mobile-tools-profile { padding: 14px; border: 1px solid rgb(var(--c-border)); border-radius: 18px; background: rgb(var(--c-bg-card)); }
   .mobile-tools-profile a > span:last-child { white-space: normal; font-size: 14px; }
   .mobile-tools-profile small, .mobile-tools-profile button { font-size: 12px; }
   .mobile-dashboard-ai { padding: 16px; border-radius: 20px; background: rgb(var(--c-bg-card)); }
   .mobile-dashboard-header > .date-filter { width: 100%; }
   .mobile-dashboard-header h1 { font-size: 24px; }
+  .workspace-page .mobile-dashboard-header { padding: 0; gap: 12px; }
+  .workspace-page .ai-dashboard > :not([hidden]) ~ :not([hidden]) { margin-top: 16px; }
   .mobile-dashboard-header > div > p { overflow-wrap: anywhere; }
   .mobile-dashboard-ai-heading h2 { font-size: 16px; }
   .mobile-dashboard-ai-open { border-radius: 24px; padding-inline: 14px; }

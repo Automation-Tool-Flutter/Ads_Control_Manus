@@ -6,13 +6,13 @@
   max-width: none;
   min-height: 100dvh;
   margin: 0;
-  padding: max(32px, env(safe-area-inset-top)) max(20px, env(safe-area-inset-right)) max(32px, env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left));
+  padding: calc(32px + env(safe-area-inset-top, 0px)) calc(20px + env(safe-area-inset-right, 0px)) calc(32px + env(safe-area-inset-bottom, 0px)) calc(20px + env(safe-area-inset-left, 0px));
   background: rgb(var(--c-bg-primary));
 }
 .login-card-wrap { width: 100%; max-width: 408px; margin-inline: auto; }
 .login-simple .login-card { padding: 32px; border: 1px solid rgb(var(--c-border) / .8); border-radius: 28px; background: rgb(var(--c-bg-card)); box-shadow: 0 16px 48px rgb(20 40 80 / .045), 0 2px 6px rgb(20 40 80 / .025); }
 .login-brand { display: flex; flex-direction: column; align-items: center; text-align: center; }
-.login-brand-mark { display: grid; place-items: center; width: 72px; height: 72px; margin-bottom: 18px; border: 1px solid rgb(var(--c-border) / .45); border-radius: 23px; background: linear-gradient(145deg,rgb(var(--c-bg-card)),rgb(var(--c-accent) / .055)); }
+.login-brand-mark { display: grid; place-items: center; width: 72px; height: 72px; margin-bottom: 18px; }
 .login-greeting { margin: 0 0 5px; color: rgb(var(--c-text-secondary)); font-size: 13px; line-height: 1.5; font-weight: 500; }
 .login-brand h1 { margin: 0; color: rgb(var(--c-text-primary)); font-size: 29px; line-height: 1.2; letter-spacing: -.9px; font-weight: 700; }
 .login-description { margin: 14px 0 26px; text-align: center; font-size: 14px; line-height: 1.65; color: rgb(var(--c-text-secondary)); }
@@ -87,7 +87,7 @@
   .login-workspace.login-simple { align-content: center; gap: 0; }
   .login-simple .login-card { padding: 28px 24px; }
   .workspace-shell:has(.meta-ai-page) { padding-bottom: 0; }
-  .mobile-app-content .meta-ai-page { height: calc(var(--app-viewport-height,100dvh) - 135px - env(safe-area-inset-top) - env(safe-area-inset-bottom)); padding: 0; }
+  .mobile-app-content .meta-ai-page { height: calc(var(--app-viewport-height,100dvh) - 64px - var(--mobile-tab-height,71px) - env(safe-area-inset-top) - env(safe-area-inset-bottom)); padding: 0; }
   .meta-ai-page-heading { gap: 8px; padding: 8px 12px; }
   .meta-ai-page-title { display: none; }
   .meta-ai-page-scope { flex: 1; width: auto; background: rgb(var(--c-bg-secondary) / .4); }

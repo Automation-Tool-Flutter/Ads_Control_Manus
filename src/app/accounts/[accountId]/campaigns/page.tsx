@@ -20,6 +20,7 @@ import { ReauthError, isPermissionError } from '@/components/ui/ReauthError';
 import { StatusToggle } from '@/components/ui/StatusToggle';
 import { BudgetEditor } from '@/components/ui/BudgetEditor';
 import { DateFilter } from '@/components/ui/DateFilter';
+import { CollectionFilterChoices } from '@/components/ui/CollectionFilterChoices';
 import { CollectionToolbar } from '@/components/ui/CollectionToolbar';
 import { ScoreCard } from '@/components/optimize/ScoreCard';
 import { AngleTabs } from '@/components/optimize/AngleTabs';
@@ -415,7 +416,7 @@ export default function CampaignsPage() {
           </div>
         )}
       </ControlHeader>
-      {state.status === 'success' && campaigns.length > 0 && <CollectionToolbar search={search} onSearch={setSearch} label="Search campaigns" placeholder="Search campaigns…" count={`${visibleCampaigns.length} of ${campaigns.length} campaigns · ${selectedIds.size} selected`} filterCount={statusFilter === 'all' ? 0 : 1} onReset={() => { setSearch(''); setStatusFilter('all'); }} filters={<label>Delivery status<select value={statusFilter} onChange={event => setStatusFilter(event.target.value)}><option value="all">All campaigns</option><option value="ACTIVE">Active</option><option value="PAUSED">Paused</option><option value="ARCHIVED">Archived</option><option value="DELETED">Deleted</option></select></label>} />}
+      {state.status === 'success' && campaigns.length > 0 && <CollectionToolbar search={search} onSearch={setSearch} label="Search campaigns" placeholder="Search campaigns…" count={`${visibleCampaigns.length} of ${campaigns.length} campaigns · ${selectedIds.size} selected`} filterCount={statusFilter === 'all' ? 0 : 1} onReset={() => { setSearch(''); setStatusFilter('all'); }} filters={<CollectionFilterChoices label="Delivery status" value={statusFilter} onChange={setStatusFilter} options={[{"value":"all","label":"All campaigns"},{"value":"ACTIVE","label":"Active"},{"value":"PAUSED","label":"Paused"},{"value":"ARCHIVED","label":"Archived"},{"value":"DELETED","label":"Deleted"}]} />} />}
       {state.status === 'success' && campaigns.length > 0 && visibleCampaigns.length === 0 && <div className="collection-empty"><h2>No matching campaigns</h2><p>Try another name, ID or delivery status.</p><button type="button" onClick={() => { setSearch(''); setStatusFilter('all'); }}>Clear filters</button></div>}
 
       {/* Mutation error */}
@@ -717,8 +718,8 @@ export default function CampaignsPage() {
                     </div>
                   </div>
                   <div className="text-center">
-                    <p className="text-text-primary font-semibold mb-1">Analyzing campaigns...</p>
-                    <p className="text-text-muted text-sm">Meta AI is analyzing your campaign data</p>
+                    <p className="sr-only">Analyzing campaigns...</p>
+                    <p className="sr-only">Meta AI is analyzing your campaign data</p>
                   </div>
                 </div>
               )}
@@ -794,7 +795,7 @@ export default function CampaignsPage() {
               )}
               disabled={!insightsLoaded || analysisState.step === 'analyzing'}
               title={!insightsLoaded ? 'Load metrics first' : undefined}
-              className="selection-analyze flex items-center gap-1.5 px-3 py-2 bg-text-primary text-white text-sm font-medium rounded-lg disabled:opacity-50 transition-opacity"
+              className="selection-analyze flex items-center gap-1.5 px-3 py-2 bg-[#0866ff] text-white text-sm font-medium rounded-lg disabled:opacity-50 transition-opacity"
             >
               Analyze with Meta AI ({selectedIds.size})
             </button>

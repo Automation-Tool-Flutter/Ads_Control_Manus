@@ -1,0 +1,23 @@
+.collection-filter-fields .collection-filter-select, .collection-desktop-filters .collection-filter-options { display: none; }
+.collection-native-filters .collection-sheet-heading { padding-bottom: 20px; }
+.collection-filter-header-actions { display: flex; align-items: center; gap: 12px; }
+.collection-sheet-heading .collection-filter-reset { width: auto; padding-inline: 8px; background: transparent; color: rgb(var(--c-accent)); font-size: 14px; font-weight: 600; }
+.collection-filter-reset:disabled { opacity: .4; }
+.collection-filter-options { min-width: 0; margin: 0; padding: 0; border: 0; }
+.collection-filter-options legend { padding: 0 0 10px; font-size: 13px; font-weight: 500; color: rgb(var(--c-text-secondary)); }
+.collection-filter-options > div { overflow: hidden; border-radius: 16px; background: rgb(var(--c-bg-secondary)); }
+.collection-filter-fields .collection-filter-option { position: relative; display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 56px; padding: 14px 16px; cursor: pointer; font-size: 16px; font-weight: 400; touch-action: manipulation; }
+.collection-filter-option + .collection-filter-option { border-top: 1px solid rgb(var(--c-border)/.65); }
+.collection-filter-option:has(input:checked) { background: rgb(var(--c-accent)/.08); }
+.collection-filter-option:has(input:checked) .collection-filter-option-label { font-weight: 600; }
+.collection-filter-option:has(input:focus-visible) { outline: 2px solid rgb(var(--c-accent)); outline-offset: -3px; }
+.collection-filter-option:active { background: rgb(var(--c-accent)/.12); }
+.collection-filter-check { display: grid; place-items: center; flex: 0 0 24px; width: 24px; height: 24px; border: 1.5px solid rgb(var(--c-text-muted)/.5); border-radius: 50%; }
+.collection-filter-option:has(input:checked) .collection-filter-check { background: #0866ff; border-color: #0866ff; color: white; }
+.collection-filter-check svg { width: 16px; height: 16px; stroke-width: 2.4; }
+.collection-native-filters .collection-sheet-actions { margin-top: 24px; border-top: 0; padding-top: 0; background: transparent; }
+.collection-native-filters .collection-sheet-actions button { min-height: 52px; border-radius: 14px; font-size: 16px; }
+@media (max-width: 1023px), (hover: none) and (pointer: coarse) {
+  .app-modal-content > .collection-native-filters { padding-inline: 20px; border: 0; border-radius: 28px 28px 0 0; padding-bottom: max(20px,env(safe-area-inset-bottom)); }
+  .collection-native-filters .collection-sheet-heading h2 { font-size: 22px; font-weight: 650; }
+}

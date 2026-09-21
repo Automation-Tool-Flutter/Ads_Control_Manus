@@ -5,17 +5,24 @@ import { useAuth } from "@/contexts/AuthContext";
 import { BrandLogo } from "@/components/ui/BrandLogo";
 import { UserAvatar } from "@/components/ui/UserAvatar";
 import { FacebookLoginButton } from "@/components/facebook/FacebookLoginButton";
+import { LoadingState } from "@/components/ui/LoadingState";
 
 export default function LoginPage() {
-  const { state } = useAuth();
+  const { state, isRedirecting } = useAuth();
   const signedIn = !state.isLoading && Boolean(state.token);
+
+  if (state.isLoading || isRedirecting) {
+    return <main className="login-workspace login-simple" aria-busy="true">
+      <LoadingState message="Opening your workspace…" />
+    </main>;
+  }
 
   return (
     <main className="login-workspace login-simple">
       <div className="login-card-wrap">
         <section className="meta-panel login-card" aria-labelledby="login-title" data-signed-in={signedIn}>
           <header className="login-brand">
-            <div className="login-brand-mark"><BrandLogo size={48} decorative /></div>
+            <div className="login-brand-mark"><BrandLogo src="/meta-ai-login.png" size={72} decorative /></div>
             <p className="login-greeting">{signedIn ? 'Welcome back' : 'Your advertising workspace'}</p>
             <h1 id="login-title">Meta Ads AI</h1>
           </header>

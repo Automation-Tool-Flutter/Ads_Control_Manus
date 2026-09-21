@@ -22,7 +22,6 @@ function render({search='',editing=false,base='/accounts/act_1',pathname='/accou
     'next/link':{default:({children,...props})=>React.createElement('a',props,children)},
     './AdsIcon':{AdsIcon:()=>null},
     './MenuAccountPicker':{MenuAccountPicker:()=>null},
-    '@/lib/menu-navigation':{beginMenuNavigation(){}},
     '@/components/ui/BrandLogo':{BrandLogo:()=>React.createElement('img',{src:'/meta-ads-ai.png',alt:''})},
     '@/components/ui/UserAvatar':{UserAvatar:()=>null},
     'next/navigation':{usePathname:()=>pathname,useRouter:()=>({push(){}})},
@@ -129,7 +128,6 @@ test('an account tool opens the picker then navigates to that tool after selecti
     '@/components/ui/UserAvatar': { UserAvatar: () => null },
     './MobileNavBar': { MobileNavBar: () => null },
     './MenuAccountPicker': { MenuAccountPicker: Picker },
-    '@/lib/menu-navigation': { beginMenuNavigation: () => events.push('show loading') },
   };
   dependencies['./WorkbenchNavigation'] = load('src/components/layout/WorkbenchNavigation.tsx', dependencies);
   const { MobileToolMenu } = load('src/components/layout/MobileToolMenu.tsx', dependencies);
@@ -153,8 +151,9 @@ test('an account tool opens the picker then navigates to that tool after selecti
   budget.props.onClick();
   picker = nodes(renderMenu()).find(node => node.type === Picker);
   picker.props.onSelect({ id: 'act_123', name: 'Demo & Co', currency: 'VND' });
-  assert.deepEqual(events.slice(0, 3), ['show loading', 'close dialog', 'close menu']);
-  const destination = new URL(events[3], 'https://example.test');
+  assert.deepEqual(events.slice(0, 2), ['close dialog', 'close menu']);
+  assert.equal(events.length, 3);
+  const destination = new URL(events[2], 'https://example.test');
   assert.equal(destination.pathname, '/accounts/act_123/budget-optimizer');
   assert.equal(destination.searchParams.get('accountName'), 'Demo & Co');
   assert.equal(destination.searchParams.get('currency'), 'VND');

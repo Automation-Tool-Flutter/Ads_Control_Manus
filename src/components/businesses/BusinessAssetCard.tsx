@@ -1,5 +1,6 @@
 'use client';
 
+import { AdsIcon } from '@/components/layout/AdsIcon';
 import { memo, useState } from 'react';
 import Link from 'next/link';
 import { CopyButton } from '@/components/ui/CopyButton';
@@ -29,7 +30,7 @@ export const BusinessAssetCard = memo(function BusinessAssetCard({ business }: {
           ) : (business.name.trim().charAt(0).toUpperCase() || 'B')}
         </span>
         <div className="business-asset-name"><h2>{business.name}</h2><span className="business-asset-status"><StatusDot color={color} />{label}</span></div>
-        <span className="business-asset-chevron" aria-hidden="true">›</span>
+        <span className="business-asset-chevron" aria-hidden="true"><AdsIcon name="chevron-right" /></span>
       </Link>
       <CopyButton value={business.id} />
     </div>

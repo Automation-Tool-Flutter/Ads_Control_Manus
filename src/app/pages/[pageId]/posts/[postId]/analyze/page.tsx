@@ -1,5 +1,6 @@
 'use client';
 
+import { AdsIcon } from '@/components/layout/AdsIcon';
 import { useEffect, useState } from 'react';
 import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
@@ -65,7 +66,7 @@ function PostPreview({ post, insights, followersCount }: {
           {post.permalink_url && (
             <a href={post.permalink_url} target="_blank" rel="noopener noreferrer"
               className="text-accent hover:text-accent/80 transition-colors">
-              View post →
+              View post <AdsIcon name="chevron-right" />
             </a>
           )}
         </div>

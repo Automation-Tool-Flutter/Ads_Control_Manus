@@ -1,4 +1,10 @@
 /* Phone-specific app shell. Desktop workspaces keep their existing layout. */
+@media (max-width: 1023px), (hover: none) and (pointer: coarse) {
+  .workspace-shell.mobile-app-content[data-mobile-tab-bar=false] {
+    --mobile-tab-height: 0px;
+    padding-bottom: env(safe-area-inset-bottom,0px);
+  }
+}
 .mobile-ai-icon { display: grid; place-items: center; width: 36px; height: 32px; flex-shrink: 0; }
 .mobile-ai-icon img { display: block; width: 32px; height: 32px; object-fit: contain; }
 .accounts-overview-stats { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); border: 1px solid rgb(var(--c-border)); border-radius: 10px; background: rgb(var(--c-bg-card)); }
@@ -6,7 +12,7 @@
 .accounts-overview-stats > div + div { border-left: 1px solid rgb(var(--c-border)); }
 .accounts-overview-stats span { display: block; font-size: 12px; line-height: 1.4; color: rgb(var(--c-text-secondary)); }
 .accounts-overview-stats strong { display: block; margin-top: 6px; font-size: 25px; line-height: 1.2; font-weight: 600; font-variant-numeric: tabular-nums; color: rgb(var(--c-text-primary)); }
-.ads-mobile-header.mobile-header-clean { min-height: 64px; padding: calc(8px + env(safe-area-inset-top)) 16px 8px; gap: 10px; background: rgb(var(--c-bg-card)); color: rgb(var(--c-text-primary)); border-bottom: 1px solid rgb(var(--c-border)); box-shadow: none; }
+.ads-mobile-header.mobile-header-clean { min-height: calc(64px + env(safe-area-inset-top,0px)); padding: calc(8px + env(safe-area-inset-top)) 16px 8px; gap: 10px; background: rgb(var(--c-bg-card)); color: rgb(var(--c-text-primary)); border-bottom: 1px solid rgb(var(--c-border)); box-shadow: none; }
 .ads-mobile-header.mobile-header-clean > .mobile-header-title { display: flex; align-items: center; justify-content: flex-start; flex: 1 1 auto; min-width: 0; gap: 10px; text-align: left; text-decoration: none; }
 .ads-mobile-header.mobile-header-clean .mobile-header-title-text { display: block; margin: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-size: 18px; font-weight: 600; line-height: 1.3; letter-spacing: -.3px; color: rgb(var(--c-text-primary)); }
 .ads-mobile-header.mobile-header-clean .mobile-header-mark { display: grid; place-items: center; margin: 0; flex-shrink: 0; width: 32px; height: 32px; }
@@ -17,7 +23,7 @@
   .mobile-app-content { padding-bottom: calc(82px + env(safe-area-inset-bottom)); }
   .mobile-app-content .workspace-page { padding-bottom: 24px; }
   .workspace-bar { display: none; }
-  .ads-mobile-header { min-height: 64px; padding: calc(8px + env(safe-area-inset-top)) 12px 8px; gap: 8px; }
+  .ads-mobile-header { min-height: calc(64px + env(safe-area-inset-top,0px)); padding: calc(8px + env(safe-area-inset-top)) 12px 8px; gap: 8px; }
   .ads-mobile-header button, .ads-mobile-header .mobile-back, .ads-mobile-header a[aria-label] { display: inline-flex; align-items: center; justify-content: center; min-width: 44px; min-height: 44px; }
   .ads-mobile-header .mobile-back { font-size: 32px; font-weight: 400; }
   .ads-mobile-header > a { flex: 1; text-align: left; }

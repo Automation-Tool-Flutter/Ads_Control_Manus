@@ -1,5 +1,6 @@
 'use client';
 
+import { AdsIcon } from '@/components/layout/AdsIcon';
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { BrandLogo } from '@/components/ui/BrandLogo';
@@ -68,7 +69,7 @@ export function FloatingAssistant() {
           <button type="button" onClick={close} aria-label="Close Meta AI chat" className="meta-ai-icon-button"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="m6 6 12 12M6 18 18 6" /></svg></button>
         </div>
       </div>
-      {visited && (state.token ? <AccountChat key={state.user?.id ?? 'session'} token={state.token} userId={state.user?.id ?? ''} active={open} /> : <div className="p-6"><h3 className="text-lg font-bold text-text-primary">Analyze with AI, right here.</h3><p className="mt-3 text-sm leading-6 text-text-secondary">Connect Meta to explore campaigns, compare performance, and receive recommendations grounded in your account data.</p><Link onClick={close} href="/login" className="ai-primary-button mt-5">Connect an account →</Link></div>)}
+      {visited && (state.token ? <AccountChat key={state.user?.id ?? 'session'} token={state.token} userId={state.user?.id ?? ''} active={open} /> : <div className="p-6"><h3 className="text-lg font-bold text-text-primary">Analyze with AI, right here.</h3><p className="mt-3 text-sm leading-6 text-text-secondary">Connect Meta to explore campaigns, compare performance, and receive recommendations grounded in your account data.</p><Link onClick={close} href="/login" className="ai-primary-button mt-5">Connect an account <AdsIcon name="chevron-right" /></Link></div>)}
     </section>
     <button ref={trigger} aria-label={open ? 'Minimize Meta AI' : 'Open Meta AI'} aria-expanded={open} aria-controls="floating-ai-panel" onClick={open ? close : show} className="ai-floating-trigger"><BrandLogo size={28} decorative /><span>Meta AI</span><span className="h-1.5 w-1.5 rounded-full bg-indigo-200" /></button>
   </div>;
@@ -117,13 +118,13 @@ function AccountChat({ token, userId, active }: { token: string; userId: string;
     </> : accounts.length && !routeAccount ? <>
       <div className="meta-ai-setup-content"><ChatWelcome onSelect={prompt => { setQuestion(prompt); chooseAccount(); }} /></div>
       <footer className="meta-ai-setup-footer">
-        <button type="button" className="meta-ai-start-button" onClick={chooseAccount} aria-haspopup="dialog" aria-expanded={pickerOpen}>Choose ad account<span aria-hidden="true">→</span></button>
+        <button type="button" className="meta-ai-start-button" onClick={chooseAccount} aria-haspopup="dialog" aria-expanded={pickerOpen}>Choose ad account<span aria-hidden="true"><AdsIcon name="chevron-right" /></span></button>
         <p>{question ? 'Your question is ready. Choose an account to continue.' : `${accounts.length} connected ${accounts.length === 1 ? 'account' : 'accounts'} · Choose where to start`}</p>
       </footer>
     </> : <div className="meta-ai-setup-recovery">
       <BrandLogo size={48} decorative /><h3>{routeAccount ? 'This account is unavailable' : 'Connect your first ad account'}</h3>
       <p>{routeAccount ? 'This account is not in your current access list. Open your accounts to choose an available one.' : 'Your Facebook connection does not have any ad accounts available yet.'}</p>
-      <Link href="/accounts" className="meta-ai-start-button">View ad accounts<span aria-hidden="true">→</span></Link>
+      <Link href="/accounts" className="meta-ai-start-button">View ad accounts<span aria-hidden="true"><AdsIcon name="chevron-right" /></span></Link>
       <button type="button" className="meta-ai-retry-link" onClick={retry}>Refresh accounts</button>
     </div>}
     <ChatAccountSheet key={pickerSession} open={pickerOpen && active} accounts={accounts} selectedId={account?.id ?? ''} days={days} lockedId={routeAccount || undefined} onApply={applyScope} onClose={() => setPickerOpen(false)} />
@@ -146,8 +147,8 @@ function ChatSession({ account, days, token, question, setQuestion }: { account:
       <summary><span>{ready ? 'Analysis details' : 'Preparing account data'}</span><span aria-hidden="true">•••</span></summary>
       <div className="meta-chat-options-content">
         {chat.dataState.status === 'ready' && <p>{chat.dataState.snapshot.coverage.campaignCount} campaigns · Comparing two periods</p>}
-        {context && <><p>Context: {context.entities.map(item => item.name).join(', ') || (context.missingIds.length ? 'Entity not included in this snapshot' : 'Account')}</p>{view.dateLabel && <p>Page filter: {view.dateLabel} · Chat period: {days} days</p>}{context.missingIds.length > 0 && <p className="text-status-yellow">Missing {context.missingIds.length} entities in the AI snapshot.</p>}<Link href={`${base}actions`}>Open Action Center ↗</Link></>}
-        <div className="meta-chat-option-actions"><button disabled={chat.isSending || !ready} onClick={chat.reload}>Refresh data</button><button disabled={chat.isSending} onClick={() => setClearOpen(true)}>Clear chat</button><Link href={full}>Full conversation ↗</Link></div>
+        {context && <><p>Context: {context.entities.map(item => item.name).join(', ') || (context.missingIds.length ? 'Entity not included in this snapshot' : 'Account')}</p>{view.dateLabel && <p>Page filter: {view.dateLabel} · Chat period: {days} days</p>}{context.missingIds.length > 0 && <p className="text-status-yellow">Missing {context.missingIds.length} entities in the AI snapshot.</p>}<Link href={`${base}actions`}>Open Action Center <AdsIcon name="chevron-right" /></Link></>}
+        <div className="meta-chat-option-actions"><button disabled={chat.isSending || !ready} onClick={chat.reload}>Refresh data</button><button disabled={chat.isSending} onClick={() => setClearOpen(true)}>Clear chat</button><Link href={full}>Full conversation <AdsIcon name="chevron-right" /></Link></div>
       </div>
     </details>
     <div className="meta-chat-body">
@@ -158,7 +159,7 @@ function ChatSession({ account, days, token, question, setQuestion }: { account:
         {message.result.tables.map((table, i) => <ChatDataTable key={i} table={table} />)}
         {message.result.recommendations.map((item, i) => {
           const href = getChatEntityHref(snapshot, item.entityId);
-          return <ChatEntityLink key={i} href={href} className="mt-3 block rounded-xl bg-accent/5 p-3 text-xs text-text-primary"><span className="font-bold">{item.action}{href && ' →'}</span><span className="mt-1 block leading-5 text-text-secondary">{item.rationale}</span></ChatEntityLink>;
+          return <ChatEntityLink key={i} href={href} className="mt-3 block rounded-xl bg-accent/5 p-3 text-xs text-text-primary"><span className="font-bold">{item.action}{href && <AdsIcon name="chevron-right" />}</span><span className="mt-1 block leading-5 text-text-secondary">{item.rationale}</span></ChatEntityLink>;
         })}
         {message.result.links.map((item, i) => <ChatEntityLink key={i} href={getChatEntityHref(snapshot, item.entityId, item.entityType)} title={item.reason} arrow className="mt-2 text-xs font-semibold text-accent">{item.entityName}</ChatEntityLink>)}
         {message.result.caveats.length > 0 && <details className="meta-chat-limitations"><summary>Data limitations ({message.result.caveats.length})</summary><ul>{message.result.caveats.map((text, i) => <li key={i}>{text}</li>)}</ul></details>}
@@ -170,7 +171,7 @@ function ChatSession({ account, days, token, question, setQuestion }: { account:
     {chat.isSending && <div className="meta-chat-loading"><ChatThinking /></div>}
     </div>
     <ConfirmDialog open={clearOpen} title="Clear conversation?" description="This removes the conversation saved on this device for the selected account and period." confirmLabel="Clear conversation" destructive loading={chat.isSending} onCancel={() => setClearOpen(false)} onConfirm={() => { chat.clear(); setClearOpen(false); }} />
-    {scroll.hasNew && <button type="button" className="ai-chat-new" onClick={scroll.scrollToLatest}>Latest messages ↓</button>}
+    {scroll.hasNew && <button type="button" className="ai-chat-new" onClick={scroll.scrollToLatest}>Latest messages <AdsIcon name="arrow-down" /></button>}
     <ChatComposer inputRef={input} value={question} onChange={setQuestion} ready={ready} sending={chat.isSending} onSubmit={() => { scroll.scrollToLatest(); void chat.send(question); setQuestion(''); }} />
   </>;
 }

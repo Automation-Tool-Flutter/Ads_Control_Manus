@@ -14,6 +14,12 @@ function render(pathname, signedIn = true) {
     if(name==='next/navigation') return {usePathname:()=>pathname,useRouter:()=>({push(){}})};
     if(name==='@/contexts/AuthContext') return {useAuth:()=>({state:{user:signedIn ? {id:'u1'} : null, token:'test'}})};
     if(name==='@/hooks/useAccountDetail') return {useAccountDetail:()=>({state:{status:'success',data:{id:'act_1',name:'Test',currency:'VND'}}})};
+    if(name==='@/lib/mobile-navigation') {
+      const navExports = {};
+      const compiled = ts.transpileModule(fs.readFileSync('src/lib/mobile-navigation.ts','utf8'), {compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2020}}).outputText;
+      vm.runInNewContext(compiled, {exports:navExports});
+      return navExports;
+    }
     if(name==='./MobileNavBar') {
       const navExports = {};
       const compiled = ts.transpileModule(fs.readFileSync('src/components/layout/MobileNavBar.tsx','utf8'), {compilerOptions:{module:ts.ModuleKind.CommonJS,jsx:ts.JsxEmit.ReactJSX,target:ts.ScriptTarget.ES2020}}).outputText;
@@ -28,7 +34,7 @@ function render(pathname, signedIn = true) {
   return renderToStaticMarkup(React.createElement(exports.BottomNav));
 }
 test('mobile navigation has five primary destinations with a dedicated AI button',()=>{
-  const html=render('/accounts/act_1');
+  const html=render('/accounts');
   assert.equal((html.match(/<a /g)||[]).length,3);
   assert.equal((html.match(/<button /g)||[]).length,2);
   assert.match(html,/Open Meta AI/);
@@ -36,10 +42,16 @@ test('mobile navigation has five primary destinations with a dedicated AI button
   assert.match(html,/>Meta AI<\/span>/);
   assert.match(html,/Open all tools/);
 });
-test('mobile campaign navigation preserves account and currency',()=>{
-  const html=render('/accounts/act_1/campaigns/c1');
-  assert.match(html,/href="\/accounts\/act_1\/campaigns\?accountName=Test&amp;currency=VND" aria-current="page"/);
-  assert.equal((html.match(/aria-current="page"/g)||[]).length,1);
+test('child screens have no primary tab bar',()=>{
+  for (const path of ['/accounts/act_1', '/accounts/act_1/campaigns', '/accounts/act_1/campaigns/c1', '/accounts/act_1/ask-ads', '/pages/42', '/businesses/42', '/settings/profile']) {
+    assert.equal(render(path), '', path);
+  }
+});
+
+test('primary screens keep the tab bar',()=>{
+  for (const path of ['/accounts', '/accounts/', '/businesses', '/pages', '/settings']) {
+    assert.match(render(path), /Mobile primary navigation/, path);
+  }
 });
 test('signed-out pages do not show app navigation',()=>assert.equal(render('/login',false),''));
 

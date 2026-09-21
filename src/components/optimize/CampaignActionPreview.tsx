@@ -1,5 +1,6 @@
 'use client';
 
+import { AdsIcon } from '@/components/layout/AdsIcon';
 import { Modal } from '@/components/ui/Modal';
 import type { Recommendation } from '@/lib/types/optimize';
 import { formatCurrency } from '@/lib/utils';
@@ -54,7 +55,7 @@ export function CampaignActionPreview({ recommendation, currency, applying, onAp
                   {formatCurrency(action.currentDailyBudget, currency)}
                 </p>
               </div>
-              <span className="text-accent">→</span>
+              <span className="text-accent"><AdsIcon name="chevron-right" /></span>
               <div>
                 <p className="text-[10px] font-bold uppercase text-text-muted">Proposed</p>
                 <p className="mt-1 font-bold text-accent">

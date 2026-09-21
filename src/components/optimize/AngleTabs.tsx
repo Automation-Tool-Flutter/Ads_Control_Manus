@@ -22,7 +22,7 @@ export function AngleTabs({ angles, onPreviewAction }: Props) {
             onClick={() => setActiveIndex(i)}
             className={`flex-shrink-0 rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
               activeIndex === i
-                ? 'bg-text-primary text-white shadow-lg shadow-slate-900/15'
+                ? 'bg-[#0866ff] text-white shadow-lg shadow-slate-900/15'
                 : 'border border-border bg-bg-card text-text-secondary hover:border-border/80 hover:text-text-primary'
             }`}
           >

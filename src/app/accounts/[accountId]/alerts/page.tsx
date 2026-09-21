@@ -1,5 +1,6 @@
 'use client';
 
+import { AdsIcon } from '@/components/layout/AdsIcon';
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
@@ -60,7 +61,7 @@ function AlertCard({ alert, currency, accountId, status, onStatus }: { alert: AI
       <div className="mt-3 rounded-lg border border-accent/20 bg-accent/[0.06] p-3"><p className="text-[10px] font-black uppercase text-accent">Recommended next action</p><p className="mt-1 text-sm text-text-secondary">{alert.recommendedAction}</p></div>
 
       <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-border/60 pt-3">
-        <Link href={href} className="text-xs font-bold text-accent hover:underline">Open {alert.entityType} →</Link>
+        <Link href={href} className="text-xs font-bold text-accent hover:underline">Open {alert.entityType} <AdsIcon name="chevron-right" /></Link>
         <div className="flex gap-2">
           <button type="button" onClick={() => onStatus(status === 'acknowledged' ? 'new' : 'acknowledged')} className="rounded-lg border border-border px-2.5 py-1.5 text-xs font-bold text-text-secondary hover:bg-bg-secondary">{status === 'acknowledged' ? 'Mark new' : 'Acknowledge'}</button>
           <button type="button" onClick={() => onStatus(status === 'dismissed' ? 'new' : 'dismissed')} className="rounded-lg border border-border px-2.5 py-1.5 text-xs font-bold text-text-muted hover:bg-bg-secondary">{status === 'dismissed' ? 'Restore' : 'Dismiss'}</button>

@@ -1,5 +1,6 @@
 'use client';
 
+import { AdsIcon } from '@/components/layout/AdsIcon';
 import { useEffect, useId, useState } from 'react';
 import type { DatePreset, DateRange } from '@/lib/types';
 import { Modal } from './Modal';
@@ -48,7 +49,7 @@ export function DateFilter({ value, onChange, disabled, allowCustom = true, pres
 
   return (
     <div className="date-filter space-y-3">
-      <button type="button" className="mobile-date-trigger" disabled={disabled} aria-haspopup="dialog" aria-expanded={sheetOpen} onClick={() => { resetDraft(); setSheetOpen(true); }}><span>Period · {periodLabel}</span><span aria-hidden="true">⌄</span></button>
+      <button type="button" className="mobile-date-trigger" disabled={disabled} aria-haspopup="dialog" aria-expanded={sheetOpen} onClick={() => { resetDraft(); setSheetOpen(true); }}><span>Period · {periodLabel}</span><span aria-hidden="true"><AdsIcon name="chevron-down" /></span></button>
       <div className="date-filter-desktop space-y-3">
       <select aria-label="Reporting period" value={selection} disabled={disabled} className={inputClass}
         onChange={event => {
@@ -81,7 +82,7 @@ export function DateFilter({ value, onChange, disabled, allowCustom = true, pres
       </div>
       <Modal open={sheetOpen} label="Reporting period" onClose={closeSheet}>
         <div className="collection-filter-sheet">
-          <div className="collection-sheet-heading"><h2>Reporting period</h2><button type="button" aria-label="Close reporting period" onClick={closeSheet}>✕</button></div>
+          <div className="collection-sheet-heading"><h2>Reporting period</h2><button type="button" aria-label="Close reporting period" onClick={closeSheet}><AdsIcon name="close" /></button></div>
           <p className="collection-filter-note">Choose the dates to use for your report.</p>
           <div className="date-preset-options" role="group" aria-label="Date presets">
             {[...presets, ...(allowCustom ? [{ value: 'custom' as const, label: 'Custom date range' }] : [])].map(item => <button type="button" key={item.value} disabled={disabled} aria-pressed={selection === item.value} onClick={() => setSelection(item.value)}><span>{item.label}</span>{selection === item.value && <span aria-hidden="true">✓</span>}</button>)}

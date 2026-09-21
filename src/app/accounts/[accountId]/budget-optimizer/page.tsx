@@ -1,4 +1,5 @@
 'use client';
+import { AdsIcon } from '@/components/layout/AdsIcon';
 import { usePublishAIView } from '@/hooks/useAIViewContext';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -318,17 +319,17 @@ function BudgetPlanView({
 
   return (
     <section className="meta-panel overflow-hidden">
-      <div className="border-b border-border bg-text-primary px-4 py-4 text-white">
+      <div className="border-b border-border bg-bg-secondary px-4 py-4 text-text-primary">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <p className="text-[10px] font-black uppercase text-white/65">Recommended scenario</p>
+            <p className="text-[10px] font-black uppercase text-accent">Recommended scenario</p>
             <h2 className="mt-1 text-lg font-black">{plan.mode} allocation</h2>
           </div>
-          <span className="rounded-md bg-white/10 px-2.5 py-1 text-xs font-bold">
+          <span className="rounded-md bg-accent/10 px-2.5 py-1 text-xs font-bold text-accent">
             {Math.round(plan.confidence)}% confidence
           </span>
         </div>
-        <p className="mt-3 max-w-3xl text-sm leading-relaxed text-white/78">{plan.summary}</p>
+        <p className="mt-3 max-w-3xl text-sm leading-relaxed text-text-secondary">{plan.summary}</p>
         <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3">
           <PlanMetric label="Current/day" value={formatCurrency(plan.currentTotalBudgetRaw, plan.currency)} />
           <PlanMetric label="Target/day" value={formatCurrency(plan.targetTotalBudgetRaw, plan.currency)} />
@@ -375,7 +376,7 @@ function BudgetPlanView({
                   <div className="flex-1 rounded-lg bg-bg-secondary/60 px-3 py-2 text-right">
                     <p className="text-[10px] font-bold uppercase text-text-muted">Daily budget</p>
                     <p className="mt-1 text-sm font-bold text-text-primary">
-                      {formatCurrency(allocation.currentDailyBudgetRaw, plan.currency)} →{' '}
+                      {formatCurrency(allocation.currentDailyBudgetRaw, plan.currency)} <AdsIcon name="chevron-right" />{' '}
                       <span className={changeTone}>{formatCurrency(allocation.proposedDailyBudgetRaw, plan.currency)}</span>
                     </p>
                   </div>
@@ -410,9 +411,9 @@ function BudgetPlanView({
 
 function PlanMetric({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-lg bg-white/8 px-3 py-2">
-      <p className="text-[10px] font-bold uppercase text-white/55">{label}</p>
-      <p className="mt-1 text-sm font-black text-white">{value}</p>
+    <div className="rounded-lg bg-bg-card px-3 py-2">
+      <p className="text-[10px] font-bold uppercase text-text-secondary">{label}</p>
+      <p className="mt-1 text-sm font-black text-text-primary">{value}</p>
     </div>
   );
 }

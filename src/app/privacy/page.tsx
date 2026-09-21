@@ -1,10 +1,11 @@
+import { AdsIcon } from '@/components/layout/AdsIcon';
 import Link from "next/link";
 
 export default function PrivacyPage() {
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-12">
       <Link data-inline-back href="/" className="text-accent text-sm hover:underline">
-        ← Back to home
+        <AdsIcon name="chevron-left" /> Back to home
       </Link>
 
       <h1 className="text-3xl font-bold text-text-primary mt-6 mb-2">

@@ -253,9 +253,9 @@ export default function AdSetsPage() {
         eyebrow="Ad set operations"
         title="Targeting board"
         description={state.status === 'success' && activeCount > 0
-          ? `${activeCount} active ad set${activeCount !== 1 ? 's' : ''}. Review delivery, targeting, budget, and GPT optimization signals.`
-          : 'Review delivery, targeting, budget, and GPT optimization signals for this campaign.'}
-        badge="Meta Ads + GPT"
+          ? `${activeCount} active ad set${activeCount !== 1 ? 's' : ''}. Review delivery, targeting, budget, and Meta AI optimization signals.`
+          : 'Review delivery, targeting, budget, and Meta AI optimization signals for this campaign.'}
+        badge="Meta Ads + Meta AI"
         stats={state.status === 'success' ? [
           { label: 'total', value: adsets.length, tone: 'neutral' },
           { label: 'active', value: activeCount, tone: 'green' },
@@ -528,7 +528,7 @@ export default function AdSetsPage() {
             <div className="flex items-center justify-between px-5 py-4 border-b border-border flex-shrink-0">
               <div className="flex items-center gap-2">
                 <span className="text-accent text-lg leading-none">✦</span>
-                <h2 className="text-base font-semibold text-text-primary">GPT Analysis</h2>
+                <h2 className="text-base font-semibold text-text-primary">Meta AI Analysis</h2>
               </div>
               {analysisState.step !== 'analyzing' && (
                 <button
@@ -555,8 +555,8 @@ export default function AdSetsPage() {
                     </div>
                   </div>
                   <div className="text-center">
-                    <p className="text-text-primary font-semibold mb-1">Analyzing ad sets...</p>
-                    <p className="text-text-muted text-sm">GPT is processing your ad set data</p>
+                    <p className="sr-only">Analyzing ad sets...</p>
+                    <p className="sr-only">Meta AI is processing your ad set data</p>
                   </div>
                 </div>
               )}
@@ -594,9 +594,9 @@ export default function AdSetsPage() {
               onClick={() => analyze(selectedAdSets, insights, currency, dateFilter)}
               disabled={!insightsLoaded || analysisState.step === 'analyzing'}
               title={!insightsLoaded ? 'Load metrics first' : undefined}
-              className="selection-analyze flex items-center gap-1.5 px-3 py-2 bg-text-primary text-white text-sm font-medium rounded-lg disabled:opacity-50 transition-opacity"
+              className="selection-analyze flex items-center gap-1.5 px-3 py-2 bg-[#0866ff] text-white text-sm font-medium rounded-lg disabled:opacity-50 transition-opacity"
             >
-              Analyze with GPT ({selectedIds.size})
+              Analyze with Meta AI ({selectedIds.size})
             </button>
           </div>
         </div>

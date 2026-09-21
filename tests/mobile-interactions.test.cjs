@@ -14,6 +14,7 @@ function load(file, dependencies = {}, globals = {}) {
   vm.runInNewContext(source, { exports, ...globals, require: name => {
     if (dependencies[name]) return dependencies[name];
     if (name === 'react' || name === 'react/jsx-runtime') return require(name);
+    if (name === '@/components/layout/AdsIcon') return load('src/components/layout/AdsIcon.tsx');
     throw new Error('Unexpected dependency: ' + name);
   } });
   return exports;

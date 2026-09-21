@@ -1,7 +1,7 @@
 'use client';
 
-import React, { createContext, useContext, useReducer, useEffect, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
+import React, { createContext, useContext, useReducer, useEffect, useCallback, useState } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
 import type { AuthState, FBUser } from '@/lib/types';
 import { clearViewMemory } from '@/lib/view-memory';
 import {
@@ -53,6 +53,7 @@ const initialState: AuthState = {
 
 interface AuthContextValue {
   state: AuthState;
+  isRedirecting: boolean;
   login: (options?: { rerequest?: boolean }) => Promise<FBUser>;
   logout: () => void;
 }
@@ -147,6 +148,12 @@ async function finishOAuthLogin(callback: FacebookOAuthCallback) {
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [state, dispatch] = useReducer(reducer, initialState);
   const router = useRouter();
+  const pathname = usePathname();
+  const [isRedirecting, setIsRedirecting] = useState(false);
+
+  useEffect(() => {
+    setIsRedirecting(false);
+  }, [pathname]);
 
   // Restore session or complete the OAuth redirect after Facebook returns.
   useEffect(() => {
@@ -196,6 +203,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               destination = `${target.pathname}${target.search}${target.hash}`;
             }
           }
+          setIsRedirecting(true);
           dispatch({
             type: 'SET_AUTH',
             payload: { token: oauthCallback.accessToken, user },
@@ -207,6 +215,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         clearOAuthRequest();
         clearFacebookOAuthCallbackUrl();
         if (!cancelled) {
+          setIsRedirecting(false);
           dispatch({ type: 'SET_LOADING', payload: false });
           console.error(error);
         }
@@ -267,7 +276,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ state, login, logout }}>
+    <AuthContext.Provider value={{ state, isRedirecting, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

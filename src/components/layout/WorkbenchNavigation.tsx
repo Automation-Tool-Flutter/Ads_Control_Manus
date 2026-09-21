@@ -10,7 +10,7 @@ export const WORKBENCH_SECTIONS = [
 ];
 export function WorkbenchNavigation({ accountBase, query, onNavigate }: { accountBase: string; query: string; onNavigate?: () => void }) {
   const pathname = usePathname();
-  return <div className="ads-workbench">{WORKBENCH_SECTIONS.map(section => <details key={section.title} open className="ads-nav-group"><summary>{section.title}<span aria-hidden="true">⌄</span></summary><div>{section.items.map(([path,label,icon]) => {
+  return <div className="ads-workbench">{WORKBENCH_SECTIONS.map(section => <details key={section.title} open className="ads-nav-group"><summary>{section.title}<span aria-hidden="true"><AdsIcon name="chevron-down" /></span></summary><div>{section.items.map(([path,label,icon]) => {
     const active = path ? pathname === accountBase + path || pathname.startsWith(accountBase + path + '/') : pathname === accountBase;
     return <Link key={path} onClick={onNavigate} aria-current={active ? 'page' : undefined} href={accountBase + path + query} className={'ads-nav-link ' + (active ? 'is-active' : '')}><AdsIcon name={icon} /><span>{label}</span>{icon === 'ai' && <small>AI</small>}</Link>;
   })}</div></details>)}</div>;

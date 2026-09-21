@@ -122,7 +122,7 @@ test('provider errors keep useful metadata, never raw messages or credentials', 
 
 test('model access, schema and quota failures are distinguished', async () => {
   for (const [status, code, message] of [
-    [404, 'model_not_found', /cannot access gpt-5.6-luna/],
+    [404, 'model_not_found', /cannot access the configured analysis model/],
     [400, 'invalid_json_schema', /schema was rejected/],
     [429, 'insufficient_quota', /no available API quota/],
     [401, 'invalid_api_key', /could not authenticate/],

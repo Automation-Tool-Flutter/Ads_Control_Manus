@@ -1,5 +1,6 @@
 'use client';
 
+import { AdsIcon } from '@/components/layout/AdsIcon';
 import { useState } from 'react';
 import Link from 'next/link';
 import type { RootCauseAnalysis, RootCauseDriver, RootCauseEntityType } from '@/lib/types/root-cause';
@@ -28,7 +29,7 @@ function DriverBranch({ driver, accountId, campaignId }: { driver: RootCauseDriv
         <button type="button" onClick={() => setOpen(value => !value)} className="flex w-full items-start justify-between gap-3 text-left">
           <div>
             <p className="text-sm font-bold text-text-primary">{driver.label}</p>
-            <p className="mt-0.5 text-xs text-text-muted">{driver.metric}: {driver.previousValue} → {driver.currentValue}</p>
+            <p className="mt-0.5 text-xs text-text-muted">{driver.metric}: {driver.previousValue} <AdsIcon name="chevron-right" /> {driver.currentValue}</p>
           </div>
           <div className="flex shrink-0 items-center gap-2">
             <span className={`text-xs font-black tabular-nums ${driver.changePercent > 0 ? 'text-status-red' : driver.changePercent < 0 ? 'text-status-green' : 'text-text-muted'}`}>
@@ -47,7 +48,7 @@ function DriverBranch({ driver, accountId, campaignId }: { driver: RootCauseDriv
             </div>
             <div className="flex items-center justify-between gap-2">
               <span className="text-[11px] font-semibold text-text-muted">Confidence {driver.confidence}%</span>
-              {href && <Link href={href} className="text-xs font-bold text-accent hover:underline">Open {driver.entityType} →</Link>}
+              {href && <Link href={href} className="text-xs font-bold text-accent hover:underline">Open {driver.entityType} <AdsIcon name="chevron-right" /></Link>}
             </div>
 
             {driver.causes.map(cause => {
@@ -60,7 +61,7 @@ function DriverBranch({ driver, accountId, campaignId }: { driver: RootCauseDriv
                   <p className="mt-1 text-xs text-text-secondary"><span className="font-semibold">Verify:</span> {cause.nextCheck}</p>
                   <div className="mt-1 flex items-center justify-between">
                     <span className="text-[10px] text-text-muted">Confidence {cause.confidence}%</span>
-                    {causeHref && <Link href={causeHref} className="text-[11px] font-bold text-accent hover:underline">Open →</Link>}
+                    {causeHref && <Link href={causeHref} className="text-[11px] font-bold text-accent hover:underline">Open <AdsIcon name="chevron-right" /></Link>}
                   </div>
                 </div>
               );
@@ -88,7 +89,7 @@ export function RootCauseTree({ analysis, accountId, campaignId }: { analysis: R
         <div className="mt-3 flex flex-wrap items-end gap-x-5 gap-y-2">
           <div>
             <p className="text-[10px] font-semibold uppercase text-text-muted">{analysis.primaryMetric.label}</p>
-            <p className="text-xl font-black tabular-nums text-text-primary">{analysis.primaryMetric.previousValue} → {analysis.primaryMetric.currentValue}</p>
+            <p className="text-xl font-black tabular-nums text-text-primary">{analysis.primaryMetric.previousValue} <AdsIcon name="chevron-right" /> {analysis.primaryMetric.currentValue}</p>
           </div>
           <p className={`text-sm font-black ${analysis.severity === 'critical' ? 'text-status-red' : analysis.severity === 'warning' ? 'text-status-yellow' : 'text-status-green'}`}>
             {analysis.primaryMetric.changePercent > 0 ? '+' : ''}{analysis.primaryMetric.changePercent.toFixed(1)}%

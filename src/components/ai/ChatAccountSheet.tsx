@@ -1,5 +1,6 @@
 'use client';
 
+import { AdsIcon } from '@/components/layout/AdsIcon';
 import { useId, useState } from 'react';
 import { Modal } from '@/components/ui/Modal';
 import type { AdAccount } from '@/lib/types';
@@ -25,7 +26,7 @@ export function ChatAccountSheet({ accounts, selectedId, days, lockedId, onApply
     <div className="meta-ai-account-sheet">
       <header className="meta-ai-sheet-heading">
         <div><h2 id={titleId}>{lockedId ? 'Chat settings' : 'Choose ad account'}</h2><p>{lockedId ? 'Following the account on this page.' : 'Choose the data you want to talk about.'}</p></div>
-        <button type="button" onClick={onClose} className="meta-ai-icon-button" aria-label="Close account picker">×</button>
+        <button type="button" onClick={onClose} className="meta-ai-icon-button" aria-label="Close account picker"><AdsIcon name="close" /></button>
       </header>
       <fieldset className="meta-ai-sheet-period"><legend>Analysis period</legend><div>
         {[7, 14, 30].map(value => <button key={value} type="button" aria-pressed={period === value} onClick={() => setPeriod(value)}>{value} days</button>)}
@@ -42,7 +43,7 @@ export function ChatAccountSheet({ accounts, selectedId, days, lockedId, onApply
         </button>)}
         {!filtered.length && <div className="meta-ai-account-empty"><p>{search ? 'No matching accounts.' : 'No accounts available.'}</p>{search && <button type="button" onClick={() => setSearch('')}>Clear search</button>}</div>}
       </div>
-      <footer className="meta-ai-sheet-footer"><button type="button" className="meta-ai-start-button" disabled={!valid} onClick={() => { if (valid) onApply(choice, period); }}>{selectedId ? 'Use these settings' : 'Start chatting'}<span aria-hidden="true">→</span></button></footer>
+      <footer className="meta-ai-sheet-footer"><button type="button" className="meta-ai-start-button" disabled={!valid} onClick={() => { if (valid) onApply(choice, period); }}>{selectedId ? 'Use these settings' : 'Start chatting'}<span aria-hidden="true"><AdsIcon name="chevron-right" /></span></button></footer>
     </div>
   </Modal>;
 }

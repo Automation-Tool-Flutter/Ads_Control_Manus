@@ -1,5 +1,6 @@
 "use client";
 
+import { AdsIcon } from '@/components/layout/AdsIcon';
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
@@ -100,8 +101,8 @@ export default function PageInsightsPage() {
         ]}
         eyebrow="Meta Page analytics"
         title="Page Insights"
-        description="Review Page growth, engagement, reach, video, monetization signals, and GPT recommendations in one workspace."
-        badge="Insights + GPT"
+        description="Review Page growth, engagement, reach, video, monetization signals, and Meta AI recommendations in one workspace."
+        badge="Insights + Meta AI"
         stats={metrics.length > 0 ? [
           { label: 'net followers', value: computeNetNewFollowers(metrics).toLocaleString(), tone: computeNetNewFollowers(metrics) >= 0 ? 'green' : 'amber' },
           { label: 'metrics', value: metrics.length, tone: 'neutral' },
@@ -155,7 +156,7 @@ export default function PageInsightsPage() {
               rel="noopener noreferrer"
               className="px-4 py-2 text-sm font-semibold bg-accent text-white rounded-xl hover:bg-accent/90 transition-colors"
             >
-              View Insights on Facebook →
+              View Insights on Facebook <AdsIcon name="chevron-right" />
             </a>
           </div>
         ) : (

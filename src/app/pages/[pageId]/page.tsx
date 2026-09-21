@@ -1,5 +1,6 @@
 'use client';
 
+import { AdsIcon } from '@/components/layout/AdsIcon';
 import { useEffect, useState, useMemo } from 'react';
 import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
@@ -165,8 +166,8 @@ export default function PageDetailPage() {
         ]}
         eyebrow="Content studio"
         title={page?.name ?? 'Page workspace'}
-        description={page?.category ? `${page.category}. Manage publishing, scheduled content, comments, boosts, and GPT post review.` : 'Manage publishing, scheduled content, comments, boosts, and GPT post review.'}
-        badge="Meta Page + GPT"
+        description={page?.category ? `${page.category}. Manage publishing, scheduled content, comments, boosts, and Meta AI post review.` : 'Manage publishing, scheduled content, comments, boosts, and Meta AI post review.'}
+        badge="Meta Page + Meta AI"
         stats={[
           { label: 'likes', value: page?.fan_count !== undefined ? page.fan_count.toLocaleString() : '-', tone: 'neutral' },
           { label: 'followers', value: page?.followers_count !== undefined ? page.followers_count.toLocaleString() : '-', tone: 'blue' },
@@ -194,7 +195,7 @@ export default function PageDetailPage() {
             </Link>
             <Link
               href={`/pages/${pageId}/posts/new`}
-              className="hidden min-h-10 items-center justify-center rounded-xl bg-text-primary px-3 text-sm font-semibold text-white hover:bg-slate-800 sm:inline-flex"
+              className="hidden min-h-10 items-center justify-center rounded-xl bg-[#0866ff] px-3 text-sm font-semibold text-white hover:bg-[#0759de] sm:inline-flex"
             >
               Create post
             </Link>
@@ -211,7 +212,7 @@ export default function PageDetailPage() {
         {/* Desktop create button */}
         <Link
           href={`/pages/${pageId}/posts/new`}
-          className="hidden sm:flex items-center gap-1.5 text-sm font-semibold text-white bg-text-primary hover:bg-slate-800 px-3 py-1.5 rounded-lg transition-colors"
+          className="hidden sm:flex items-center gap-1.5 text-sm font-semibold text-white bg-[#0866ff] hover:bg-[#0759de] px-3 py-1.5 rounded-lg transition-colors"
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -275,7 +276,7 @@ export default function PageDetailPage() {
                 href={`/pages/${pageId}/posts/new`}
                 className="inline-block mt-3 text-sm font-semibold text-accent hover:text-accent/80"
               >
-                Schedule a post →
+                Schedule a post <AdsIcon name="chevron-right" />
               </Link>
             </div>
           )}
@@ -313,7 +314,7 @@ export default function PageDetailPage() {
             href={`/pages/${pageId}/posts/new`}
             className="inline-block mt-3 text-sm font-semibold text-accent hover:text-accent/80"
           >
-            Create your first post →
+            Create your first post <AdsIcon name="chevron-right" />
           </Link>
         </div>
       )}

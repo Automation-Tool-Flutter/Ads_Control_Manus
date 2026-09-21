@@ -13,6 +13,7 @@ function render(business) {
   }).outputText;
   const dependencies = {
     react: React,
+    '@/components/layout/AdsIcon': { AdsIcon: () => React.createElement('svg', { 'aria-hidden': true }) },
     'react/jsx-runtime': require('react/jsx-runtime'),
     'next/link': { default: props => React.createElement('a', props) },
     '@/components/ui/CopyButton': { CopyButton: ({ value }) => React.createElement('button', { 'data-copy': value }, 'Copy') },

@@ -1,9 +1,9 @@
 import Image from 'next/image';
 
-export function BrandLogo({ size = 40, decorative = false }: { size?: number; decorative?: boolean }) {
+export function BrandLogo({ size = 40, decorative = false, src = '/meta-ads-ai.png' }: { size?: number; decorative?: boolean; src?: string }) {
   return (
     <Image
-      src="/meta-ads-ai.png"
+      src={src}
       alt={decorative ? '' : 'Meta Ads AI'}
       width={size}
       height={size}

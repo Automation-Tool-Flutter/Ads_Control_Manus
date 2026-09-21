@@ -10,6 +10,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
 import { LoadingState } from '@/components/ui/LoadingState';
 import { StatusDot } from "@/components/ui/StatusBadge";
 import { CopyButton } from "@/components/ui/CopyButton";
+import { CollectionFilterChoices } from '@/components/ui/CollectionFilterChoices';
 import { CollectionToolbar } from "@/components/ui/CollectionToolbar";
 import { ErrorState } from "@/components/ui/ErrorState";
 import { formatCurrency, getAccountStatus } from "@/lib/utils";
@@ -209,7 +210,7 @@ export default function AccountsPage() {
         count={state.status === "success" ? state.data.length : undefined}
         activeCount={activeCount}
       />
-      {state.status === 'success' && <CollectionToolbar search={search} onSearch={setSearch} label="Search ad accounts" placeholder="Search accounts…" count={`${accounts.length} of ${allAccounts.length} accounts`} filterCount={statusFilter === 'all' ? 0 : 1} onReset={() => { setSearch(''); setStatusFilter('all'); }} filters={<label>Account status<select value={statusFilter} onChange={event => setStatusFilter(event.target.value)}><option value="all">All statuses</option><option value="active">Active</option><option value="attention">Needs attention</option></select></label>} />}
+      {state.status === 'success' && <CollectionToolbar search={search} onSearch={setSearch} label="Search ad accounts" placeholder="Search accounts…" count={`${accounts.length} of ${allAccounts.length} accounts`} filterCount={statusFilter === 'all' ? 0 : 1} onReset={() => { setSearch(''); setStatusFilter('all'); }} filters={<CollectionFilterChoices label="Account status" value={statusFilter} onChange={setStatusFilter} options={[{"value":"all","label":"All statuses"},{"value":"active","label":"Active"},{"value":"attention","label":"Needs attention"}]} />} />}
 
       {/* Loading */}
       {state.status === "loading" && (

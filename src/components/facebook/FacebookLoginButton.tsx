@@ -17,6 +17,7 @@ export function FacebookLoginButton({ className = '' }: Props) {
     <div className={`flex flex-col gap-2 ${className}`}>
       <a
         href="/api/auth/facebook/start"
+        data-navigation-feedback="inline"
         onClick={handleLoginStart}
         aria-disabled={isLoading}
         className="w-full mobile-action flex items-center justify-center gap-3 px-5 bg-accent hover:bg-accent/90 aria-disabled:opacity-60 aria-disabled:cursor-not-allowed text-white font-bold rounded-full transition-all shadow-xl shadow-accent/25 active:scale-[0.98]"

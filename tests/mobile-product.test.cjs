@@ -15,6 +15,7 @@ function load(file, dependencies = {}) {
   vm.runInNewContext(source, { exports, require: name => {
     if (dependencies[name]) return dependencies[name];
     if (name === 'react' || name === 'react/jsx-runtime') return require(name);
+    if (name === '@/components/layout/AdsIcon') return load('src/components/layout/AdsIcon.tsx');
     throw new Error('Unexpected dependency: ' + name);
   } });
   return exports;
@@ -22,6 +23,21 @@ function load(file, dependencies = {}) {
 
 const modalMock = { Modal: () => null };
 const iconMock = { AdsIcon: () => React.createElement('svg', { 'aria-hidden': true }) };
+
+test('dashboard priorities keep the empty state short and link to analysis', () => {
+  const { ActionCenter } = load('src/components/dashboard/ActionCenter.tsx', {
+    'next/link': { default: ({ children, ...props }) => React.createElement('a', props, children) },
+    '@/lib/report-export': {},
+    '@/contexts/AuthContext': { useAuth: () => ({ state: { token: 'test' } }) },
+    '@/hooks/useAccountDetail': { useAccountDetail: () => ({ state: { status: 'idle' } }) },
+    '@/lib/action-center': {},
+  });
+  const html = renderToStaticMarkup(React.createElement(ActionCenter, { accountId: '42', compact: true }));
+  assert.match(html, /No saved recommendations yet/);
+  assert.match(html, /href="\/accounts\/42\/optimize"/);
+  assert.match(html, /About these actions/);
+  assert.doesNotMatch(html, /dashboard-priority-counts|border-dashed|AI ACTION CENTER/);
+});
 
 test('only authenticated section roots suppress duplicate mobile headings', () => {
   let pathname = '/businesses';
@@ -33,6 +49,7 @@ test('only authenticated section roots suppress duplicate mobile headings', () =
   const { NavSpacer } = load('src/components/layout/NavSpacer.tsx', {
     'next/navigation': navigation, '@/contexts/AuthContext': { useAuth: () => ({ state: { user } }) },
     './WorkbenchNavigation': workbench,
+    '@/lib/mobile-navigation': load('src/lib/mobile-navigation.ts'),
   });
   for (const route of ['/businesses', '/pages', '/settings', '/accounts', '/accounts/42', '/accounts/42/campaigns', '/accounts/42/ask-ads']) {
     pathname = route;
@@ -44,6 +61,13 @@ test('only authenticated section roots suppress duplicate mobile headings', () =
   }
   pathname = '/businesses'; user = null;
   assert.match(renderToStaticMarkup(React.createElement(NavSpacer)), /data-title-in-app-bar="false"/);
+  user = { id: 'test' };
+  for (const route of ['/accounts/42', '/accounts/42/campaigns', '/pages/42']) {
+    pathname = route;
+    assert.match(renderToStaticMarkup(React.createElement(NavSpacer)), /data-mobile-tab-bar="false"/, route);
+  }
+  pathname = '/accounts';
+  assert.match(renderToStaticMarkup(React.createElement(NavSpacer)), /data-mobile-tab-bar="true"/);
 });
 
 test('collection search exposes count, clear, reset and mobile filter state', () => {

@@ -113,10 +113,6 @@ body::before {
   outline-offset: 3px;
 }
 
-header {
-  padding-top: env(safe-area-inset-top);
-}
-
 .table-container {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;

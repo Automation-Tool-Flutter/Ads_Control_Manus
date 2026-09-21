@@ -26,11 +26,11 @@ export function AnalyzeButton({ step, onAnalyze }: Props) {
       <div className="meta-item-header px-4 py-3">
         <div className="flex items-center justify-between gap-3">
           <div>
-            <p className="text-[10px] font-black uppercase text-accent">GPT optimization layer</p>
+            <p className="text-[10px] font-black uppercase text-accent">Meta AI optimization layer</p>
             <h2 className="mt-1 text-base font-semibold text-text-primary">AI Analysis & Optimization</h2>
           </div>
           <span className="rounded-md border border-accent/20 bg-accent/10 px-2.5 py-1 text-xs font-black text-accent">
-            GPT
+            Meta AI
           </span>
         </div>
         <p className="mt-2 text-sm text-text-secondary">
@@ -63,7 +63,7 @@ export function AnalyzeButton({ step, onAnalyze }: Props) {
                   d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"
                 />
               </svg>
-              Analyze with GPT
+              Analyze with Meta AI
             </>
           )}
         </button>

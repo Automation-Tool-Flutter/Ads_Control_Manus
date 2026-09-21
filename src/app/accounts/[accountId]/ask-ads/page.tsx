@@ -1,5 +1,6 @@
 'use client';
 
+import { AdsIcon } from '@/components/layout/AdsIcon';
 import { FormEvent, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useChatScroll } from '@/hooks/useChatScroll';
@@ -47,7 +48,7 @@ export default function AskAdsPage() {
       <header className="meta-ai-page-heading">
         <div className="meta-ai-page-title"><ChatIdentity /></div>
         <details className="meta-chat-scope-picker meta-ai-page-scope">
-          <summary><span>{accountName}</span><span>{days} days <span aria-hidden="true">⌄</span></span></summary>
+          <summary><span>{accountName}</span><span>{days} days <span aria-hidden="true"><AdsIcon name="chevron-down" /></span></span></summary>
           <div className="meta-chat-options-content">
             <label className="meta-ai-period-label">Analysis period
               <select value={days} disabled={chat.isSending} onChange={event => { const value = Number(event.target.value); if (value !== days) setDays(value); }}>
@@ -103,7 +104,7 @@ export default function AskAdsPage() {
 
           {chat.isSending && <div className="meta-chat-loading"><ChatThinking /></div>}
           </div>
-          {scroll.hasNew && <button type="button" className="ai-chat-new" onClick={scroll.scrollToLatest}>Latest messages ↓</button>}
+          {scroll.hasNew && <button type="button" className="ai-chat-new" onClick={scroll.scrollToLatest}>Latest messages <AdsIcon name="arrow-down" /></button>}
           <ChatComposer inputRef={input} value={question} onChange={setQuestion} onSubmit={submit} ready={chat.dataState.status === 'ready'} sending={chat.isSending} />
         </section>
       </div>}

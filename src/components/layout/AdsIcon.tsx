@@ -1,5 +1,11 @@
 export function AdsIcon({ name = 'grid', className = 'h-5 w-5' }: { name?: string; className?: string }) {
   const paths: Record<string, string> = {
+    check: 'm5 12 4 4L19 6',
+    'chevron-right': 'm9 5 7 7-7 7',
+    'chevron-down': 'm5 9 7 7 7-7',
+    'chevron-left': 'm15 5-7 7 7 7',
+    'arrow-down': 'M12 4v16m-7-7 7 7 7-7',
+    'arrow-up-right': 'M7 17 17 7M7 7h10v10',
     close: 'M6 6l12 12M18 6 6 18',
     grid: 'M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z',
     ai: 'm12 3 2.5 6.5L21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5Z',
@@ -16,5 +22,5 @@ export function AdsIcon({ name = 'grid', className = 'h-5 w-5' }: { name?: strin
     search: 'M10 17a7 7 0 1 0 0-14 7 7 0 0 0 0 14ZM15 15l6 6',
     menu: 'M4 6h16M4 12h16M4 18h16',
   };
-  return <svg aria-hidden="true" className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d={paths[name] ?? paths.grid} /></svg>;
+  return <svg aria-hidden="true" focusable="false" data-icon={name} className={`app-icon ${className}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d={paths[name] ?? paths.grid} /></svg>;
 }

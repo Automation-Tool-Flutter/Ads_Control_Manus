@@ -2,7 +2,7 @@
 :root, .light {
   --c-bg-card: 255 255 255; --c-bg-primary: 240 242 245; --c-bg-secondary: 242 244 247;
   --c-text-primary: 28 30 33; --c-text-secondary: 75 79 86; --c-text-muted: 101 107 115;
-  --c-accent: 8 102 255; --c-border: 222 226 231;
+  --c-accent: 7 89 222; --c-border: 222 226 231;
 }
 .dark {
   --c-bg-primary: 24 25 26; --c-bg-secondary: 48 49 51; --c-bg-card: 36 37 38;
@@ -30,7 +30,6 @@ body::before { background: none; }
 .ads-nav-group { margin-bottom: 14px; }
 .ads-nav-group summary, .ads-nav-label { display: flex; align-items: center; justify-content: space-between; padding: 12px 12px 8px; list-style: none; color: #b6def5; font-size: 9px; font-weight: 600; letter-spacing: 1.4px; text-transform: uppercase; cursor: pointer; }
 .ads-nav-group summary::-webkit-details-marker { display: none; }
-.ads-nav-group:not([open]) summary span { transform: rotate(-90deg); }
 .ads-nav-link { display: flex; min-height: 44px; align-items: center; gap: 10px; padding: 10px 12px; margin: 2px 0; border-radius: 8px !important; color: #e0f2fe; font-size: 14px; line-height: 1.45; transition: background .15s; }
 .ads-nav-link svg { width: 17px; height: 17px; flex-shrink: 0; opacity: .8; }
 .ads-nav-link span { flex: 1; }

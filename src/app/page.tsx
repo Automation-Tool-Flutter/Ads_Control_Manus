@@ -15,20 +15,14 @@ export default function Home() {
     if (!state.isLoading && !state.token) router.replace("/login");
   }, [state.isLoading, state.token, router]);
 
-  if (state.isLoading) {
-    return (
-      <LoadingState message="Opening your workspace…" />
-    );
-  }
-
-  return null;
+  return <LoadingState message="Opening your workspace…" />;
 }
 
 function LandingPage() {
   return (
     <main className="px-3 py-4 sm:px-6 sm:py-10">
       <section className="mx-auto grid max-w-[1400px] gap-4 lg:grid-cols-[1.15fr_0.85fr]">
-        <div className="meta-panel min-h-[620px] overflow-hidden bg-text-primary p-6 text-white sm:p-10">
+        <div className="meta-panel min-h-[620px] overflow-hidden bg-[#182b49] p-6 text-white sm:p-10">
           <div className="flex h-full flex-col justify-between">
             <div>
               <div className="inline-flex rounded-md border border-white/15 bg-white/10 px-4 py-2 text-xs font-black uppercase tracking-wide text-white/70">
