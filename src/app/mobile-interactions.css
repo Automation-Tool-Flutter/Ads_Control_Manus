@@ -122,7 +122,6 @@
   .ai-floating-root[data-authenticated=true] .ai-floating-trigger { display: none; }
   .ai-floating-root[data-open=true] { inset: 0; z-index: 60; display: block; }
   .ai-floating-panel { position: absolute; inset: var(--mobile-chat-top,0px) 0 auto; width: 100%; height: var(--mobile-chat-height,100dvh); max-height: none; border-radius: 0; }
-  .ai-floating-heading { padding-top: calc(12px + env(safe-area-inset-top)); }
 }
 @media (max-width: 359px) {
   .mobile-tools-grid { gap: 8px; }

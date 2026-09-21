@@ -96,7 +96,17 @@
   .meta-ai-welcome { padding: 24px 0; }
   .meta-ai-welcome h2 { font-size: 28px; }
   .meta-ai-starters { margin-top: 22px; }
-  .ai-floating-panel { padding-bottom: 0; }
+  /* Reserve system insets on the frame, outside the header and scrollable content.
+     Apply to both phones and touch WebViews, including wide/landscape viewports. */
+  .ai-floating-root .ai-floating-panel {
+    box-sizing: border-box;
+    padding: env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) 0 env(safe-area-inset-left,0px);
+  }
+  .ai-floating-panel .ai-floating-heading.meta-ai-chat-heading {
+    flex: 0 0 auto;
+    min-height: 64px;
+    padding: 8px 16px;
+  }
   html[data-mobile-keyboard=true] .meta-ai-page-heading { display: none; }
   html[data-mobile-keyboard=true] .mobile-app-content .meta-ai-page { height: calc(var(--app-viewport-height,100dvh) - 64px - env(safe-area-inset-top)); }
   html[data-mobile-keyboard=true] .meta-ai-page .meta-chat-composer-note { display: none; }

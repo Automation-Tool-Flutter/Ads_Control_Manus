@@ -80,8 +80,7 @@
   .ai-floating-root[data-authenticated="true"] .ai-floating-trigger { display: none; }
   .ai-floating-root[data-open="true"] { inset: 0; z-index: 60; display: block; }
   .ai-floating-root[data-open="true"] .ai-floating-trigger { display: none; }
-  .ai-floating-panel { position: absolute; top: var(--mobile-chat-top,0px); left: 0; width: 100%; height: var(--mobile-chat-height,100dvh); max-height: none; border: 0; border-radius: 0; padding-bottom: env(safe-area-inset-bottom); }
-  .ai-floating-heading { padding-top: calc(12px + env(safe-area-inset-top)); }
+  .ai-floating-panel { position: absolute; top: var(--mobile-chat-top,0px); left: 0; width: 100%; height: var(--mobile-chat-height,100dvh); max-height: none; border: 0; border-radius: 0; }
   .ai-floating-panel button, .ai-floating-panel a { min-height: 44px; }
   .ai-floating-panel form { flex-shrink: 0; }
   .ai-floating-panel [role=log] { font-size: 14px; }
