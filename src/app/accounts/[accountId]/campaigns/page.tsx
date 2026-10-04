@@ -395,7 +395,7 @@ export default function CampaignsPage() {
         eyebrow="Campaign operations"
         title="Campaigns"
         description="Monitor delivery, review budgets and analyze performance with Meta AI."
-        badge="Meta Ads AI"
+        badge="Meta AI Ads"
         stats={state.status === 'success' ? [
           { label: 'total', value: campaigns.length, tone: 'neutral' },
           { label: 'active', value: activeCount, tone: 'green' },

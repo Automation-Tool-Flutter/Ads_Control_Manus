@@ -13,9 +13,10 @@
 .login-simple .login-card { padding: 32px; border: 1px solid rgb(var(--c-border) / .8); border-radius: 28px; background: rgb(var(--c-bg-card)); box-shadow: 0 16px 48px rgb(20 40 80 / .045), 0 2px 6px rgb(20 40 80 / .025); }
 .login-brand { display: flex; flex-direction: column; align-items: center; text-align: center; }
 .login-brand-mark { display: grid; place-items: center; width: 72px; height: 72px; margin-bottom: 18px; }
-.login-greeting { margin: 0 0 5px; color: rgb(var(--c-text-secondary)); font-size: 13px; line-height: 1.5; font-weight: 500; }
+.login-greeting, .login-description { font-family: inherit; font-size: 14px; font-weight: 400; line-height: 1.65; letter-spacing: normal; }
+.login-greeting { margin: 0 0 5px; color: rgb(var(--c-text-secondary)); }
 .login-brand h1 { margin: 0; color: rgb(var(--c-text-primary)); font-size: 29px; line-height: 1.2; letter-spacing: -.9px; font-weight: 700; }
-.login-description { margin: 14px 0 26px; text-align: center; font-size: 14px; line-height: 1.65; color: rgb(var(--c-text-secondary)); }
+.login-description { margin: 14px 0 26px; text-align: center; color: rgb(var(--c-text-secondary)); }
 .login-actions { display: grid; gap: 12px; }
 .login-session { display: flex; align-items: center; gap: 12px; min-width: 0; padding: 0 2px 8px; }
 .login-session .login-session-avatar { width: 40px; height: 40px; }

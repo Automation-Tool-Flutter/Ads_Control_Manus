@@ -113,7 +113,7 @@ export default function AlertCenterPage() {
       >
         <button type="button" onClick={refresh} disabled={state.status === 'loading'} className="rounded-lg bg-accent px-3 py-2 text-sm font-bold text-white disabled:opacity-50">Refresh analysis</button>
       </ControlHeader>
-      {state.status === 'idle' && <section className="ai-surface p-8"><h2 className="text-lg font-bold text-text-primary">Run an account health check</h2><p className="mt-3 max-w-2xl text-sm leading-6 text-text-secondary">Analyze recent delivery, cost, tracking, and fatigue signals. This is an on-demand review, not background monitoring. A Meta Ads AI request is sent only when you start the analysis.</p><button onClick={refresh} className="ai-primary-button mt-5">Run analysis</button></section>}
+      {state.status === 'idle' && <section className="ai-surface p-8"><h2 className="text-lg font-bold text-text-primary">Run an account health check</h2><p className="mt-3 max-w-2xl text-sm leading-6 text-text-secondary">Analyze recent delivery, cost, tracking, and fatigue signals. This is an on-demand review, not background monitoring. A Meta AI Ads request is sent only when you start the analysis.</p><button onClick={refresh} className="ai-primary-button mt-5">Run analysis</button></section>}
 
       {state.status === 'loading' && <LoadingState message="Loading diagnostics…" />}
       {state.status === 'error' && <ErrorState message={state.error} onRetry={refresh} />}

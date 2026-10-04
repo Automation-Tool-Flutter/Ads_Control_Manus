@@ -88,9 +88,9 @@ export function Header() {
   const mobileTitle = accountId
     ? WORKBENCH_SECTIONS.flatMap(section => section.items).find(([path]) => path && pathname === '/accounts/' + accountId + path)?.[1]
       ?? (segments.length > 2 ? 'Account workspace' : 'Account overview')
-    : pathname.startsWith('/accounts') ? 'Ad accounts' : pathname.startsWith('/pages') ? 'Page' : pathname.startsWith('/businesses') ? 'Business assets' : pathname.startsWith('/settings') ? 'Settings' : 'Meta Ads AI';
+    : pathname.startsWith('/accounts') ? 'Ad accounts' : pathname.startsWith('/pages') ? 'Page' : pathname.startsWith('/businesses') ? 'Business assets' : pathname.startsWith('/settings') ? 'Settings' : 'Meta AI Ads';
   const navigation = <>
-    <div className="ads-brand"><Link href={state.user ? '/accounts' : '/'} onClick={close}><span className="ads-brand-mark"><BrandLogo decorative /></span><span>Meta Ads AI<small>INTELLIGENCE WORKSPACE</small></span></Link><button className="lg:hidden" onClick={close} aria-label="Close menu"><AdsIcon name="close" /></button></div>
+    <div className="ads-brand"><Link href={state.user ? '/accounts' : '/'} onClick={close}><span className="ads-brand-mark"><BrandLogo decorative /></span><span>Meta AI Ads<small>INTELLIGENCE WORKSPACE</small></span></Link><button className="lg:hidden" onClick={close} aria-label="Close menu"><AdsIcon name="close" /></button></div>
     {state.user && <><Link href="/accounts" onClick={close} className="ads-account-switch"><span className="ads-account-avatar">{current?.name.charAt(0).toUpperCase() ?? 'W'}</span><span><small>{accountId ? 'AD ACCOUNT' : 'WORKSPACE'}</small><strong>{current?.name ?? (accountId ? 'Account workspace' : 'All ad accounts')}</strong></span><span aria-hidden="true"><AdsIcon name="chevron-down" /></span></Link><button className="ads-copilot-entry" onClick={() => {close();window.dispatchEvent(new Event('open-ai-assistant'));}}><BrandLogo size={28} decorative /><span>Meta AI<small>Your next move starts here</small></span><span><AdsIcon name="chevron-right" /></span></button></>}
     <nav aria-label="Main navigation" className="ads-sidebar-scroll">
       {accountId && <WorkbenchNavigation accountBase={'/accounts/' + accountId} query={query} onNavigate={close} />}

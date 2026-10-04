@@ -44,7 +44,7 @@ test('all legal pages render complete server HTML with working section anchors',
     const html = renderToStaticMarkup(React.createElement(Page));
     assert.match(html, /<h1>/);
     assert.match(html, /mailto:info@newgame.studio/);
-    assert.match(metadata.title, /Meta Ads AI/);
+    assert.match(metadata.title, /Meta AI Ads/);
     for (const [, anchor] of html.matchAll(/href="#([^"]+)"/g)) assert.ok(html.includes(`id="${anchor}"`), anchor);
     assert.doesNotMatch(html, /localStorage.*never transmitted/);
   }

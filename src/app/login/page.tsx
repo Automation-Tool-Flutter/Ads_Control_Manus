@@ -24,7 +24,7 @@ export default function LoginPage() {
           <header className="login-brand">
             <div className="login-brand-mark"><BrandLogo src="/meta-ai-login.png" size={72} decorative /></div>
             <p className="login-greeting">{signedIn ? 'Welcome back' : 'Your advertising workspace'}</p>
-            <h1 id="login-title">Meta Ads AI</h1>
+            <h1 id="login-title">Meta AI Ads</h1>
           </header>
           <p className="login-description">
             Your ads. Clearer insights.<br />Smarter decisions with AI.

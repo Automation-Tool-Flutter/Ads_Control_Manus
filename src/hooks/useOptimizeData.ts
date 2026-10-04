@@ -125,7 +125,7 @@ export function useOptimizeData(accountId: string, token: string | null) {
         analysis = json as GeminiAnalysis;
       } catch (err) {
         const message =
-          err instanceof Error ? err.message : 'Meta Ads AI could not complete the analysis.';
+          err instanceof Error ? err.message : 'Meta AI Ads could not complete the analysis.';
         setState({ step: 'error', analysis: null, error: message });
         return;
       }

@@ -1,8 +1,8 @@
 <p align="center">
-  <img src="public/meta-ads-ai.png" alt="Meta Ads AI" width="80" height="80">
+  <img src="public/meta-ads-ai.png" alt="Meta AI Ads" width="80" height="80">
 </p>
 
-# Meta Ads AI
+# Meta AI Ads
 
 ## Public data portal API
 
@@ -73,7 +73,7 @@ Nội dung phản hồi của dịch vụ đích không được chuyển lại 
 
 | Hạng mục | Thiết kế và trải nghiệm |
 | :--- | :--- |
-| **Nhận diện thương hiệu** | Tên ứng dụng **Meta Ads AI**, logo riêng, màu chủ đạo **xanh da trời**. |
+| **Nhận diện thương hiệu** | Tên ứng dụng **Meta AI Ads**, logo riêng, màu chủ đạo **xanh da trời**. |
 | **Biểu tượng điều hướng** | Nút **Meta AI** dùng logo mới; mục **Page** dùng icon lá cờ. |
 | **Menu và phím tắt** | Menu dưới, menu công cụ và tối đa **6 phím tắt** tùy chỉnh. |
 | **Thẻ dữ liệu** | Phong cách Meta Ads Manager, ưu tiên thiết bị cảm ứng. |

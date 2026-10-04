@@ -9,7 +9,7 @@ export function LegalDocument({ title, description, sections, kind }: {
   return <div className="legal-page">
     <a className="legal-skip" href="#legal-content">Skip to content</a>
     <header className="legal-header">
-      <Link href="/" className="legal-brand"><BrandLogo size={32} decorative /><span>Meta Ads AI</span></Link>
+      <Link href="/" className="legal-brand"><BrandLogo size={32} decorative /><span>Meta AI Ads</span></Link>
       <Link href="/login" className="legal-login">Open app</Link>
     </header>
     <div className="legal-layout">
@@ -27,7 +27,7 @@ export function LegalDocument({ title, description, sections, kind }: {
       </aside>
       <main id="legal-content" className="legal-article" tabIndex={-1}>
         <div className="legal-intro">
-          <p className="legal-eyebrow">Meta Ads AI</p>
+          <p className="legal-eyebrow">Meta AI Ads</p>
           <h1>{title}</h1>
           <p className="legal-description">{description}</p>
           <p className="legal-updated">Last updated: <time dateTime="2026-10-04">October 4, 2026</time></p>
@@ -39,7 +39,7 @@ export function LegalDocument({ title, description, sections, kind }: {
         <footer className="legal-footer">
           <p>Questions about these policies? <a href="mailto:info@newgame.studio">Contact us</a>.</p>
           <nav aria-label="Related information"><Link href="/privacy-policy">Privacy Policy</Link><Link href="/terms-of-service">Terms of Service</Link><Link href="/data-deletion">Data deletion</Link></nav>
-          <small>Meta Ads AI is an independent application and is not an official product of Meta Platforms, Inc.</small>
+          <small>Meta AI Ads is an independent application and is not an official product of Meta Platforms, Inc.</small>
         </footer>
       </main>
     </div>

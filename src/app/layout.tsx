@@ -24,9 +24,9 @@ import { ToastProvider } from "@/components/ui/Toaster";
 import { WebViewExternalLinks } from '@/components/layout/WebViewExternalLinks';
 
 export const metadata: Metadata = {
-  title: "Meta Ads AI",
-  applicationName: "Meta Ads AI",
-  appleWebApp: { capable: true, title: "Meta Ads AI" },
+  title: "Meta AI Ads",
+  applicationName: "Meta AI Ads",
+  appleWebApp: { capable: true, title: "Meta AI Ads" },
   description: "A modern workspace for Meta ads, pages, content, and AI analysis.",
   icons: {
     icon: "/meta-ads-ai.png",

@@ -3,13 +3,13 @@ import Link from 'next/link';
 import { LegalDocument, type LegalSection } from '@/components/layout/LegalDocument';
 
 export const metadata: Metadata = {
-  title: 'Terms of Service | Meta Ads AI',
-  description: 'Terms for using Meta Ads AI, connected Facebook assets and AI-assisted advertising tools.',
+  title: 'Terms of Service | Meta AI Ads',
+  description: 'Terms for using Meta AI Ads, connected Facebook assets and AI-assisted advertising tools.',
 };
 
 const sections: LegalSection[] = [
-  { id: 'agreement', title: 'Using the service', content: <p>These terms govern your use of Meta Ads AI. By using the service, you agree to these terms. If you do not agree, do not use the service. Meta Ads AI is an independent application, not an official product of or an endorsement by Meta Platforms, Inc.</p> },
-  { id: 'service', title: 'What the service provides', content: <p>Meta Ads AI provides tools to view advertising insights, manage connected campaigns and Pages, and receive AI-assisted analysis and recommendations. Available functionality depends on Facebook permissions, account eligibility and third-party platform availability.</p> },
+  { id: 'agreement', title: 'Using the service', content: <p>These terms govern your use of Meta AI Ads. By using the service, you agree to these terms. If you do not agree, do not use the service. Meta AI Ads is an independent application, not an official product of or an endorsement by Meta Platforms, Inc.</p> },
+  { id: 'service', title: 'What the service provides', content: <p>Meta AI Ads provides tools to view advertising insights, manage connected campaigns and Pages, and receive AI-assisted analysis and recommendations. Available functionality depends on Facebook permissions, account eligibility and third-party platform availability.</p> },
   { id: 'access', title: 'Accounts and authorization', content: <ul>
     <li>Connect only accounts, Pages and business assets you are authorized to manage.</li>
     <li>Keep your login credentials secure and notify us if you suspect unauthorized access.</li>

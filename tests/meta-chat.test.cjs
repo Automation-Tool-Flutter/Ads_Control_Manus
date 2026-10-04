@@ -23,7 +23,7 @@ function load(file, dependencies = {}) {
 test('assistant identity uses Meta AI and the existing brand logo', () => {
   const { ChatIdentity, ChatThinking } = load('src/components/ai/ChatIdentity.tsx', {
     '@/components/ui/BrandLogo': { BrandLogo: ({ size, decorative }) => React.createElement('img', {
-      src: '/meta-ads-ai.png', width: size, alt: decorative ? '' : 'Meta Ads AI',
+      src: '/meta-ads-ai.png', width: size, alt: decorative ? '' : 'Meta AI Ads',
     }) },
   });
   const markup = renderToStaticMarkup(React.createElement(ChatIdentity));

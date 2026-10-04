@@ -3,14 +3,14 @@ import Link from 'next/link';
 import { LegalDocument, type LegalSection } from '@/components/layout/LegalDocument';
 
 export const metadata: Metadata = {
-  title: 'User Data Deletion | Meta Ads AI',
-  description: 'How to remove your Meta Ads AI session, clear saved data and request deletion of information associated with your account.',
+  title: 'User Data Deletion | Meta AI Ads',
+  description: 'How to remove your Meta AI Ads session, clear saved data and request deletion of information associated with your account.',
 };
 
 const sections: LegalSection[] = [
   {
     id: 'overview', title: 'Your data and your choices',
-    content: <p>You can stop using Meta Ads AI, remove its access to your Facebook assets and request deletion of information associated with the service. These instructions are available without signing in.</p>,
+    content: <p>You can stop using Meta AI Ads, remove its access to your Facebook assets and request deletion of information associated with the service. These instructions are available without signing in.</p>,
   },
   {
     id: 'session', title: 'End your session',
@@ -26,11 +26,11 @@ const sections: LegalSection[] = [
   },
   {
     id: 'disconnect', title: 'Revoke Facebook access',
-    content: <p>In your Facebook settings, find the connected application under Apps and Websites or Business Integrations, then remove its access. Select the entry you authorized when connecting Meta Ads AI. This step is separate from logging out or clearing browser data.</p>,
+    content: <p>In your Facebook settings, find the connected application under Apps and Websites or Business Integrations, then remove its access. Select the entry you authorized when connecting Meta AI Ads. This step is separate from logging out or clearing browser data.</p>,
   },
   {
     id: 'request', title: 'Request deletion of your information',
-    content: <><p>Email <a href="mailto:info@newgame.studio?subject=Meta%20Ads%20AI%20-%20Data%20deletion%20request">info@newgame.studio</a> with the subject “Meta Ads AI — Data deletion request”.</p><ul>
+    content: <><p>Email <a href="mailto:info@newgame.studio?subject=Meta%20AI%20Ads%20-%20Data%20deletion%20request">info@newgame.studio</a> with the subject “Meta AI Ads — Data deletion request”.</p><ul>
       <li>Include the name or account identifier used with the application and a contact email for the reply.</li>
       <li>Describe the information you want deleted so we can identify your request.</li>
       <li>Do not send passwords, access tokens or payment card details.</li>

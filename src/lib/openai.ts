@@ -34,7 +34,7 @@ function record(value: unknown): Record<string, unknown> {
 
 // Never log provider messages, prompts, account data, headers or credentials.
 function failure(message: string, status: number, details: ErrorDetails): OpenAIError {
-  console.error('[Meta Ads AI]', { status, ...details });
+  console.error('[Meta AI Ads]', { status, ...details });
   const reference = details.requestId ? ` Reference: ${details.requestId}.` : '';
   return new OpenAIError(`${message}${reference}`, status, details);
 }
@@ -49,15 +49,15 @@ function providerFailure(payload: unknown, status: number, requestId?: string): 
   const param = typeof error.param === 'string' && /^(model|temperature|reasoning|text|input|max_output_tokens|store)([.\[\]a-zA-Z0-9_]{0,100})$/.test(error.param)
     ? error.param : undefined;
   const details = { code, param, requestId };
-  if (status === 401 || code === 'invalid_api_key') return failure('Meta Ads AI could not authenticate. Check the server API key and deploy a new rollout.', status, details);
+  if (status === 401 || code === 'invalid_api_key') return failure('Meta AI Ads could not authenticate. Check the server API key and deploy a new rollout.', status, details);
   if (status === 403 || code === 'model_not_found' || status === 404) return failure('Meta AI cannot access the configured analysis model. Please contact your administrator.', status, details);
-  if (code === 'insufficient_quota') return failure('Meta Ads AI has no available API quota. Check your API billing and project spending limit.', status, details);
-  if (status === 429) return failure('Meta Ads AI reached an API usage limit. Please wait before trying again.', status, details);
-  if (code === 'invalid_json_schema' || param?.startsWith('text.format')) return failure('Meta Ads AI output schema was rejected. Please contact your administrator to update the analysis schema.', status, details);
+  if (code === 'insufficient_quota') return failure('Meta AI Ads has no available API quota. Check your API billing and project spending limit.', status, details);
+  if (status === 429) return failure('Meta AI Ads reached an API usage limit. Please wait before trying again.', status, details);
+  if (code === 'invalid_json_schema' || param?.startsWith('text.format')) return failure('Meta AI Ads output schema was rejected. Please contact your administrator to update the analysis schema.', status, details);
   if (code === 'unsupported_parameter' || code === 'unsupported_value') return failure(`Meta AI request configuration was rejected${param ? ` (${param})` : ''}. Please contact your administrator.`, status, details);
   if (code === 'context_length_exceeded') return failure('The analysis input is too large. Use fewer campaigns or a shorter conversation.', status, details);
-  if (['invalid_image', 'invalid_image_url', 'image_parse_error', 'image_too_large'].includes(code)) return failure('Meta Ads AI could not read an input image.', status, details);
-  return failure(`Meta Ads AI service rejected the request (HTTP ${status}${param ? `; parameter: ${param}` : ''}). Please contact your administrator.`, status, details);
+  if (['invalid_image', 'invalid_image_url', 'image_parse_error', 'image_too_large'].includes(code)) return failure('Meta AI Ads could not read an input image.', status, details);
+  return failure(`Meta AI Ads service rejected the request (HTTP ${status}${param ? `; parameter: ${param}` : ''}). Please contact your administrator.`, status, details);
 }
 
 function extractOutputText(payload: unknown): string {
@@ -84,7 +84,7 @@ export async function callOpenAI<T>(
 ): Promise<T> {
   const apiKey = process.env.OPENAI_API_KEY?.trim();
   if (!apiKey) {
-    throw new OpenAIError('Meta Ads AI is not configured on the server. Please contact your administrator.', 500);
+    throw new OpenAIError('Meta AI Ads is not configured on the server. Please contact your administrator.', 500);
   }
   // This application is intentionally Luna-only: never silently route to another model.
   if (OPENAI_MODEL !== 'gpt-5.6-luna') {
@@ -144,10 +144,10 @@ export async function callOpenAI<T>(
   } catch (error) {
     const name = error instanceof Error ? error.name : '';
     const message = name === 'TimeoutError' || name === 'AbortError'
-      ? 'Meta Ads AI timed out. Please try again.'
+      ? 'Meta AI Ads timed out. Please try again.'
       : name === 'SyntaxError'
-        ? 'The Meta Ads AI service returned an unreadable response. Please try again.'
-      : 'Unable to reach the Meta Ads AI analysis service.';
+        ? 'The Meta AI Ads service returned an unreadable response. Please try again.'
+      : 'Unable to reach the Meta AI Ads analysis service.';
     throw new OpenAIError(message, 503);
   }
 
@@ -161,30 +161,30 @@ export async function callOpenAI<T>(
   if (result.status === 'incomplete') {
     const reason = record(result.incomplete_details).reason;
     throw failure(reason === 'max_output_tokens'
-      ? 'Meta Ads AI reached the output limit before completing this analysis. Reduce the analysis scope or increase its token budget.'
-      : 'Meta Ads AI could not complete this analysis. Please revise the request.', 502,
+      ? 'Meta AI Ads reached the output limit before completing this analysis. Reduce the analysis scope or increase its token budget.'
+      : 'Meta AI Ads could not complete this analysis. Please revise the request.', 502,
     { code: reason === 'max_output_tokens' ? 'output_limit' : 'incomplete_response', requestId });
   }
   const content = (Array.isArray(result.output) ? result.output : [])
     .flatMap(item => Array.isArray(record(item).content) ? record(item).content as unknown[] : []);
   if (content.some(item => record(item).type === 'refusal')) {
-    throw failure('Meta Ads AI declined this request. Please rephrase it and try again.', 422, { code: 'model_refusal', requestId });
+    throw failure('Meta AI Ads declined this request. Please rephrase it and try again.', 422, { code: 'model_refusal', requestId });
   }
   if (result.status !== 'completed') {
-    throw failure('Meta Ads AI returned an unfinished response. Please try again.', 502, { code: 'unfinished_response', requestId });
+    throw failure('Meta AI Ads returned an unfinished response. Please try again.', 502, { code: 'unfinished_response', requestId });
   }
 
   const rawText = extractOutputText(payload);
-  if (!rawText) throw failure('Meta Ads AI returned no content.', 502, { code: 'empty_output', requestId });
+  if (!rawText) throw failure('Meta AI Ads returned no content.', 502, { code: 'empty_output', requestId });
 
   let parsed: unknown;
   try {
     parsed = JSON.parse(rawText);
   } catch {
-    throw failure('Meta Ads AI returned invalid analysis JSON. Please try again.', 502, { code: 'invalid_json', requestId });
+    throw failure('Meta AI Ads returned invalid analysis JSON. Please try again.', 502, { code: 'invalid_json', requestId });
   }
   if (parsed === null || typeof parsed !== 'object' || Array.isArray(parsed)) {
-    throw failure('Meta Ads AI returned an invalid analysis object.', 502, { code: 'invalid_output', requestId });
+    throw failure('Meta AI Ads returned an invalid analysis object.', 502, { code: 'invalid_output', requestId });
   }
   return parsed as T;
 }

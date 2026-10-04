@@ -1,6 +1,6 @@
 # Mobile UI refresh
 
-The interface uses Facebook-inspired neutral surfaces, blue actions and rounded cards while retaining the Meta Ads AI name and logo. It is not an official Meta interface or a pixel-perfect copy.
+The interface uses Facebook-inspired neutral surfaces, blue actions and rounded cards while retaining the Meta AI Ads name and logo. It is not an official Meta interface or a pixel-perfect copy.
 
 ## Implemented
 

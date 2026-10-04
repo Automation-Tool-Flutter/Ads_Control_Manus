@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import { LegalDocument, type LegalSection } from '@/components/layout/LegalDocument';
 
 export const metadata: Metadata = {
-  title: 'Privacy Policy | Meta Ads AI',
-  description: 'How Meta Ads AI handles account information, advertising data, cookies and your privacy choices.',
+  title: 'Privacy Policy | Meta AI Ads',
+  description: 'How Meta AI Ads handles account information, advertising data, cookies and your privacy choices.',
 };
 
 const sections: LegalSection[] = [
-  { id: 'about', title: 'About this policy', content: <p>This policy explains how Meta Ads AI processes information when you connect Facebook accounts, manage advertising and Pages, or use our AI tools. It covers this application; Facebook and other third-party services have their own privacy policies.</p> },
+  { id: 'about', title: 'About this policy', content: <p>This policy explains how Meta AI Ads processes information when you connect Facebook accounts, manage advertising and Pages, or use our AI tools. It covers this application; Facebook and other third-party services have their own privacy policies.</p> },
   { id: 'information', title: 'Information we process', content: <ul>
     <li><strong>Account information:</strong> your Facebook identifier, name, profile picture and email where provided and authorized.</li>
     <li><strong>Connected assets:</strong> the ad accounts, campaigns, ad sets, ads, Pages, posts and performance insights available under the permissions you grant.</li>

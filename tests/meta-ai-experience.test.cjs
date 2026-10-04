@@ -35,7 +35,7 @@ for (const signedIn of [false, true]) {
     });
     const html = renderToStaticMarkup(React.createElement(Login));
     assert.match(html, /login-simple/);
-    assert.match(html, /Meta Ads AI/);
+    assert.match(html, /Meta AI Ads/);
     assert.match(html, /Continue with Facebook/);
     assert.equal(html.includes('Continue to workspace'), signedIn);
     assert.equal(html.includes('login-session-copy'), signedIn);

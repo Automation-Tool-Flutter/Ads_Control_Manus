@@ -4,7 +4,7 @@ export function BrandLogo({ size = 40, decorative = false, src = '/meta-ads-ai.p
   return (
     <Image
       src={src}
-      alt={decorative ? '' : 'Meta Ads AI'}
+      alt={decorative ? '' : 'Meta AI Ads'}
       width={size}
       height={size}
       unoptimized

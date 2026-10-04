@@ -183,8 +183,8 @@ export default function BudgetOptimizerPage() {
         ]}
         eyebrow="AI budget allocation"
         title="Budget Optimizer"
-        description="Score active campaigns with Meta Ads AI, simulate a controlled allocation, and apply budget changes."
-        badge="Meta Ads AI"
+        description="Score active campaigns with Meta AI Ads, simulate a controlled allocation, and apply budget changes."
+        badge="Meta AI Ads"
         stats={state.status === 'success' ? [
           { label: 'eligible', value: eligibleCampaigns.length, tone: 'neutral' },
           { label: 'mode', value: mode, tone: 'blue' },
@@ -257,7 +257,7 @@ export default function BudgetOptimizerPage() {
                 disabled={!targetIsValid || eligibleCampaigns.length === 0 || optimizerState.status === 'analyzing'}
                 className="meta-action meta-action-primary w-full py-3 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                {optimizerState.status === 'analyzing' ? 'Meta Ads AI is building the plan…' : 'Generate budget plan'}
+                {optimizerState.status === 'analyzing' ? 'Meta AI Ads is building the plan…' : 'Generate budget plan'}
               </button>
             </div>
           </section>

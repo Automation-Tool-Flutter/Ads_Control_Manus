@@ -58,7 +58,7 @@ export default function CreativeIntelligencePage() {
         eyebrow="Organic + paid intelligence"
         title="AI Creative Intelligence"
         description="Find winning content patterns, compare paid creatives, detect fatigue signals, and generate new variants and a creative brief."
-        badge="Meta Ads AI vision + metrics"
+        badge="Meta AI Ads vision + metrics"
         stats={state.status === 'success' ? [
           { label: 'confidence', value: `${state.analysis.confidence}%`, tone: 'blue' },
           { label: 'boost ideas', value: state.analysis.boostCandidates.length, tone: 'green' },

@@ -32,7 +32,7 @@ function LandingPage() {
                 Turn ad work into a control room.
               </h1>
               <p className="mt-6 max-w-2xl text-base leading-7 text-white/68 sm:text-lg">
-                Meta Ads AI reorganizes Meta accounts, campaigns, Pages,
+                Meta AI Ads reorganizes Meta accounts, campaigns, Pages,
                 content, comments, insights, and AI recommendations into one
                 focused operating system.
               </p>

@@ -1,4 +1,4 @@
-# Meta Ads AI — GPT-5.6 Luna setup
+# Meta AI Ads — GPT-5.6 Luna setup
 
 Create a `.env.local` file at the project root:
 
@@ -52,7 +52,7 @@ the new API client. No deployment is performed by editing these files.
 | Output limit reached | Reduce scope, lower reasoning effort, or adjust the affected route's output budget. |
 | No available API quota | Check API billing and project spending limits. |
 
-Server logs tagged `[Meta Ads AI]` contain only HTTP status, allowlisted error
+Server logs tagged `[Meta AI Ads]` contain only HTTP status, allowlisted error
 code/parameter and a validated provider request ID. They do not contain the key,
 provider error message, prompts or advertising data. User-facing errors include
 the request reference when available. A successful local edit does not verify

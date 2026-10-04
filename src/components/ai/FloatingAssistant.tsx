@@ -63,7 +63,7 @@ export function FloatingAssistant() {
       if (href?.startsWith('/') && !href.startsWith('//')) close();
     }} onKeyDown={e => { if (e.key === 'Escape') { e.stopPropagation(); close(); } }} className="ai-floating-panel">
       <div className="ai-floating-heading meta-ai-chat-heading">
-        <div className="meta-ai-heading-brand"><BrandLogo size={30} decorative /><div><h2>Meta AI</h2><p>Meta Ads AI</p></div></div>
+        <div className="meta-ai-heading-brand"><BrandLogo size={30} decorative /><div><h2>Meta AI</h2><p>Meta AI Ads</p></div></div>
         <div className="flex gap-2">
           <button type="button" onClick={() => setDocked(value => !value)} aria-label={docked ? 'Float AI panel' : 'Dock AI panel'} className="meta-ai-dock hidden min-[1600px]:block">{docked ? 'Float' : 'Dock'}</button>
           <button type="button" onClick={close} aria-label="Close Meta AI chat" className="meta-ai-icon-button"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="m6 6 12 12M6 18 18 6" /></svg></button>
