@@ -15,11 +15,13 @@ import { UserAvatar } from '@/components/ui/UserAvatar';
 import { useOverlayPresence } from '@/hooks/useOverlayPresence';
 import { observeMobileViewport } from '@/lib/observe-mobile-viewport';
 import { notifyWebViewLogout } from '@/lib/webview-events';
+import { LogoutLoading } from './LogoutLoading';
 
 export function Header() {
   const { state, logout } = useAuth();
   const { toast } = useToast();
   const signingOut = useRef(false);
+  const [logoutLoading, setLogoutLoading] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
   const { canGoBack, goBack } = useAppBack();
@@ -32,7 +34,7 @@ export function Header() {
   const { state: account } = useAccountDetail(accountId, state.token);
   const current = account.status === 'success' && account.data.id === accountId ? account.data : null;
   const query = current ? '?accountName=' + encodeURIComponent(current.name) + '&currency=' + encodeURIComponent(current.currency) : '';
-  useEffect(() => { setMobile(false); }, [pathname]);
+  useEffect(() => { setMobile(false); setLogoutLoading(false); }, [pathname]);
   useEffect(() => {
     const show = () => { setMenuPath(pathname); setMobile(true); };
     window.addEventListener('open-workspace-menu', show);
@@ -63,13 +65,16 @@ export function Header() {
       if (element) delete element.dataset.keyboard;
     };
   }, [menuVisible, pathname]);
+  if (logoutLoading && pathname !== '/login') return <LogoutLoading />;
   if (pathname === '/login' || (!state.user && pathname !== '/')) return null;
   const close = () => setMobile(false);
   const signOut = async () => {
     if (signingOut.current) return;
     signingOut.current = true;
-    try { await logout(); await notifyWebViewLogout(); close(); router.replace('/login'); }
-    catch { toast('Could not sign out. Check your connection and try again.', 'error'); }
+    setLogoutLoading(true);
+    close();
+    try { await logout(notifyWebViewLogout); close(); router.replace('/login'); }
+    catch { setLogoutLoading(false); toast('Could not sign out. Check your connection and try again.', 'error'); }
     finally { signingOut.current = false; }
   };
   const toggleMenu = () => { setMenuPath(pathname); setMobile(value => !value); };

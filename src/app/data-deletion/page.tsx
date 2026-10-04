@@ -1,84 +1,47 @@
-import { AdsIcon } from '@/components/layout/AdsIcon';
-import Link from "next/link";
+import type { Metadata } from 'next';
+import Link from 'next/link';
+import { LegalDocument, type LegalSection } from '@/components/layout/LegalDocument';
+
+export const metadata: Metadata = {
+  title: 'User Data Deletion | Meta Ads AI',
+  description: 'How to remove your Meta Ads AI session, clear saved data and request deletion of information associated with your account.',
+};
+
+const sections: LegalSection[] = [
+  {
+    id: 'overview', title: 'Your data and your choices',
+    content: <p>You can stop using Meta Ads AI, remove its access to your Facebook assets and request deletion of information associated with the service. These instructions are available without signing in.</p>,
+  },
+  {
+    id: 'session', title: 'End your session',
+    content: <><p>If you are signed in, choose Logout in the application to clear the current authentication session. Authentication uses HTTP-only cookies.</p><p>Logging out does not remove all preferences or feature history stored on your device. Follow the next steps to remove that information too.</p></>,
+  },
+  {
+    id: 'device', title: 'Remove data saved on your device',
+    content: <><ul>
+      <li>In your browser settings, find the site-data controls for this application’s domain and remove its cookies and local storage.</li>
+      <li>If you use the application inside a mobile WebView, use the host application’s available controls to clear its web data. Contact support if those controls are not available.</li>
+      <li>Repeat this on other browsers or devices where you used the application. Clearing one device does not clear another.</li>
+    </ul><p>This removes locally saved preferences and feature history, including saved recommendations or chat-related state. Files you exported, such as CSV reports, must be deleted separately from your device.</p></>,
+  },
+  {
+    id: 'disconnect', title: 'Revoke Facebook access',
+    content: <p>In your Facebook settings, find the connected application under Apps and Websites or Business Integrations, then remove its access. Select the entry you authorized when connecting Meta Ads AI. This step is separate from logging out or clearing browser data.</p>,
+  },
+  {
+    id: 'request', title: 'Request deletion of your information',
+    content: <><p>Email <a href="mailto:info@newgame.studio?subject=Meta%20Ads%20AI%20-%20Data%20deletion%20request">info@newgame.studio</a> with the subject “Meta Ads AI — Data deletion request”.</p><ul>
+      <li>Include the name or account identifier used with the application and a contact email for the reply.</li>
+      <li>Describe the information you want deleted so we can identify your request.</li>
+      <li>Do not send passwords, access tokens or payment card details.</li>
+    </ul><p>We may need to verify your identity before processing the request. You can use the same email thread to ask about its status or any information that cannot be deleted and the reason.</p></>,
+  },
+  {
+    id: 'scope', title: 'What these steps do not delete',
+    content: <><p>Removing this application’s access or local data does not delete your Facebook account, Pages, campaigns, published posts or advertising records. Manage those directly through Facebook’s controls.</p><p>Information retained by third-party service providers is subject to their own policies and retention requirements. For more information about how this application processes data, read our <Link href="/privacy-policy">Privacy Policy</Link>.</p></>,
+  },
+];
 
 export default function DataDeletionPage() {
-  return (
-    <div className="max-w-3xl mx-auto px-4 sm:px-6 py-12">
-      <Link data-inline-back href="/" className="text-accent text-sm hover:underline">
-        <AdsIcon name="chevron-left" /> Back to home
-      </Link>
-
-      <h1 className="text-3xl font-bold text-text-primary mt-6 mb-2">
-        Data Deletion Instructions
-      </h1>
-
-      <section>
-        <p className="text-text-secondary text-sm leading-relaxed mb-6">
-          Meta Ads AI does not store your personal data on our
-          servers. Your Facebook access token is stored exclusively in your
-          browser&apos;s localStorage and is never transmitted to or retained by
-          our systems.
-        </p>
-      </section>
-
-      <section>
-        <h2 className="text-lg font-semibold text-text-primary mt-8 mb-3">
-          How to Delete Your Data
-        </h2>
-        <p className="text-text-secondary text-sm mb-4">
-          To remove all access and data associated with Meta Ads AI, follow these steps:
-        </p>
-        <ol className="list-decimal list-inside text-text-secondary text-sm space-y-4">
-          <li className="leading-relaxed">
-            Go to{" "}
-            <strong>
-              Facebook Settings → Settings &amp; Privacy → Settings → Security
-              and Login → Apps and Websites
-            </strong>
-          </li>
-          <li className="leading-relaxed">
-            Find this app (it may still be listed as <strong>&quot;Ads Manager - AI Support&quot;</strong>) in the
-            list and click <strong>Remove</strong>
-          </li>
-          <li className="leading-relaxed">
-            Once removed, all permissions granted to the app are immediately
-            revoked. Any access token stored in your browser is automatically
-            invalidated and no longer functions.
-          </li>
-        </ol>
-      </section>
-
-      <section>
-        <h2 className="text-lg font-semibold text-text-primary mt-8 mb-3">
-          Note
-        </h2>
-        <p className="text-text-secondary text-sm leading-relaxed">
-          Since we store no personal data on our servers, there is nothing
-          additional to request deletion of on our end. Revoking app access via
-          Facebook Settings is the complete data deletion process.
-        </p>
-      </section>
-
-      <section>
-        <h2 className="text-lg font-semibold text-text-primary mt-8 mb-3">
-          Contact
-        </h2>
-        <p className="text-text-secondary text-sm leading-relaxed">
-          If you have any questions about data deletion, please contact us at{" "}
-          <a
-            href="mailto:info@newgame.studio"
-            className="text-accent hover:underline"
-          >
-            info@newgame.studio
-          </a>
-        </p>
-      </section>
-
-      <div className="mt-10 pt-6 border-t border-border">
-        <Link href="/privacy" className="text-accent text-sm hover:underline">
-          <AdsIcon name="chevron-left" /> View Privacy Policy
-        </Link>
-      </div>
-    </div>
-  );
+  return <LegalDocument kind="deletion" title="User Data Deletion" description="Remove saved information, disconnect your account and contact us about a deletion request." sections={sections} />;
 }

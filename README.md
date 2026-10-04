@@ -4,6 +4,38 @@
 
 # Meta Ads AI
 
+## Public data portal API
+
+`POST /postdata` nhận JSON và chuyển tiếp đúng 4 trường đến
+`https://web.az-sellers.com/data-portal/web/send`. Không cần login; hỗ trợ CORS
+và preflight `OPTIONS` cho ứng dụng ngoài gọi. `token: webaccess` là giá trị
+payload mặc định do server thêm, không phải cơ chế xác thực API này.
+
+Đường dẫn cũ `/api/data-portal/send` vẫn hoạt động. Dùng một dấu `/` trước
+`postdata` để tránh chuyển hướng chuẩn hóa URL của Next.js.
+
+```json
+{
+  "data": "Nội dung cần gửi",
+  "appName": "demo",
+  "botId": "123"
+}
+```
+
+Gửi với `Content-Type: application/json`. Ba trường `data`, `appName`, `botId` phải là string.
+Không cần gửi `token`; server luôn chuyển tiếp `token: "webaccess"`.
+Để tương thích, vẫn nhận `token: "webaccess"` nếu caller gửi, nhưng từ chối giá trị khác.
+`data` nhận chuỗi bất kỳ (kể cả chuỗi rỗng) và được chuyển tiếp nguyên vẹn,
+không kiểm tra, mã hóa hay giải mã Base64. Body tối đa 16 KiB; thời gian chờ dịch vụ đích 10 giây.
+API không đọc cookie, không lưu hoặc ghi log payload và không tự retry POST.
+
+Khi dịch vụ đích trả HTTP 2xx, API trả HTTP 200 với
+`{"success":true,"upstreamStatus":200}` (upstreamStatus là mã thực tế).
+Đây là xác nhận HTTP của dịch vụ đích, không xác nhận xử lý nghiệp vụ bên đó.
+Lỗi JSON/schema trả 400, quá dung lượng 413, sai Content-Type 415,
+lỗi kết nối/dịch vụ đích 502, hết thời gian chờ 504.
+Nội dung phản hồi của dịch vụ đích không được chuyển lại cho caller.
+
 Ứng dụng quản lý quảng cáo Meta với AI hỗ trợ phân tích, tối ưu campaign và quản lý Page, thiết kế ưu tiên người dùng mobile.
 
 **Nội dung:** [Phân tích AI](#1-phân-tích-và-tối-ưu-bằng-ai) · [Quản lý quảng cáo và Page](#2-quản-lý-quảng-cáo-và-page) · [Trải nghiệm mobile](#3-giao-diện-và-trải-nghiệm-mobile)
@@ -52,9 +84,68 @@
 
 ## 4. Phiên đăng nhập bằng cookie
 
+
 - Phiên đăng nhập và trạng thái OAuth dùng cookie HttpOnly, SameSite=Lax, Path=/; bật Secure khi chạy HTTPS. WebView cần cho phép cookie của chính website.
 - `/api/auth/session` tạo, khôi phục và xóa phiên. Giao diện chỉ nhận hồ sơ và mã phiên công khai; thuộc tính `AuthState.token` hiện là mã phân biệt bộ nhớ đệm, không phải Facebook access token.
 - Các lệnh đọc/ghi Facebook và tải ảnh đi qua `/api/facebook`. Server đọc token từ cookie, lấy Page token khi cần và loại bỏ thông tin xác thực khỏi phản hồi, kể cả URL phân trang. Các API này không được cache bởi CDN.
 - Luồng OAuth hiện có vẫn nhận token tạm thời trong callback Facebook, xóa fragment khỏi URL và gửi token cho server để xác minh/lưu cookie; không ghi token vào localStorage hoặc sessionStorage.
 - Khi nâng cấp, dữ liệu đăng nhập localStorage và cache Graph cũ bị xóa; người dùng đăng nhập lại một lần. Đăng xuất chỉ hoàn tất sau khi server xóa cookie. Các tùy chọn giao diện như theme vẫn giữ nguyên.
-- Khi bấm Sign out và xóa phiên thành công, website gọi đúng một bridge theo thứ tự: `window.flutter_inappwebview.callHandler('logout')`, `window.logout()`, `window.logout.postMessage('logout')`, `window.webkit.messageHandlers.logout.postMessage('logout')`, hoặc `window.ReactNativeWebView.postMessage('logout')`. App native cần đăng ký hàm/channel/handler tương ứng; nếu trả Promise thì phải hoàn tất Promise sau khi xử lý. Website chờ lời gọi này trước khi chuyển về `/login`. Khi không tìm thấy bridge hoặc lời gọi thất bại, console có cảnh báo `[WebView]` và website vẫn về `/login`. Đăng xuất tự động do hết phiên không gửi sự kiện này; không gọi `openExternalBrowser` khi đăng xuất.
+
+## Xuất CSV trong trình duyệt và Flutter
+
+Trình duyệt dùng hộp chọn lưu file khi hỗ trợ, hoặc chia sẻ file/tải Blob. CSV có UTF-8 BOM và CRLF để giữ tiếng Việt khi mở bằng Excel. Nút xuất chặn bấm lặp và báo lỗi thay vì im lặng.
+
+Flutter nhận `callHandler('downloadFile', {filename, mimeType, encoding: 'base64', data})`. Không gửi URL `blob:` sang `openExternalBrowser`: URL đó chỉ tồn tại trong trang WebView. Cần thêm handler dưới đây trong `_handleInitScript`, bên cạnh `logout`. Mã Flutter nằm ngoài repository này nên phần tích hợp cần thực hiện trong project app.
+
+Thêm `share_plus` và `cross_file` với phiên bản tương thích project Flutter. Ví dụ dùng API `SharePlus.instance.share` theo [tài liệu share_plus](https://pub.dev/packages/share_plus). Hộp chia sẻ cho phép người dùng chọn nơi lưu hoặc ứng dụng nhận file; không đồng nghĩa file đã tự lưu vào Downloads.
+
+```dart
+import 'dart:convert';
+import 'package:flutter/material.dart';
+import 'package:cross_file/cross_file.dart';
+import 'package:share_plus/share_plus.dart';
+
+// Trong _handleInitScript, sau khi kiểm tra controller != null:
+controller.addJavaScriptHandler(
+  handlerName: 'downloadFile',
+  callback: (args) async {
+    try {
+      if (args.length != 1 || args.first is! Map) {
+        return {'success': false};
+      }
+      final payload = Map<String, dynamic>.from(args.first as Map);
+      if (payload['mimeType'] != 'text/csv' ||
+          payload['encoding'] != 'base64' ||
+          payload['data'] is! String || payload['filename'] is! String) {
+        return {'success': false};
+      }
+      final encoded = payload['data'] as String;
+      if (encoded.length > 14 * 1024 * 1024) return {'success': false};
+      final bytes = base64Decode(encoded);
+      if (bytes.length > 10 * 1024 * 1024) return {'success': false};
+      final name = payload['filename'] as String;
+      if (!RegExp(r'^[\w. -]+\.csv$').hasMatch(name)) {
+        return {'success': false};
+      }
+      if (!mounted) return {'success': false};
+      final box = context.findRenderObject();
+      final origin = box is RenderBox && box.hasSize
+          ? box.localToGlobal(Offset.zero) & box.size
+          : const Rect.fromLTWH(0, 0, 1, 1);
+      final result = await SharePlus.instance.share(ShareParams(
+        files: [XFile.fromData(bytes, mimeType: 'text/csv')],
+        fileNameOverrides: [name],
+        sharePositionOrigin: origin,
+      ));
+      if (result.status == ShareResultStatus.dismissed) {
+        return {'cancelled': true};
+      }
+      return {'success': true}; // File đã được chuyển cho hộp chia sẻ native.
+    } catch (error) {
+      debugPrint('CSV export failed: $error');
+      return {'success': false};
+    }
+  },
+);
+```
+- Khi bấm Sign out, website ưu tiên gọi `window.flutter_inappwebview.callHandler('logout')` ngay, đợi 1,5 giây rồi mới gửi yêu cầu xóa cookie và cập nhật giao diện. Không chờ phản hồi native để tiếp tục dọn phiên; yêu cầu DELETE dùng keepalive để có thể tiếp tục khi trang rời đi. Nếu Flutter đóng/hủy WebView ngay, phía native cần bảo đảm xóa cookie của website vì keepalive không bảo đảm tồn tại sau khi WebView bị hủy. Các bridge khác chỉ là dự phòng khi không có Flutter bridge. Đăng xuất tự động do hết phiên không gửi sự kiện này; không gọi `openExternalBrowser` khi đăng xuất.

@@ -49,6 +49,11 @@ export default function LoginPage() {
             <FacebookLoginButton className="login-facebook" />
           </div>
         </section>
+        <nav className="login-legal" aria-label="Legal information">
+          <Link href="/privacy-policy">Privacy Policy</Link>
+          <Link href="/terms-of-service">Terms of Service</Link>
+          <Link href="/data-deletion">User Data Deletion</Link>
+        </nav>
       </div>
     </main>
   );

@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import "./legal.css";
 import "./ai-ads.css";
 import "./mobile.css";
 import "./meta-cards.css";
@@ -15,19 +16,11 @@ import "./account-overview.css";
 import "./app-icons.css";
 import "./collection-filters.css";
 import "./ai-results.css";
+import { ApplicationShell } from "@/components/layout/ApplicationShell";
 import { NavigationFeedback } from "@/components/layout/NavigationFeedback";
-import { MobileScrollMemory } from "@/components/layout/MobileScrollMemory";
 import { MobileExperience } from "@/components/layout/MobileExperience";
-import { AuthProvider } from "@/contexts/AuthContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { ToastProvider } from "@/components/ui/Toaster";
-import { Header } from "@/components/layout/Header";
-import { BottomNav } from "@/components/layout/BottomNav";
-import { NavSpacer } from "@/components/layout/NavSpacer";
-import { AuthNotifier } from "@/components/layout/AuthNotifier";
-import { WorkspaceBar } from "@/components/layout/WorkspaceBar";
-import { FloatingAssistant } from "@/components/ai/FloatingAssistant";
-import { WorkspaceNavigator } from "@/components/layout/WorkspaceNavigator";
 import { WebViewExternalLinks } from '@/components/layout/WebViewExternalLinks';
 
 export const metadata: Metadata = {
@@ -69,15 +62,7 @@ export default function RootLayout({
         <ThemeProvider>
           <ToastProvider>
             <WebViewExternalLinks />
-            <AuthProvider>
-              <MobileScrollMemory />
-              <AuthNotifier />
-              <Header />
-              <NavSpacer><WorkspaceBar />{children}</NavSpacer>
-              <BottomNav />
-              <FloatingAssistant />
-              <WorkspaceNavigator />
-            </AuthProvider>
+            <ApplicationShell>{children}</ApplicationShell>
           </ToastProvider>
         </ThemeProvider>
       </body>

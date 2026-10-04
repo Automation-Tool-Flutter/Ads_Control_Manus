@@ -14,7 +14,7 @@ interface AuthContextValue {
   state: AuthState;
   isRedirecting: boolean;
   login: (options?: { rerequest?: boolean }) => Promise<FBUser>;
-  logout: () => Promise<void>;
+  logout: (onLogoutRequested?: () => Promise<unknown>) => Promise<void>;
 }
 const AuthContext = createContext<AuthContextValue | null>(null);
 const loggedOut: AuthState = { token: null, user: null, isLoading: false };
@@ -71,13 +71,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => { cancelled = true; clearTimeout(delay); };
   }, [router, publish, toast]);
 
-  const logout = useCallback(async () => {
+  const logout = useCallback(async (onLogoutRequested?: () => Promise<unknown>) => {
     ++generation.current;
+    // Send to Flutter immediately. Native logout may close the WebView without
+    // resolving its Promise, so cookie cleanup must not wait for an acknowledgement.
+    try { void onLogoutRequested?.().catch(() => {}); }
+    catch { /* Native delivery must not prevent web session cleanup. */ }
+    // Give the host 1.5 seconds to handle the event before changing the web session.
+    if (onLogoutRequested) await new Promise<void>(resolve => setTimeout(resolve, 1500));
     await sessionRequest('DELETE');
     clearLegacyLoginStorage(); clearViewMemory(); clearGraphCache();
     setIsRedirecting(false); publish(null);
     if (typeof BroadcastChannel !== 'undefined') {
-      const channel = new BroadcastChannel('ads-session'); channel.postMessage('logout'); channel.close();
+      try {
+        const channel = new BroadcastChannel('ads-session');
+        try { channel.postMessage('logout'); } finally { channel.close(); }
+      } catch { /* Cross-tab sync is optional in embedded WebViews. */ }
     }
   }, [publish]);
 

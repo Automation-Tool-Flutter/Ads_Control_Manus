@@ -58,7 +58,7 @@ test('AI findings preserve evidence and action previews in the new layout', () =
 test('dashboard priorities keep the empty state short and link to analysis', () => {
   const { ActionCenter } = load('src/components/dashboard/ActionCenter.tsx', {
     'next/link': { default: ({ children, ...props }) => React.createElement('a', props, children) },
-    '@/lib/report-export': {},
+    '@/components/ui/CsvExportButton': { CsvExportButton: () => null },
     '@/contexts/AuthContext': { useAuth: () => ({ state: { token: 'test' } }) },
     '@/hooks/useAccountDetail': { useAccountDetail: () => ({ state: { status: 'idle' } }) },
     '@/lib/action-center': {},

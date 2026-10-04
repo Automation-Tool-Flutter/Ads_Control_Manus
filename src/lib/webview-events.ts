@@ -40,7 +40,7 @@ export function handleWebViewExternalLinkClick(event: MouseEvent, onFailure: () 
   return true;
 }
 
-/** Notify the native host after an explicit, successful logout. */
+/** Send an explicit logout request to the native host before web session cleanup. */
 export async function notifyWebViewLogout(): Promise<boolean> {
   if (typeof window === 'undefined') return false;
   const host = window as AppWebViewWindow;

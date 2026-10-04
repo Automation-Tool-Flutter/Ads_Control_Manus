@@ -6,6 +6,7 @@ export interface BrowserSession { scope: string; user: FBUser; expiresAt: number
 export async function sessionRequest(method = 'GET', body?: unknown): Promise<{ session: BrowserSession | null; returnTo?: string }> {
   const response = await fetch('/api/auth/session', {
     method, credentials: 'same-origin', cache: 'no-store',
+    keepalive: method === 'DELETE',
     headers: { 'X-Auth-Request': '1', ...(body ? { 'Content-Type': 'application/json' } : {}) },
     body: body ? JSON.stringify(body) : undefined,
   });
