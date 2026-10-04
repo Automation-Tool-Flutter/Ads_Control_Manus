@@ -7,7 +7,7 @@ export const FB_API_VERSION =
 export const FB_APP_ID =
   process.env.NEXT_PUBLIC_FACEBOOK_APP_ID ||
   process.env.NEXT_PUBLIC_FB_APP_ID ||
-  "3052289695158760";
+  "2085087769012937";
 export const FB_LOGIN_CONFIG_ID =
   process.env.NEXT_PUBLIC_FACEBOOK_LOGIN_CONFIG_ID ||
   process.env.NEXT_PUBLIC_FB_LOGIN_CONFIG_ID ||
