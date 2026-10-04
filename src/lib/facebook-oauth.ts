@@ -39,7 +39,6 @@ function splitScopes(value: string | null): string[] {
 
 function graphUrl(path: string, accessToken: string, params: Record<string, string> = {}) {
   const url = new URL(`${GRAPH_API_BASE}${path}`);
-  url.searchParams.set("access_token", accessToken);
   Object.entries(params).forEach(([key, value]) => url.searchParams.set(key, value));
   return url;
 }
@@ -130,7 +129,9 @@ export function clearCookieValue(name: string) {
 }
 
 export async function fetchFacebookPermissions(accessToken: string) {
-  const response = await fetch(graphUrl("/me/permissions", accessToken));
+  const response = await fetch(graphUrl("/me/permissions", accessToken), {
+    headers: { Authorization: `Bearer ${accessToken}` }, cache: 'no-store',
+  });
   const payload = await response.json();
 
   if (!response.ok || payload?.error) {
@@ -152,6 +153,7 @@ export async function fetchFacebookPermissions(accessToken: string) {
 export async function fetchFacebookUser(accessToken: string): Promise<FBUser> {
   const response = await fetch(
     graphUrl("/me", accessToken, { fields: "id,name,email,picture" }),
+    { headers: { Authorization: `Bearer ${accessToken}` }, cache: 'no-store' },
   );
   const payload = await response.json();
 

@@ -75,7 +75,7 @@ export default function PageDetailPage() {
     : null;
 
   // Use Page Access Token — New Page Experience rejects User Access Token (error_subcode 2069032)
-  const pageToken = page?.access_token ?? null;
+  const pageToken = page?.pageScope ?? null;
 
   const { state: postsState, retry: retryPosts, loadMore: loadMorePosts, hasMore: hasMorePosts, loadingMore: loadingMorePosts } = usePagePosts(pageId, pageToken);
 

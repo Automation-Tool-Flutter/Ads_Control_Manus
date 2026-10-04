@@ -11,7 +11,7 @@ interface PagesResponse {
 
 export async function getPages(token: string, cursor?: string): Promise<PagedResult<Page>> {
   const params: Record<string, string> = {
-    fields: 'id,name,access_token,category,fan_count,followers_count,picture,verification_status,business{id,name}',
+    fields: 'id,name,category,fan_count,followers_count,picture,verification_status,business{id,name}',
     limit: '50',
   };
   if (cursor) params.after = cursor;
@@ -22,7 +22,7 @@ export async function getPages(token: string, cursor?: string): Promise<PagedRes
     token
   );
   return {
-    data: result.data ?? [],
+    data: (result.data ?? []).map(page => ({ ...page, pageScope: `page:${page.id}:${token}` })),
     nextCursor: result.paging?.next ? result.paging.cursors?.after : undefined,
   };
 }

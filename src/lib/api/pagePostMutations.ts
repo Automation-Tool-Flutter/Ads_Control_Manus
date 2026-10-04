@@ -1,5 +1,4 @@
-import { GRAPH_API_BASE } from '../constants';
-import { GraphApiError, graphMutate } from './client';
+import { GraphApiError, graphMutate, graphRequest } from './client';
 import type { GraphApiResponse } from '../types';
 
 export async function createPagePost(
@@ -33,12 +32,11 @@ export async function createPagePostWithPhotos(
     const form = new FormData();
     form.append('source', images[0]);
     form.append('message', message);
-    form.append('access_token', token);
     if (scheduledPublishTime) {
       form.append('scheduled_publish_time', scheduledPublishTime);
       form.append('published', 'false');
     }
-    const res = await fetch(`${GRAPH_API_BASE}/${pageId}/photos`, { method: 'POST', body: form });
+    const res = await graphRequest(`/${pageId}/photos`, form, token, 'POST');
     const json: GraphApiResponse<{ id: string; post_id: string }> = await res.json();
     if (json.error) throw new GraphApiError(json.error.code, json.error.message, json.error.type);
     return { id: (json as { id: string; post_id: string }).post_id ?? (json as { id: string }).id };
@@ -50,8 +48,7 @@ export async function createPagePostWithPhotos(
       const form = new FormData();
       form.append('source', file);
       form.append('published', 'false');
-      form.append('access_token', token);
-      const res = await fetch(`${GRAPH_API_BASE}/${pageId}/photos`, { method: 'POST', body: form });
+      const res = await graphRequest(`/${pageId}/photos`, form, token, 'POST');
       const json: GraphApiResponse<{ id: string }> = await res.json();
       if (json.error) throw new GraphApiError(json.error.code, json.error.message, json.error.type);
       return (json as { id: string }).id;

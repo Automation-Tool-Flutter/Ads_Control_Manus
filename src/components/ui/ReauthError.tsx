@@ -29,7 +29,7 @@ export function ReauthError({ message, errorCode, permissionHint, onRetry }: Rea
 
   async function handleReauth() {
     try {
-      logout();
+      await logout();
       await login({ rerequest: true });
       router.refresh();
       onRetry?.();

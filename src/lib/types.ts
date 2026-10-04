@@ -139,6 +139,7 @@ export type AsyncState<T> =
 // ─── Auth Context ─────────────────────────────────────────────────────────────
 
 export interface AuthState {
+  /** Public session scope retained for hook compatibility; never a Facebook access token. */
   token: string | null;
   user: FBUser | null;
   isLoading: boolean;
@@ -239,7 +240,7 @@ export interface AdSetDetail {
 export interface Page {
   id: string;
   name: string;
-  access_token?: string; // Page Access Token — required for page-specific API calls
+  pageScope?: string; // Public Page routing scope; its access token stays on the server.
   category?: string;
   fan_count?: number;
   followers_count?: number;

@@ -1,4 +1,4 @@
-import { graphFetch, GraphApiError, cacheInvalidatePrefix } from './client';
+import { graphFetch, GraphApiError, cacheInvalidatePrefix, graphRequest } from './client';
 import { GRAPH_API_BASE, FB_AUTH_ERROR_CODES, FB_AUTH_ERROR_EVENT } from '../constants';
 import type { PageInfo, GraphApiResponse } from '../types';
 
@@ -18,7 +18,6 @@ export async function updatePageInfo(
   token: string
 ): Promise<void> {
   const form = new FormData();
-  form.append('access_token', token);
   for (const [key, value] of Object.entries(fields)) {
     if (value === undefined) continue;
     if (key === 'email') {
@@ -27,10 +26,7 @@ export async function updatePageInfo(
       form.append(key, String(value));
     }
   }
-  const response = await fetch(`${GRAPH_API_BASE}/${pageId}`, {
-    method: 'POST',
-    body: form,
-  });
+  const response = await graphRequest(`/${pageId}`, form, token, 'POST');
   const json: GraphApiResponse<unknown> = await response.json();
   if (json.error) {
     if (FB_AUTH_ERROR_CODES.includes(json.error.code)) {
@@ -49,11 +45,7 @@ export async function updatePagePicture(
 ): Promise<void> {
   const form = new FormData();
   form.append('source', file);
-  form.append('access_token', token);
-  const response = await fetch(`${GRAPH_API_BASE}/${pageId}/picture`, {
-    method: 'POST',
-    body: form,
-  });
+  const response = await graphRequest(`/${pageId}/picture`, form, token, 'POST');
   const json: GraphApiResponse<unknown> = await response.json();
   if (json.error) {
     if (FB_AUTH_ERROR_CODES.includes(json.error.code)) {

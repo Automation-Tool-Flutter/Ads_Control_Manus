@@ -17,9 +17,9 @@ export class GraphApiError extends Error {
 // lifecycle quirks, visibilitychange race conditions).
 const inFlight = new Map<string, Promise<unknown>>();
 
-// ─── Persistent cache (localStorage) ─────────────────────────────────────────
-// A short TTL prevents performance metrics from remaining stale indefinitely.
-const CACHE_PREFIX = 'gfc:';
+// Graph responses stay in memory; neither credentials nor Page tokens are persisted.
+const responseCache = new Map<string, CacheEntry>();
+let cacheGeneration = 0;
 export const CACHE_TTL_MS = 2 * 60 * 1000;
 
 interface CacheEntry {
@@ -29,9 +29,8 @@ interface CacheEntry {
 
 function cacheGet(key: string): unknown | null {
   try {
-    const raw = localStorage.getItem(CACHE_PREFIX + key);
-    if (!raw) return null;
-    const entry: CacheEntry = JSON.parse(raw);
+    const entry = responseCache.get(key);
+    if (!entry) return null;
     if (!Number.isFinite(entry.cachedAt) || Date.now() - entry.cachedAt > CACHE_TTL_MS) return null;
     return entry.data;
   } catch {
@@ -42,9 +41,10 @@ function cacheGet(key: string): unknown | null {
 function cacheSet(key: string, data: unknown) {
   try {
     const entry: CacheEntry = { data, cachedAt: Date.now() };
-    localStorage.setItem(CACHE_PREFIX + key, JSON.stringify(entry));
+    responseCache.set(key, entry);
+    if (responseCache.size > 200) responseCache.delete(responseCache.keys().next().value!);
   } catch {
-    // localStorage full or unavailable — ignore
+    // Cache is optional.
   }
 }
 
@@ -55,12 +55,7 @@ export async function graphMutate<T = unknown>(
   token: string,
   method: 'POST' | 'DELETE' = 'POST'
 ): Promise<T> {
-  const url = new URL(`${GRAPH_API_BASE}${path}`);
-  url.searchParams.set('access_token', token);
-  for (const [key, value] of Object.entries(params)) {
-    url.searchParams.set(key, value);
-  }
-  const response = await fetch(url.toString(), { method });
+  const response = await graphRequest(path, params, token, method);
   const json: GraphApiResponse<T> = await response.json();
   if (json.error) {
     if (FB_AUTH_ERROR_CODES.includes(json.error.code)) {
@@ -73,11 +68,31 @@ export async function graphMutate<T = unknown>(
 
 export function cacheInvalidatePrefix(prefix: string) {
   try {
-    const keys = Object.keys(localStorage).filter(k => k.startsWith(CACHE_PREFIX + prefix));
-    keys.forEach(k => localStorage.removeItem(k));
+    for (const key of Array.from(responseCache.keys())) if (key.startsWith(prefix)) responseCache.delete(key);
   } catch {
     // ignore
   }
+}
+
+export function clearGraphCache() {
+  ++cacheGeneration;
+  responseCache.clear();
+  inFlight.clear();
+}
+
+export function graphRequest(path: string, params: Record<string, string> | FormData, scope: string, method = 'GET') {
+  const pageId = /^page:(\d+):/.exec(scope)?.[1];
+  const headers: Record<string, string> = { 'X-Auth-Request': '1' };
+  let body: FormData | string;
+  if (params instanceof FormData) {
+    params.set('_path', path);
+    if (pageId) params.set('_pageId', pageId);
+    body = params;
+  } else {
+    headers['Content-Type'] = 'application/json';
+    body = JSON.stringify({ path, params, pageId, method });
+  }
+  return fetch('/api/facebook', { method: 'POST', credentials: 'same-origin', cache: 'no-store', headers, body });
 }
 
 // ─── graphFetch ───────────────────────────────────────────────────────────────
@@ -88,12 +103,12 @@ export async function graphFetch<T>(
   options: { cache?: boolean } = {},
 ): Promise<T> {
   const url = new URL(`${GRAPH_API_BASE}${path}`);
-  url.searchParams.set('access_token', token);
   for (const [key, value] of Object.entries(params)) {
     url.searchParams.set(key, value);
   }
 
-  const cacheKey = url.toString();
+  const cacheKey = url.toString() + '|scope=' + token;
+  const generation = cacheGeneration;
   const useCache = options.cache !== false;
   const cached = useCache ? cacheGet(cacheKey) : null;
   if (cached !== null) {
@@ -106,7 +121,7 @@ export async function graphFetch<T>(
   }
 
   const requestPromise: Promise<T> = (async () => {
-    const response = await fetch(url.toString());
+    const response = await graphRequest(path, params, token);
 
     // Handle HTTP-level errors before parsing JSON
     if (response.status === 401) {
@@ -141,7 +156,7 @@ export async function graphFetch<T>(
       throw new GraphApiError(response.status, `HTTP ${response.status}: ${response.statusText}`);
     }
 
-    if (useCache) cacheSet(cacheKey, json);
+    if (useCache && generation === cacheGeneration) cacheSet(cacheKey, json);
     return json as T;
   })();
 

@@ -1,5 +1,6 @@
 'use client';
 import Link from 'next/link';
+import { useToast } from '@/components/ui/Toaster';
 import { lockOverlayScroll } from '@/lib/overlay-scroll';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
@@ -16,6 +17,8 @@ import { observeMobileViewport } from '@/lib/observe-mobile-viewport';
 
 export function Header() {
   const { state, logout } = useAuth();
+  const { toast } = useToast();
+  const signingOut = useRef(false);
   const pathname = usePathname();
   const router = useRouter();
   const { canGoBack, goBack } = useAppBack();
@@ -61,6 +64,13 @@ export function Header() {
   }, [menuVisible, pathname]);
   if (pathname === '/login' || (!state.user && pathname !== '/')) return null;
   const close = () => setMobile(false);
+  const signOut = async () => {
+    if (signingOut.current) return;
+    signingOut.current = true;
+    try { await logout(); close(); router.replace('/login'); }
+    catch { toast('Could not sign out. Check your connection and try again.', 'error'); }
+    finally { signingOut.current = false; }
+  };
   const toggleMenu = () => { setMenuPath(pathname); setMobile(value => !value); };
   const segments = pathname.split('/').filter(Boolean);
   // Post editing/comments have no intermediate /posts or /posts/:id route.
@@ -81,7 +91,7 @@ export function Header() {
       <div className="ads-nav-group"><p className="ads-nav-label">{state.user ? 'Workspace' : 'Discover'}</p>{(state.user ? [['/accounts','All accounts','grid'],['/pages','Page','page'],['/businesses','Business assets','audience'],['/settings','Settings','settings']] : [['/','Overview','grid'],['/terms','Terms','plan'],['/privacy','Privacy','settings'],['/contact','Contact','audience']]).map(([href,label,icon]) => <Link key={href} href={href} onClick={close} aria-current={pathname === href ? 'page' : undefined} className={'ads-nav-link ' + (pathname === href ? 'is-active' : '')}><AdsIcon name={icon}/><span>{label}</span></Link>)}</div>
       {!accountId && state.user && <div className="ads-sidebar-note"><AdsIcon name="campaign" /><p>Select an ad account to unlock campaign intelligence, budget tools, and growth plans.</p></div>}
     </nav>
-    <div className="ads-sidebar-footer">{state.user ? <><Link href="/settings" onClick={close} className="ads-profile"><UserAvatar name={state.user.name} src={state.user.picture?.data?.url} /><div><strong>{state.user.name}</strong><small>Workspace settings <AdsIcon name="chevron-right" /></small></div></Link><button className="ads-signout" onClick={() => {close();logout();router.push('/login');}}>Sign out</button></> : <Link href="/login" className="ads-copilot-entry">Connect your workspace <AdsIcon name="chevron-right" /></Link>}</div>
+    <div className="ads-sidebar-footer">{state.user ? <><Link href="/settings" onClick={close} className="ads-profile"><UserAvatar name={state.user.name} src={state.user.picture?.data?.url} /><div><strong>{state.user.name}</strong><small>Workspace settings <AdsIcon name="chevron-right" /></small></div></Link><button className="ads-signout" onClick={signOut}>Sign out</button></> : <Link href="/login" className="ads-copilot-entry">Connect your workspace <AdsIcon name="chevron-right" /></Link>}</div>
   </>;
-  return <><aside className="workspace-sidebar ads-sidebar hidden lg:flex">{navigation}</aside><header className="ads-mobile-header mobile-header-clean lg:hidden">{showBack && <button type="button" className="mobile-back context-back-link" aria-label="Go back to previous page" title="Go back" onClick={() => goBack(backHref || '/accounts')}><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="m15 5-7 7 7 7"/></svg></button>}<Link href={state.user ? '/accounts' : '/'} className="mobile-header-title" aria-label={mobileTitle + ' — return to accounts'}>{!showBack && <span className="mobile-header-mark" aria-hidden="true"><BrandLogo size={32} decorative /></span>}<span className="mobile-header-title-text">{mobileTitle}</span></Link>{state.user && <Link href="/settings" className="mobile-header-profile" aria-label="Open profile settings"><UserAvatar name={state.user.name} src={state.user.picture?.data?.url} /></Link>}</header><dialog id="workspace-menu" ref={drawer} tabIndex={-1} data-closing={menuClosing} onCancel={event => { event.preventDefault(); close(); }} onClose={event => { if (!event.currentTarget.open) close(); }} aria-label="Workspace navigation" className={state.user ? "mobile-tools-dialog" : "ads-mobile-drawer"}>{state.user ? <MobileToolMenu key={state.user.id + ':' + pathname} accountBase={accountId ? '/accounts/' + accountId : ''} query={query} accountName={current?.name} pathname={pathname} userId={state.user.id} name={state.user.name} picture={state.user.picture?.data?.url} onClose={close} onToggleMenu={toggleMenu} onLogout={() => {close();logout();router.push('/login');}} /> : <div className="ads-sidebar">{navigation}</div>}</dialog></>;
+  return <><aside className="workspace-sidebar ads-sidebar hidden lg:flex">{navigation}</aside><header className="ads-mobile-header mobile-header-clean lg:hidden">{showBack && <button type="button" className="mobile-back context-back-link" aria-label="Go back to previous page" title="Go back" onClick={() => goBack(backHref || '/accounts')}><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="m15 5-7 7 7 7"/></svg></button>}<Link href={state.user ? '/accounts' : '/'} className="mobile-header-title" aria-label={mobileTitle + ' — return to accounts'}>{!showBack && <span className="mobile-header-mark" aria-hidden="true"><BrandLogo size={32} decorative /></span>}<span className="mobile-header-title-text">{mobileTitle}</span></Link>{state.user && <Link href="/settings" className="mobile-header-profile" aria-label="Open profile settings"><UserAvatar name={state.user.name} src={state.user.picture?.data?.url} /></Link>}</header><dialog id="workspace-menu" ref={drawer} tabIndex={-1} data-closing={menuClosing} onCancel={event => { event.preventDefault(); close(); }} onClose={event => { if (!event.currentTarget.open) close(); }} aria-label="Workspace navigation" className={state.user ? "mobile-tools-dialog" : "ads-mobile-drawer"}>{state.user ? <MobileToolMenu key={state.user.id + ':' + pathname} accountBase={accountId ? '/accounts/' + accountId : ''} query={query} accountName={current?.name} pathname={pathname} userId={state.user.id} name={state.user.name} picture={state.user.picture?.data?.url} onClose={close} onToggleMenu={toggleMenu} onLogout={signOut} /> : <div className="ads-sidebar">{navigation}</div>}</dialog></>;
 }

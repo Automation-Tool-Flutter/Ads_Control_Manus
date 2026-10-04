@@ -1,297 +1,114 @@
 'use client';
 
-import React, { createContext, useContext, useReducer, useEffect, useCallback, useState } from 'react';
+import React, { createContext, useContext, useEffect, useCallback, useRef, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import type { AuthState, FBUser } from '@/lib/types';
 import { clearViewMemory } from '@/lib/view-memory';
-import {
-  STORAGE_KEYS,
-  FB_AUTH_ERROR_EVENT,
-  FB_PERMISSIONS,
-} from '@/lib/constants';
-import {
-  buildFacebookOAuthUrl,
-  clearFacebookOAuthCallbackUrl,
-  clearCookieValue,
-  createFacebookOAuthState,
-  fetchFacebookPermissions,
-  fetchFacebookUser,
-  getCookieValue,
-  getFacebookOAuthRedirectUri,
-  parseFacebookOAuthCallback,
-  type FacebookOAuthCallback,
-  type FacebookOAuthError,
-} from '@/lib/facebook-oauth';
-
-// ─── Actions ──────────────────────────────────────────────────────────────────
-
-type Action =
-  | { type: 'SET_LOADING'; payload: boolean }
-  | { type: 'SET_AUTH'; payload: { token: string; user: FBUser } }
-  | { type: 'LOGOUT' };
-
-function reducer(state: AuthState, action: Action): AuthState {
-  switch (action.type) {
-    case 'SET_LOADING':
-      return { ...state, isLoading: action.payload };
-    case 'SET_AUTH':
-      return { ...state, token: action.payload.token, user: action.payload.user, isLoading: false };
-    case 'LOGOUT':
-      return { token: null, user: null, isLoading: false };
-    default:
-      return state;
-  }
-}
-
-const initialState: AuthState = {
-  token: null,
-  user: null,
-  isLoading: true,
-};
-
-// ─── Context ──────────────────────────────────────────────────────────────────
+import { FB_AUTH_ERROR_EVENT } from '@/lib/constants';
+import { clearFacebookOAuthCallbackUrl, parseFacebookOAuthCallback } from '@/lib/facebook-oauth';
+import { bootstrapSession, clearLegacyLoginStorage, sessionRequest, type BrowserSession } from '@/lib/auth-client';
+import { clearGraphCache } from '@/lib/api/client';
+import { useToast } from '@/components/ui/Toaster';
 
 interface AuthContextValue {
   state: AuthState;
   isRedirecting: boolean;
   login: (options?: { rerequest?: boolean }) => Promise<FBUser>;
-  logout: () => void;
+  logout: () => Promise<void>;
 }
-
 const AuthContext = createContext<AuthContextValue | null>(null);
-
-function isOAuthError(
-  callback: FacebookOAuthCallback | FacebookOAuthError,
-): callback is FacebookOAuthError {
-  return 'error' in callback;
-}
-
-function isLocalOAuthCallback() {
-  return ['localhost', '127.0.0.1', '0.0.0.0'].includes(window.location.hostname);
-}
-
-function clearStoredSession() {
-  clearViewMemory();
-  localStorage.removeItem(STORAGE_KEYS.TOKEN);
-  localStorage.removeItem(STORAGE_KEYS.TOKEN_EXPIRY);
-  localStorage.removeItem(STORAGE_KEYS.USER);
-  localStorage.removeItem(STORAGE_KEYS.GRANTED_SCOPES);
-  localStorage.removeItem(STORAGE_KEYS.DENIED_SCOPES);
-}
-
-function clearOAuthRequest() {
-  localStorage.removeItem(STORAGE_KEYS.OAUTH_STATE);
-  localStorage.removeItem(STORAGE_KEYS.OAUTH_RETURN_TO);
-  clearCookieValue(STORAGE_KEYS.OAUTH_STATE);
-  clearCookieValue(STORAGE_KEYS.OAUTH_RETURN_TO);
-}
-
-function clearOAuthState() {
-  localStorage.removeItem(STORAGE_KEYS.OAUTH_STATE);
-  clearCookieValue(STORAGE_KEYS.OAUTH_STATE);
-}
-
-function restoreStoredSession(dispatch: React.Dispatch<Action>) {
-  const token = localStorage.getItem(STORAGE_KEYS.TOKEN);
-  const userStr = localStorage.getItem(STORAGE_KEYS.USER);
-  const expiryStr = localStorage.getItem(STORAGE_KEYS.TOKEN_EXPIRY);
-
-  const isExpired = expiryStr ? Date.now() > parseInt(expiryStr, 10) : false;
-
-  if (token && userStr && !isExpired) {
-    try {
-      const user = JSON.parse(userStr) as FBUser;
-      dispatch({ type: 'SET_AUTH', payload: { token, user } });
-    } catch {
-      dispatch({ type: 'SET_LOADING', payload: false });
-    }
-    return;
-  }
-
-  if (isExpired) {
-    clearStoredSession();
-  }
-  dispatch({ type: 'SET_LOADING', payload: false });
-}
-
-async function finishOAuthLogin(callback: FacebookOAuthCallback) {
-  const permissionResponse = await fetchFacebookPermissions(callback.accessToken);
-  const granted = permissionResponse.granted.length > 0
-    ? permissionResponse.granted
-    : callback.grantedScopes;
-  const denied = Array.from(new Set([
-    ...permissionResponse.denied,
-    ...callback.deniedScopes,
-  ]));
-  const missing = FB_PERMISSIONS.filter((permission) => !granted.includes(permission));
-
-  if (missing.length > 0) {
-    localStorage.setItem(STORAGE_KEYS.GRANTED_SCOPES, JSON.stringify(granted));
-    localStorage.setItem(STORAGE_KEYS.DENIED_SCOPES, JSON.stringify(denied));
-    throw new Error(`Facebook connected, but missing permissions: ${missing.join(', ')}`);
-  }
-
-  const user = await fetchFacebookUser(callback.accessToken);
-  const expiresAt = callback.expiresIn > 0
-    ? Date.now() + callback.expiresIn * 1000
-    : Date.now() + 60 * 24 * 60 * 60 * 1000;
-
-  localStorage.setItem(STORAGE_KEYS.TOKEN, callback.accessToken);
-  localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(user));
-  localStorage.setItem(STORAGE_KEYS.GRANTED_SCOPES, JSON.stringify(granted));
-  localStorage.setItem(STORAGE_KEYS.DENIED_SCOPES, JSON.stringify(denied));
-  localStorage.setItem(STORAGE_KEYS.TOKEN_EXPIRY, String(expiresAt));
-
-  return user;
-}
+const loggedOut: AuthState = { token: null, user: null, isLoading: false };
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [state, dispatch] = useReducer(reducer, initialState);
+  const [state, setState] = useState<AuthState>({ ...loggedOut, isLoading: true });
+  const [isRedirecting, setIsRedirecting] = useState(false);
+  const [expiresAt, setExpiresAt] = useState(0);
+  const generation = useRef(0);
+  const { toast } = useToast();
   const router = useRouter();
   const pathname = usePathname();
-  const [isRedirecting, setIsRedirecting] = useState(false);
+  useEffect(() => { setIsRedirecting(false); }, [pathname]);
 
-  useEffect(() => {
-    setIsRedirecting(false);
-  }, [pathname]);
+  const publish = useCallback((session: BrowserSession | null) => {
+    // Compatibility with existing hooks: token is now a public cache scope,
+    // never a Facebook credential. Authentication is exclusively cookie-based.
+    setState(session ? { token: session.scope, user: session.user, isLoading: false } : loggedOut);
+    setExpiresAt(session?.expiresAt ?? 0);
+  }, []);
 
-  // Restore session or complete the OAuth redirect after Facebook returns.
   useEffect(() => {
     let cancelled = false;
-    let loginDelay: ReturnType<typeof setTimeout> | undefined;
-
-    async function bootstrap() {
-      const oauthCallback = parseFacebookOAuthCallback(window.location);
-
-      if (!oauthCallback) {
-        restoreStoredSession(dispatch);
-        return;
-      }
-
+    let delay: ReturnType<typeof setTimeout> | undefined;
+    const current = generation.current;
+    clearLegacyLoginStorage();
+    const callback = parseFacebookOAuthCallback(window.location);
+    const request = callback ? bootstrapSession(callback) : bootstrapSession();
+    if (callback) clearFacebookOAuthCallbackUrl();
+    void (async () => {
       try {
-        const expectedState =
-          localStorage.getItem(STORAGE_KEYS.OAUTH_STATE) ??
-          getCookieValue(STORAGE_KEYS.OAUTH_STATE);
-
-        if (
-          !oauthCallback.state ||
-          (expectedState && oauthCallback.state !== expectedState) ||
-          (!expectedState && !isLocalOAuthCallback())
-        ) {
-          throw new Error('Invalid Facebook OAuth state. Please sign in again.');
+        const result = await request;
+        if (cancelled || current !== generation.current) return;
+        if (!result.completedOAuth || !result.session) { publish(result.session); return; }
+        let destination = '/accounts';
+        if (result.returnTo?.startsWith('/')) {
+          const target = new URL(result.returnTo, window.location.origin);
+          if (target.origin === window.location.origin && !['/', '/login'].includes(target.pathname)) destination = target.pathname + target.search + target.hash;
         }
-
-        clearFacebookOAuthCallbackUrl();
-
-        if (isOAuthError(oauthCallback)) {
-          throw new Error(oauthCallback.errorDescription ?? oauthCallback.error);
-        }
-
-        const user = await finishOAuthLogin(oauthCallback);
-        clearOAuthState();
-
-        if (!cancelled) {
-          // Navigate only after a completed Facebook sign-in, never when merely
-          // restoring a saved session on the Login page.
-          const returnTo = localStorage.getItem(STORAGE_KEYS.OAUTH_RETURN_TO) ??
-            getCookieValue(STORAGE_KEYS.OAUTH_RETURN_TO);
-          localStorage.removeItem(STORAGE_KEYS.OAUTH_RETURN_TO);
-          clearCookieValue(STORAGE_KEYS.OAUTH_RETURN_TO);
-          let destination = '/accounts';
-          if (returnTo?.startsWith('/')) {
-            const target = new URL(returnTo, window.location.origin);
-            if (target.origin === window.location.origin && target.pathname !== '/login' && target.pathname !== '/') {
-              destination = `${target.pathname}${target.search}${target.hash}`;
-            }
-          }
-          setIsRedirecting(true);
-          router.prefetch(destination);
-          // Keep the login loader visible for three seconds after authentication.
-          // Publish the session only then, so the home redirect cannot skip the delay.
-          loginDelay = setTimeout(() => {
-            if (cancelled || localStorage.getItem(STORAGE_KEYS.TOKEN) !== oauthCallback.accessToken) return;
-            dispatch({
-              type: 'SET_AUTH',
-              payload: { token: oauthCallback.accessToken, user },
-            });
-            router.replace(destination);
-          }, 3000);
-        }
+        setIsRedirecting(true);
+        router.prefetch(destination);
+        delay = setTimeout(() => {
+          if (cancelled || current !== generation.current) return;
+          publish(result.session);
+          router.replace(destination);
+        }, 3000);
       } catch (error) {
-        clearStoredSession();
-        clearOAuthRequest();
-        clearFacebookOAuthCallbackUrl();
-        if (!cancelled) {
-          setIsRedirecting(false);
-          dispatch({ type: 'SET_LOADING', payload: false });
-          console.error(error);
+        if (!cancelled && current === generation.current) {
+          setIsRedirecting(false); publish(null);
+          toast(error instanceof Error ? error.message : 'Unable to restore your session. Please sign in again.', 'error');
         }
       }
+    })();
+    return () => { cancelled = true; clearTimeout(delay); };
+  }, [router, publish, toast]);
+
+  const logout = useCallback(async () => {
+    ++generation.current;
+    await sessionRequest('DELETE');
+    clearLegacyLoginStorage(); clearViewMemory(); clearGraphCache();
+    setIsRedirecting(false); publish(null);
+    if (typeof BroadcastChannel !== 'undefined') {
+      const channel = new BroadcastChannel('ads-session'); channel.postMessage('logout'); channel.close();
     }
+  }, [publish]);
 
-    bootstrap();
-    return () => {
-      cancelled = true;
-      clearTimeout(loginDelay);
-    };
-  }, [router]);
-
-  // Auto-logout when any API call detects an expired/invalid token
   useEffect(() => {
-    function handleAuthError() {
-      clearStoredSession();
-      dispatch({ type: 'LOGOUT' });
-    }
-    window.addEventListener(FB_AUTH_ERROR_EVENT, handleAuthError);
-    return () => window.removeEventListener(FB_AUTH_ERROR_EVENT, handleAuthError);
-  }, []);
+    const invalidate = () => {
+      ++generation.current;
+      clearViewMemory(); clearGraphCache(); publish(null);
+      void sessionRequest('DELETE').catch(() => {});
+    };
+    window.addEventListener(FB_AUTH_ERROR_EVENT, invalidate);
+    const channel = typeof BroadcastChannel !== 'undefined' ? new BroadcastChannel('ads-session') : null;
+    if (channel) channel.onmessage = () => { ++generation.current; clearViewMemory(); clearGraphCache(); publish(null); };
+    const checkExpiry = () => { if (expiresAt && Date.now() >= expiresAt) invalidate(); };
+    const timer = setInterval(checkExpiry, 30000);
+    window.addEventListener('focus', checkExpiry);
+    return () => { channel?.close(); clearInterval(timer); window.removeEventListener('focus', checkExpiry); window.removeEventListener(FB_AUTH_ERROR_EVENT, invalidate); };
+  }, [expiresAt, publish]);
 
   const login = useCallback(async (options: { rerequest?: boolean } = {}): Promise<FBUser> => {
-    dispatch({ type: 'SET_LOADING', payload: true });
-
-    try {
-      const state = createFacebookOAuthState();
-      const redirectUri = getFacebookOAuthRedirectUri();
-      const returnTo = `${window.location.pathname}${window.location.search}`;
-
-      localStorage.setItem(STORAGE_KEYS.OAUTH_STATE, state);
-      if (returnTo !== '/login') {
-        localStorage.setItem(STORAGE_KEYS.OAUTH_RETURN_TO, returnTo);
-      } else {
-        localStorage.removeItem(STORAGE_KEYS.OAUTH_RETURN_TO);
-      }
-
-      window.location.assign(buildFacebookOAuthUrl({
-        redirectUri,
-        state,
-        rerequest: options.rerequest,
-      }));
-
-      return await new Promise<FBUser>(() => {});
-    } catch (error) {
-      dispatch({ type: 'SET_LOADING', payload: false });
-      throw error;
-    }
+    setState(value => ({ ...value, isLoading: true }));
+    const params = new URLSearchParams({ returnTo: window.location.pathname + window.location.search });
+    if (options.rerequest) params.set('rerequest', '1');
+    window.location.assign('/api/auth/facebook/start?' + params);
+    return new Promise<FBUser>(() => {});
   }, []);
 
-  const logout = useCallback(() => {
-    clearStoredSession();
-    clearOAuthRequest();
-    dispatch({ type: 'LOGOUT' });
-    if (typeof window !== 'undefined' && window.FB) {
-      window.FB.logout(() => {});
-    }
-  }, []);
-
-  return (
-    <AuthContext.Provider value={{ state, isRedirecting, login, logout }}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={{ state, isRedirecting, login, logout }}>{children}</AuthContext.Provider>;
 }
 
 export function useAuth(): AuthContextValue {
-  const ctx = useContext(AuthContext);
-  if (!ctx) throw new Error('useAuth must be used within AuthProvider');
-  return ctx;
+  const value = useContext(AuthContext);
+  if (!value) throw new Error('useAuth must be used within AuthProvider');
+  return value;
 }

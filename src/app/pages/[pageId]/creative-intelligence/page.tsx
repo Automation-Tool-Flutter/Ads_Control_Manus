@@ -30,7 +30,7 @@ export default function CreativeIntelligencePage() {
   const { toast } = useToast();
   const { state: pagesState } = usePages(auth.token);
   const page = pagesState.status === 'success' ? pagesState.data.find(item => item.id === pageId) : undefined;
-  const pageToken = page?.access_token ?? null;
+  const pageToken = page?.pageScope ?? null;
   const { state: postsState } = usePagePosts(pageId, pageToken);
   const { state: accountsState } = useAdAccounts(auth.token);
   const { state, analyze } = useCreativeIntelligence();

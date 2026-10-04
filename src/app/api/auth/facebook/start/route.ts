@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
+import { randomUUID } from 'node:crypto';
 import { STORAGE_KEYS } from "@/lib/constants";
 import {
   buildFacebookOAuthUrl,
-  createFacebookOAuthState,
   getFacebookOAuthRedirectUri,
 } from "@/lib/facebook-oauth";
 
@@ -28,7 +28,7 @@ function getRequestOrigin(request: NextRequest) {
 export function GET(request: NextRequest) {
   const requestUrl = new URL(request.url);
   const origin = getRequestOrigin(request);
-  const state = createFacebookOAuthState();
+  const state = randomUUID();
   const redirectUri = getFacebookOAuthRedirectUri(origin);
   const returnTo = requestUrl.searchParams.get("returnTo");
   const oauthUrl = buildFacebookOAuthUrl({
@@ -43,6 +43,7 @@ export function GET(request: NextRequest) {
   response.cookies.set(STORAGE_KEYS.OAUTH_STATE, state, {
     path: "/",
     sameSite: "lax",
+    httpOnly: true,
     secure,
     maxAge: 10 * 60,
   });
@@ -51,6 +52,7 @@ export function GET(request: NextRequest) {
     response.cookies.set(STORAGE_KEYS.OAUTH_RETURN_TO, returnTo!, {
       path: "/",
       sameSite: "lax",
+      httpOnly: true,
       secure,
       maxAge: 10 * 60,
     });

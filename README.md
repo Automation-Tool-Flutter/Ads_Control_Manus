@@ -49,3 +49,11 @@
 | **Nút bấm và biểu mẫu** | Vùng chạm lớn hơn, bộ lọc ngày rõ ràng, thông báo lỗi và chống gửi lặp ở các thao tác đã nâng cấp. |
 | **Chat AI** | Giữ vị trí đang đọc, có nút về tin mới và xác nhận trước khi xóa hội thoại. |
 | **Ngôn ngữ giao diện** | Nhãn chức năng bằng **tiếng Anh**. |
+
+## 4. Phiên đăng nhập bằng cookie
+
+- Phiên đăng nhập và trạng thái OAuth dùng cookie HttpOnly, SameSite=Lax, Path=/; bật Secure khi chạy HTTPS. WebView cần cho phép cookie của chính website.
+- `/api/auth/session` tạo, khôi phục và xóa phiên. Giao diện chỉ nhận hồ sơ và mã phiên công khai; thuộc tính `AuthState.token` hiện là mã phân biệt bộ nhớ đệm, không phải Facebook access token.
+- Các lệnh đọc/ghi Facebook và tải ảnh đi qua `/api/facebook`. Server đọc token từ cookie, lấy Page token khi cần và loại bỏ thông tin xác thực khỏi phản hồi, kể cả URL phân trang. Các API này không được cache bởi CDN.
+- Luồng OAuth hiện có vẫn nhận token tạm thời trong callback Facebook, xóa fragment khỏi URL và gửi token cho server để xác minh/lưu cookie; không ghi token vào localStorage hoặc sessionStorage.
+- Khi nâng cấp, dữ liệu đăng nhập localStorage và cache Graph cũ bị xóa; người dùng đăng nhập lại một lần. Đăng xuất chỉ hoàn tất sau khi server xóa cookie. Các tùy chọn giao diện như theme vẫn giữ nguyên.
