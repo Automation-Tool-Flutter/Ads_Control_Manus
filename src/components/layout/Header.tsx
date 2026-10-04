@@ -68,7 +68,7 @@ export function Header() {
   const signOut = async () => {
     if (signingOut.current) return;
     signingOut.current = true;
-    try { await logout(); notifyWebViewLogout(); close(); router.replace('/login'); }
+    try { await logout(); await notifyWebViewLogout(); close(); router.replace('/login'); }
     catch { toast('Could not sign out. Check your connection and try again.', 'error'); }
     finally { signingOut.current = false; }
   };

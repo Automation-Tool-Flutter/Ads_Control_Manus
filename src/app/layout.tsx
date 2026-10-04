@@ -28,6 +28,7 @@ import { AuthNotifier } from "@/components/layout/AuthNotifier";
 import { WorkspaceBar } from "@/components/layout/WorkspaceBar";
 import { FloatingAssistant } from "@/components/ai/FloatingAssistant";
 import { WorkspaceNavigator } from "@/components/layout/WorkspaceNavigator";
+import { WebViewExternalLinks } from '@/components/layout/WebViewExternalLinks';
 
 export const metadata: Metadata = {
   title: "Meta Ads AI",
@@ -67,6 +68,7 @@ export default function RootLayout({
         <NavigationFeedback />
         <ThemeProvider>
           <ToastProvider>
+            <WebViewExternalLinks />
             <AuthProvider>
               <MobileScrollMemory />
               <AuthNotifier />
