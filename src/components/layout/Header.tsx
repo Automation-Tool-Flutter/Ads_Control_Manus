@@ -14,6 +14,7 @@ import { BrandLogo } from '@/components/ui/BrandLogo';
 import { UserAvatar } from '@/components/ui/UserAvatar';
 import { useOverlayPresence } from '@/hooks/useOverlayPresence';
 import { observeMobileViewport } from '@/lib/observe-mobile-viewport';
+import { notifyWebViewLogout } from '@/lib/webview-events';
 
 export function Header() {
   const { state, logout } = useAuth();
@@ -67,7 +68,7 @@ export function Header() {
   const signOut = async () => {
     if (signingOut.current) return;
     signingOut.current = true;
-    try { await logout(); close(); router.replace('/login'); }
+    try { await logout(); notifyWebViewLogout(); close(); router.replace('/login'); }
     catch { toast('Could not sign out. Check your connection and try again.', 'error'); }
     finally { signingOut.current = false; }
   };
